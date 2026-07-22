@@ -1,8 +1,8 @@
 import type { NavigationLevel } from "@/store/navigation-store";
 
 import { personalGrowthGalaxyDefinition } from "./galaxies/personal-growth/personal-growth-galaxy-definition";
+import { personalGrowthPlanets } from "./galaxies/personal-growth/personal-growth-planets";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
-import { strengthPlanets } from "./galaxies/personal-growth/strength-physique/strength-planets";
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
 import {
   personalGrowthGalaxyId,
@@ -45,7 +45,7 @@ export function getCameraPose(
   selectedPlanetId: string | null,
 ): CameraPose {
   if (navigationLevel === "planet") {
-    const planet = strengthPlanets.find(
+    const planet = personalGrowthPlanets.find(
       (definition) =>
         definition.galaxyId === selectedGalaxyId &&
         definition.systemId === selectedSystemId &&

@@ -1,14 +1,18 @@
-import type { Vector3Tuple } from "../../galaxy-definition";
+import type { Vector3Tuple } from "../galaxy-definition";
 
-export type StrengthPlanetKind = "playlist" | "program" | "sanctuary";
+export type PersonalGrowthPlanetKind =
+  "library" | "playlist" | "program" | "sanctuary" | "time-chamber";
 
-export type StrengthPlanetDefinition = Readonly<{
+export type PersonalGrowthPlanetSystemId =
+  "jiu-jitsu" | "reading" | "strength-physique";
+
+export type PersonalGrowthPlanetDefinition = Readonly<{
   cameraLookTarget: Vector3Tuple;
   cameraPosition: Vector3Tuple;
   description: string;
   galaxyId: "personal-growth";
   id: string;
-  kind: StrengthPlanetKind;
+  kind: PersonalGrowthPlanetKind;
   labelPosition: Readonly<{
     compact: readonly [x: number, y: number];
     desktop: readonly [x: number, y: number];
@@ -23,5 +27,5 @@ export type StrengthPlanetDefinition = Readonly<{
   }>;
   position: Vector3Tuple;
   seed: number;
-  systemId: "strength-physique";
+  systemId: PersonalGrowthPlanetSystemId;
 }>;

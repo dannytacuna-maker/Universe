@@ -3,8 +3,8 @@
 import type { NavigationLevel } from "@/store/navigation-store";
 
 import { PersonalGrowthGalaxyLabel } from "./galaxies/personal-growth/personal-growth-galaxy-label";
+import { PersonalGrowthPlanetLabels } from "./galaxies/personal-growth/personal-growth-planet-labels";
 import { PersonalGrowthSystemLabels } from "./galaxies/personal-growth/personal-growth-system-labels";
-import { StrengthPlanetLabels } from "./galaxies/personal-growth/strength-physique/strength-planet-labels";
 import { UniversityCourseSystemLabels } from "./galaxies/university/university-course-system-labels";
 import { UniversityWeeklySchedule } from "./galaxies/university/university-weekly-schedule";
 import { UniversityGalaxyLabel } from "./galaxies/university-galaxy-label";
@@ -122,17 +122,17 @@ export function UniverseNavigationOverlay({
         onHoverChange={onSystemHoverChange}
       />
 
-      <StrengthPlanetLabels
+      <PersonalGrowthPlanetLabels
         emphasizedPlanetId={emphasizedPlanetId}
         isVisible={
           selectedGalaxyId === personalGrowthGalaxyId &&
-          selectedSystemId === "strength-physique" &&
           level === "system" &&
           isViewSettled
         }
         onActivate={onPlanetActivate}
         onFocusChange={onPlanetFocusChange}
         onHoverChange={onPlanetHoverChange}
+        selectedSystemId={selectedSystemId}
       />
 
       {level !== "universe" ? (
@@ -144,7 +144,7 @@ export function UniverseNavigationOverlay({
           <span aria-hidden="true">←</span>
           <span>
             {level === "planet"
-              ? "Strength system"
+              ? `${activeSystemName ?? "Personal Growth"} system`
               : level === "system"
                 ? selectedGalaxyName
                 : "Universe"}
@@ -169,7 +169,7 @@ export function UniverseNavigationOverlay({
 
       {level === "planet" && isViewSettled && activePlanetName !== null ? (
         <div className="planet-context-label">
-          <span>Strength &amp; Physique</span>
+          <span>{activeSystemName}</span>
           <strong>{activePlanetName}</strong>
         </div>
       ) : null}

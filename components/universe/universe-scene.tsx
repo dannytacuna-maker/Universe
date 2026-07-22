@@ -16,13 +16,13 @@ import { UniversityGalaxy } from "./galaxies/university-galaxy";
 import { UniversityCourseSystemGroup } from "./galaxies/university/university-course-system-group";
 import { UniversityInteriorField } from "./galaxies/university/university-interior-field";
 import type { JiuJitsuProgress } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-progress";
+import { PersonalGrowthDestinationPlanet } from "./galaxies/personal-growth/personal-growth-destination-planet";
+import { PersonalGrowthDestinationSurface } from "./galaxies/personal-growth/personal-growth-destination-surface";
+import { standardPersonalGrowthPlanets } from "./galaxies/personal-growth/personal-growth-planets";
 import type { StrengthProgress } from "./galaxies/personal-growth/strength-physique/strength-physique-progress";
 import { BeerusPlanet } from "./galaxies/personal-growth/strength-physique/beerus-planet";
 import { beerusPlanetDefinition } from "./galaxies/personal-growth/strength-physique/beerus-planet-definition";
 import { BeerusPlanetSurface } from "./galaxies/personal-growth/strength-physique/beerus-planet-surface";
-import { StrengthDestinationPlanet } from "./galaxies/personal-growth/strength-physique/strength-destination-planet";
-import { StrengthDestinationSurface } from "./galaxies/personal-growth/strength-physique/strength-destination-surface";
-import { supportingStrengthPlanets } from "./galaxies/personal-growth/strength-physique/strength-planets";
 import { PersonalGrowthGalaxy } from "./galaxies/personal-growth/personal-growth-galaxy";
 import { PersonalGrowthInteriorField } from "./galaxies/personal-growth/personal-growth-interior-field";
 import { PersonalGrowthSystemGroup } from "./galaxies/personal-growth/personal-growth-system-group";
@@ -226,8 +226,8 @@ export function UniverseScene({
           onPlanetHoverChange(isHovered ? beerusPlanetDefinition.id : null)
         }
       />
-      {supportingStrengthPlanets.map((planet) => (
-        <StrengthDestinationPlanet
+      {standardPersonalGrowthPlanets.map((planet) => (
+        <PersonalGrowthDestinationPlanet
           definition={planet}
           isEmphasized={emphasizedPlanetId === planet.id}
           isHovered={hoveredPlanetId === planet.id}
@@ -257,8 +257,8 @@ export function UniverseScene({
           }
           motionEnabled={motionEnabled}
         />
-        {supportingStrengthPlanets.map((planet) => (
-          <StrengthDestinationSurface
+        {standardPersonalGrowthPlanets.map((planet) => (
+          <PersonalGrowthDestinationSurface
             definition={planet}
             isVisible={
               navigationLevel === "planet" && selectedPlanetId === planet.id

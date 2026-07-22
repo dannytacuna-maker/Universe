@@ -11,9 +11,14 @@ import {
   formatCourseScheduleSummary,
 } from "./galaxies/university/course-schedule";
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
+import { hyperbolicTimeChamberDefinition } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-planets";
+import { JiuJitsuReviewDashboard } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-review-dashboard";
 import { JiuJitsuTrainingLog } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-training-log";
 import { useJiuJitsuSessions } from "./galaxies/personal-growth/jiu-jitsu/use-jiu-jitsu-sessions";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
+import { CelestialLibraryDashboard } from "./galaxies/personal-growth/reading/celestial-library-dashboard";
+import { celestialLibraryDefinition } from "./galaxies/personal-growth/reading/reading-planets";
+import { useReadingLibrary } from "./galaxies/personal-growth/reading/use-reading-library";
 import { beerusPlanetDefinition } from "./galaxies/personal-growth/strength-physique/beerus-planet-definition";
 import { GymPlaylistPlayer } from "./galaxies/personal-growth/strength-physique/gym-playlist-player";
 import {
@@ -45,6 +50,7 @@ import { useWebGLSupport } from "./use-webgl-support";
 import { WebGLBoundary } from "./webgl-boundary";
 
 const jiuJitsuSystemId = "jiu-jitsu";
+const readingSystemId = "reading";
 const strengthPhysiqueSystemId = "strength-physique";
 
 export function UniverseViewport() {
@@ -104,6 +110,16 @@ export function UniverseViewport() {
     toggleWorkout,
     updatePersonalRecord,
   } = useStrengthPhysique();
+  const {
+    addBook,
+    addSession: addReadingSession,
+    books: readingBooks,
+    editBook,
+    isLoading: isReadingLoading,
+    sessions: readingSessions,
+    storageError: readingStorageError,
+    summary: readingSummary,
+  } = useReadingLibrary();
   const emphasizedGalaxyId = hoveredGalaxyId ?? focusedGalaxyId;
   const emphasizedSystemId = hoveredSystemId ?? focusedSystemId;
   const emphasizedPlanetId = hoveredPlanetId ?? focusedPlanetId;
@@ -456,6 +472,16 @@ export function UniverseViewport() {
     selectedGalaxyId === personalGrowthGalaxyId &&
     activeSystemId === strengthPhysiqueSystemId &&
     selectedPlanetId === gymPlaylistPlanetDefinition.id;
+  const isHyperbolicTimeChamberActive =
+    navigationLevel === "planet" &&
+    selectedGalaxyId === personalGrowthGalaxyId &&
+    activeSystemId === jiuJitsuSystemId &&
+    selectedPlanetId === hyperbolicTimeChamberDefinition.id;
+  const isCelestialLibraryActive =
+    navigationLevel === "planet" &&
+    selectedGalaxyId === personalGrowthGalaxyId &&
+    activeSystemId === readingSystemId &&
+    selectedPlanetId === celestialLibraryDefinition.id;
 
   return (
     <section
@@ -536,6 +562,13 @@ export function UniverseViewport() {
         storageError={trainingStorageError}
       />
 
+      <JiuJitsuReviewDashboard
+        isLoading={isTrainingLogLoading}
+        isVisible={isHyperbolicTimeChamberActive && isViewSettled}
+        sessions={jiuJitsuSessions}
+        storageError={trainingStorageError}
+      />
+
       <WhisTrainingAssistant
         bodyWeightEntries={bodyWeightEntries}
         isLoading={isStrengthLoading}
@@ -555,6 +588,18 @@ export function UniverseViewport() {
 
       <GymPlaylistPlayer isVisible={isGymPlaylistActive && isViewSettled} />
 
+      <CelestialLibraryDashboard
+        books={readingBooks}
+        isLoading={isReadingLoading}
+        isVisible={isCelestialLibraryActive && isViewSettled}
+        onAddBook={addBook}
+        onAddSession={addReadingSession}
+        onEditBook={editBook}
+        sessions={readingSessions}
+        storageError={readingStorageError}
+        summary={readingSummary}
+      />
+
       <span aria-live="polite" className="sr-only">
         {announcement}
       </span>
@@ -563,16 +608,18 @@ export function UniverseViewport() {
           ? "University and Personal Growth galaxies are available to explore."
           : navigationLevel === "galaxy"
             ? selectedGalaxyId === personalGrowthGalaxyId
-              ? "Four Personal Growth systems are mapped. Jiu-Jitsu and Strength and Physique are available to explore."
+              ? "Three Personal Growth systems are mapped: Jiu-Jitsu, Strength and Physique, and Reading."
               : "Five University systems are mapped: four scheduled courses and Final Project. Logistics and Distribution is available to explore."
             : navigationLevel === "planet"
               ? activePlanet === null
-                ? "Strength and Physique planet."
+                ? "Personal Growth planet."
                 : `${activePlanet.name}. ${activePlanet.description}`
               : selectedGalaxyId === personalGrowthGalaxyId
                 ? activeSystemId === strengthPhysiqueSystemId
                   ? "Strength and Physique system. Beerus' Planet, the Training Archive, and the Gym Playlist are available to enter."
-                  : "Jiu-Jitsu system. Training sessions can be logged privately on this device."
+                  : activeSystemId === jiuJitsuSystemId
+                    ? "Jiu-Jitsu system. Training sessions can be logged privately, and the Hyperbolic Time Chamber is available to enter."
+                    : "Reading system. The Celestial Library is available to enter."
                 : activeCourse === null
                   ? "University course system."
                   : `${activeCourse.name} course system. ${formatCourseScheduleDetails(activeCourse.schedule)}. Workspaces have not been introduced yet.`}

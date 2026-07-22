@@ -1,8 +1,8 @@
 import type { NavigationState } from "@/store/navigation-store";
 
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
+import { personalGrowthPlanets } from "./galaxies/personal-growth/personal-growth-planets";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
-import { strengthPlanets } from "./galaxies/personal-growth/strength-physique/strength-planets";
 
 export const universityGalaxyId = "university";
 export const personalGrowthGalaxyId = "personal-growth";
@@ -60,9 +60,13 @@ export function findPlanet(
   systemId: string | null,
   planetId: string | null,
 ) {
-  if (galaxyId !== personalGrowthGalaxyId || systemId !== "strength-physique") {
+  if (galaxyId !== personalGrowthGalaxyId || systemId === null) {
     return null;
   }
 
-  return strengthPlanets.find((planet) => planet.id === planetId) ?? null;
+  return (
+    personalGrowthPlanets.find(
+      (planet) => planet.systemId === systemId && planet.id === planetId,
+    ) ?? null
+  );
 }

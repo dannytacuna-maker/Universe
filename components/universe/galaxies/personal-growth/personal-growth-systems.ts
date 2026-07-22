@@ -62,30 +62,10 @@ export const personalGrowthSystems = [
     position: [4.55, -1.75, -9.55],
     scale: 0.72,
     seed: 805_721,
-    status: "future",
-  },
-  {
-    cameraPosition: [3.7, -1.5, -8],
-    description: "Daily push-ups, sit-ups, mobility, and personal discipline.",
-    displayName: "Daily Discipline",
-    id: "daily-discipline",
-    labelPosition: {
-      compact: [28, 66],
-      desktop: [40, 68],
-      portrait: [30, 67],
-    },
-    name: "Daily Discipline",
-    palette: {
-      core: "#edf5f5",
-      halo: "#6f9da3",
-      orbit: "#66868a",
-    },
-    position: [3.7, -1.62, -10.15],
-    scale: 0.7,
-    seed: 511_301,
-    status: "future",
+    status: "explorable",
   },
 ] as const satisfies readonly PersonalGrowthSystemDefinition[];
 
 export const jiuJitsuSystem = personalGrowthSystems[0];
 export const strengthPhysiqueSystem = personalGrowthSystems[1];
+export const readingSystem = personalGrowthSystems[2];

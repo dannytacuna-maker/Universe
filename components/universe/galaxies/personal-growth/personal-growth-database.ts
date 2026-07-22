@@ -1,10 +1,12 @@
 const databaseName = "mission-control";
-const databaseVersion = 2;
+const databaseVersion = 3;
 
 export const personalGrowthStoreNames = {
   bodyWeight: "strength-body-weight",
   jiuJitsuSessions: "jiu-jitsu-sessions",
   personalRecords: "strength-personal-records",
+  readingBooks: "reading-books",
+  readingSessions: "reading-sessions",
   workoutCompletions: "strength-workout-completions",
 } as const;
 
@@ -85,6 +87,30 @@ export async function openPersonalGrowthDatabase() {
         { keyPath: "id" },
       );
       store.createIndex("measuredOn", "measuredOn");
+    }
+
+    if (
+      !database.objectStoreNames.contains(personalGrowthStoreNames.readingBooks)
+    ) {
+      const store = database.createObjectStore(
+        personalGrowthStoreNames.readingBooks,
+        { keyPath: "id" },
+      );
+      store.createIndex("status", "status");
+      store.createIndex("updatedAt", "updatedAt");
+    }
+
+    if (
+      !database.objectStoreNames.contains(
+        personalGrowthStoreNames.readingSessions,
+      )
+    ) {
+      const store = database.createObjectStore(
+        personalGrowthStoreNames.readingSessions,
+        { keyPath: "id" },
+      );
+      store.createIndex("bookId", "bookId");
+      store.createIndex("occurredOn", "occurredOn");
     }
   });
 

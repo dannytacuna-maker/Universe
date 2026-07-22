@@ -5,8 +5,8 @@ import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import { AdditiveBlending, BackSide, Color, type Group } from "three";
 
-import { createSeededRandom } from "../../../procedural-random";
-import type { StrengthPlanetDefinition } from "./strength-planet-definition";
+import { createSeededRandom } from "../../procedural-random";
+import type { PersonalGrowthPlanetDefinition } from "./personal-growth-planet-definition";
 
 const backdropVertexShader = /* glsl */ `
   varying vec2 vUv;
@@ -38,7 +38,7 @@ const backdropFragmentShader = /* glsl */ `
 `;
 
 function createSurfaceMotes(seed: number) {
-  const count = 48;
+  const count = 64;
   const positions = new Float32Array(count * 3);
   const random = createSeededRandom(seed);
 
@@ -52,17 +52,17 @@ function createSurfaceMotes(seed: number) {
   return positions;
 }
 
-type StrengthDestinationSurfaceProps = Readonly<{
-  definition: StrengthPlanetDefinition;
+type PersonalGrowthDestinationSurfaceProps = Readonly<{
+  definition: PersonalGrowthPlanetDefinition;
   isVisible: boolean;
   motionEnabled: boolean;
 }>;
 
-export function StrengthDestinationSurface({
+export function PersonalGrowthDestinationSurface({
   definition,
   isVisible,
   motionEnabled,
-}: StrengthDestinationSurfaceProps) {
+}: PersonalGrowthDestinationSurfaceProps) {
   const atmosphere = useRef<Group>(null);
   const uniforms = useMemo(
     () => ({
@@ -83,6 +83,9 @@ export function StrengthDestinationSurface({
 
     atmosphere.current.rotation.y += Math.min(delta, 0.075) * 0.002;
   });
+
+  const isTimeChamber = definition.kind === "time-chamber";
+  const isLibrary = definition.kind === "library";
 
   return (
     <group position={definition.landingOrigin} visible={isVisible}>
@@ -112,14 +115,54 @@ export function StrengthDestinationSurface({
         />
       </mesh>
 
+      {isTimeChamber ? (
+        <group position={[0, 0.3, -3.8]}>
+          {[-2.7, -1.35, 0, 1.35, 2.7].map((x) => (
+            <mesh
+              key={x}
+              position={[x, 0.45, 0]}
+              rotation={[0, 0, Math.PI / 2]}
+            >
+              <torusGeometry args={[1.3, 0.012, 8, 80]} />
+              <meshBasicMaterial
+                blending={AdditiveBlending}
+                color={definition.palette.accent}
+                depthWrite={false}
+                opacity={0.14}
+                toneMapped={false}
+                transparent
+              />
+            </mesh>
+          ))}
+        </group>
+      ) : null}
+
+      {isLibrary ? (
+        <group position={[0, 0.45, -4.15]}>
+          {[1.55, 2.35, 3.15].map((radius, index) => (
+            <mesh key={radius} rotation={[Math.PI / 2.15, 0, index * 0.38]}>
+              <torusGeometry args={[radius, 0.012, 8, 96]} />
+              <meshBasicMaterial
+                blending={AdditiveBlending}
+                color={definition.palette.accent}
+                depthWrite={false}
+                opacity={0.13 - index * 0.025}
+                toneMapped={false}
+                transparent
+              />
+            </mesh>
+          ))}
+        </group>
+      ) : null}
+
       <group ref={atmosphere}>
         <Points positions={motes}>
           <PointMaterial
             blending={AdditiveBlending}
             color={definition.palette.accent}
             depthWrite={false}
-            opacity={0.26}
-            size={0.014}
+            opacity={isLibrary || isTimeChamber ? 0.34 : 0.26}
+            size={isLibrary ? 0.018 : 0.014}
             sizeAttenuation
             toneMapped={false}
             transparent

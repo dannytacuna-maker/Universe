@@ -5,7 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import { AdditiveBlending, BackSide, Color, type Group } from "three";
 
-import type { StrengthPlanetDefinition } from "./strength-planet-definition";
+import type { PersonalGrowthPlanetDefinition } from "./personal-growth-planet-definition";
 
 const planetVertexShader = /* glsl */ `
   varying vec3 vLocalPosition;
@@ -62,8 +62,8 @@ const planetFragmentShader = /* glsl */ `
   }
 `;
 
-type StrengthDestinationPlanetProps = Readonly<{
-  definition: StrengthPlanetDefinition;
+type PersonalGrowthDestinationPlanetProps = Readonly<{
+  definition: PersonalGrowthPlanetDefinition;
   isEmphasized: boolean;
   isHovered: boolean;
   isInteractive: boolean;
@@ -73,7 +73,7 @@ type StrengthDestinationPlanetProps = Readonly<{
   onHoverChange: (isHovered: boolean) => void;
 }>;
 
-export function StrengthDestinationPlanet({
+export function PersonalGrowthDestinationPlanet({
   definition,
   isEmphasized,
   isHovered,
@@ -82,7 +82,7 @@ export function StrengthDestinationPlanet({
   motionEnabled,
   onActivate,
   onHoverChange,
-}: StrengthDestinationPlanetProps) {
+}: PersonalGrowthDestinationPlanetProps) {
   const planet = useRef<Group>(null);
   const uniforms = useMemo(
     () => ({
@@ -103,7 +103,16 @@ export function StrengthDestinationPlanet({
     planet.current.rotation.y += Math.min(delta, 0.075) * 0.024;
   });
 
-  const radius = definition.kind === "program" ? 0.13 : 0.115;
+  const radius =
+    definition.kind === "program"
+      ? 0.13
+      : definition.kind === "library" || definition.kind === "time-chamber"
+        ? 0.14
+        : 0.115;
+  const hasOrbit =
+    definition.kind === "library" ||
+    definition.kind === "program" ||
+    definition.kind === "time-chamber";
   const emphasis = isEmphasized ? 1 : 0;
 
   return (
@@ -121,7 +130,7 @@ export function StrengthDestinationPlanet({
             vertexShader={planetVertexShader}
           />
         </mesh>
-        {definition.kind === "program" ? (
+        {hasOrbit ? (
           <mesh rotation={[Math.PI / 2.45, 0.1, -0.16]}>
             <ringGeometry args={[radius * 1.42, radius * 1.48, 96]} />
             <meshBasicMaterial

@@ -1,8 +1,8 @@
 "use client";
 
-import { PointMaterial, Points, useTexture } from "@react-three/drei";
+import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import {
   AdditiveBlending,
   DoubleSide,
@@ -10,7 +10,7 @@ import {
   SRGBColorSpace,
 } from "three";
 
-import { createSeededRandom } from "../../../procedural-random";
+import { BeerusSanctuaryAtmosphere } from "./beerus-sanctuary-atmosphere";
 
 const sanctuaryTexturePath = "/assets/environments/beerus-sanctuary.webp";
 
@@ -18,79 +18,50 @@ type BeerusSanctuaryEnvironmentProps = Readonly<{
   motionEnabled: boolean;
 }>;
 
-function createAtmosphericMotes() {
-  const count = 84;
-  const positions = new Float32Array(count * 3);
-  const random = createSeededRandom(987_214);
-
-  for (let index = 0; index < count; index += 1) {
-    const offset = index * 3;
-
-    positions[offset] = (random() - 0.5) * 9.5;
-    positions[offset + 1] = 0.35 + random() * 5.4;
-    positions[offset + 2] = -4.6 + random() * 4.1;
-  }
-
-  return positions;
-}
-
 export function BeerusSanctuaryEnvironment({
   motionEnabled,
 }: BeerusSanctuaryEnvironmentProps) {
-  const atmosphere = useRef<Group>(null);
+  const environmentPlate = useRef<Group>(null);
   const elapsedTime = useRef(0);
   const texture = useTexture(sanctuaryTexturePath, (loadedTexture) => {
     loadedTexture.anisotropy = 8;
     loadedTexture.colorSpace = SRGBColorSpace;
   });
-  const motes = useMemo(() => createAtmosphericMotes(), []);
-
   useFrame((_, delta) => {
-    if (!motionEnabled || atmosphere.current === null) {
+    if (!motionEnabled || environmentPlate.current === null) {
       return;
     }
 
     elapsedTime.current += Math.min(delta, 0.075);
-    atmosphere.current.position.y =
-      Math.sin(elapsedTime.current * 0.12) * 0.035;
-    atmosphere.current.rotation.z =
-      Math.sin(elapsedTime.current * 0.07) * 0.002;
+    environmentPlate.current.position.x =
+      Math.sin(elapsedTime.current * 0.09) * 0.045;
+    environmentPlate.current.position.y =
+      Math.cos(elapsedTime.current * 0.07) * 0.028;
   });
 
   return (
     <group>
-      <mesh position={[0, 1.1, -5.2]}>
-        <planeGeometry args={[19.6, 11.025]} />
-        <meshBasicMaterial map={texture} toneMapped={false} />
-      </mesh>
+      <group ref={environmentPlate}>
+        <mesh position={[0, 1.1, -5.2]}>
+          <planeGeometry args={[19.9, 11.2]} />
+          <meshBasicMaterial map={texture} toneMapped={false} />
+        </mesh>
 
-      <mesh position={[0, 1.1, -5.12]} renderOrder={1}>
-        <planeGeometry args={[19.6, 11.025]} />
-        <meshBasicMaterial
-          blending={AdditiveBlending}
-          color="#7d4f95"
-          depthWrite={false}
-          opacity={0.035}
-          side={DoubleSide}
-          toneMapped={false}
-          transparent
-        />
-      </mesh>
-
-      <group ref={atmosphere}>
-        <Points positions={motes}>
-          <PointMaterial
+        <mesh position={[0, 1.1, -5.12]} renderOrder={1}>
+          <planeGeometry args={[19.9, 11.2]} />
+          <meshBasicMaterial
             blending={AdditiveBlending}
-            color="#edc9ff"
+            color="#7d4f95"
             depthWrite={false}
-            opacity={0.28}
-            size={0.018}
-            sizeAttenuation
+            opacity={0.035}
+            side={DoubleSide}
             toneMapped={false}
             transparent
           />
-        </Points>
+        </mesh>
       </group>
+
+      <BeerusSanctuaryAtmosphere motionEnabled={motionEnabled} />
 
       <mesh position={[1.35, 0.035, -0.24]} rotation={[-Math.PI / 2, 0, 0]}>
         <circleGeometry args={[0.52, 48]} />

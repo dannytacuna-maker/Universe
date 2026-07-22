@@ -1,5 +1,5 @@
 import { beerusPlanetDefinition } from "./beerus-planet-definition";
-import type { StrengthPlanetDefinition } from "./strength-planet-definition";
+import type { PersonalGrowthPlanetDefinition } from "../personal-growth-planet-definition";
 
 export const trainingArchivePlanetDefinition = {
   cameraLookTarget: [18, -1, -25.4],
@@ -24,13 +24,13 @@ export const trainingArchivePlanetDefinition = {
   position: [4.64, -0.62, -10.02],
   seed: 438_217,
   systemId: "strength-physique",
-} as const satisfies StrengthPlanetDefinition;
+} as const satisfies PersonalGrowthPlanetDefinition;
 
 export const gymPlaylistPlanetDefinition = {
   cameraLookTarget: [24, -1, -29.4],
   cameraPosition: [24, -0.18, -23.2],
   description:
-    "Daniel's Spotify gym playlist, kept separate from training records and programming.",
+    "Daniel's Spotify gym playlists, kept separate from training records and programming.",
   galaxyId: "personal-growth",
   id: "gym-playlist",
   kind: "playlist",
@@ -49,15 +49,10 @@ export const gymPlaylistPlanetDefinition = {
   position: [4.96, -1.08, -9.98],
   seed: 916_403,
   systemId: "strength-physique",
-} as const satisfies StrengthPlanetDefinition;
+} as const satisfies PersonalGrowthPlanetDefinition;
 
 export const strengthPlanets = [
   beerusPlanetDefinition,
   trainingArchivePlanetDefinition,
   gymPlaylistPlanetDefinition,
-] as const satisfies readonly StrengthPlanetDefinition[];
-
-export const supportingStrengthPlanets = [
-  trainingArchivePlanetDefinition,
-  gymPlaylistPlanetDefinition,
-] as const satisfies readonly StrengthPlanetDefinition[];
+] as const satisfies readonly PersonalGrowthPlanetDefinition[];

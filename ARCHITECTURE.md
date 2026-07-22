@@ -190,39 +190,61 @@ examples are `destination=university/logistics` and
 `destination=personal-growth/strength-physique`. Strength planet deep links are
 `destination=personal-growth/strength-physique/beerus-planet`,
 `destination=personal-growth/strength-physique/training-archive`, and
-`destination=personal-growth/strength-physique/gym-playlist`. URL parsing is pure and
-colocated with the universe feature; `UniverseViewport` synchronizes browser history and
-Zustand through `pushState` and `popstate`. Unknown or future destinations fall back to
-the universe instead of fabricating unavailable navigation. This is client-side state
-reflection, not a replacement for future server-owned routes and domain data.
+`destination=personal-growth/strength-physique/gym-playlist`. Jiu-Jitsu and Reading
+planet deep links are `destination=personal-growth/jiu-jitsu/hyperbolic-time-chamber`
+and `destination=personal-growth/reading/celestial-library`. URL parsing is pure and
+colocated with the universe feature; `UniverseViewport` synchronizes browser history
+and Zustand through `pushState` and `popstate`. Unknown or future destinations fall
+back to the universe instead of fabricating unavailable navigation. This is client-side
+state reflection, not a replacement for future server-owned routes and domain data.
 
 ### Personal Growth and real-world visual state
 
-Personal Growth is a feature-owned galaxy with four first-class system
-definitions: Jiu-Jitsu, Strength and Physique, Reading, and Daily Discipline.
-Jiu-Jitsu and Strength and Physique are explorable. The remaining systems are
-visible, semantic future destinations; they intentionally do not expose
-simulated metrics or empty product screens. Each explorable renderer receives a
-compact derived progress signal. For Jiu-Jitsu, recent attention affects halo
-clarity, active-week consistency affects orbital stability, accumulated
-sessions affect field depth, and each recorded session contributes one bounded
-marker. For Strength and Physique, the six restrained markers correspond to the
-current week's Push, Pull, Legs, Push, Pull, Legs rhythm; completed sessions
-clarify those markers while recorded lifts modestly strengthen the surrounding
-structure. The visualization never reads storage and never owns authoritative
-records.
+Personal Growth is a feature-owned galaxy with three first-class explorable system
+definitions: Jiu-Jitsu, Strength and Physique, and Reading. Daily Discipline was removed
+because it no longer represents a required destination. Each renderer receives only the
+compact derived progress signal it can communicate spatially. For Jiu-Jitsu, recent
+attention affects halo clarity, active-week consistency affects orbital stability,
+accumulated sessions affect field depth, and each recorded session contributes one
+bounded marker. For Strength and Physique, the six restrained markers correspond to the
+current week's Push, Pull, Legs, Push, Pull, Legs rhythm; completed sessions clarify
+those markers while recorded lifts modestly strengthen the surrounding structure. The
+visualization never reads storage and never owns authoritative records.
 
 Personal Growth records are stored in a feature-owned IndexedDB database named
-`mission-control`. Schema version 2 preserves the original Jiu-Jitsu session
-store and adds separate Strength stores for weekly workout completion, personal
-records, and body weight. The Strength plan describes muscle groups and bounded
-exercise counts rather than prescribing exercises: Push covers chest,
-shoulders, and triceps; Pull covers back, rear delts, and biceps; Legs covers
-legs and calves, repeated over six sessions. Personal records are limited to
-bench press, squat, and deadlift, and body-weight entries retain their measured
-date. Repository and hooks remain feature-colocated; data is not copied into
-Zustand. The UI creates no example records, and every base celestial system is a
-destination identity rather than a claim of progress.
+`mission-control`. Schema version 3 preserves the original Jiu-Jitsu and Strength stores
+and adds separate Reading book and session stores. The Strength plan describes muscle
+groups and bounded exercise counts rather than prescribing exercises: Push covers chest,
+shoulders, and triceps; Pull covers back, rear delts, and biceps; Legs covers legs and
+calves, repeated over six sessions. Personal records are limited to bench press, squat,
+and deadlift, and body-weight entries retain their measured date. Reading books own
+status, page progress, rating, and final reflection; reading sessions own time, page
+range, pages read, and session reflection. Repositories and hooks remain feature-colocated;
+data is not copied into Zustand. The UI creates no example records, and every base
+celestial system is a destination identity rather than a claim of progress.
+
+Personal Growth planets now share one compact definition contract for identity, parent
+system, placement, camera pose, landing origin, palette, and semantic label coordinates.
+This is the smallest reusable boundary justified by planets across three systems; their
+domain dashboards and persistence remain feature-specific. A generic procedural planet
+and landing surface handle the lightweight destinations, while Beerus' Planet retains its
+specialized renderer. Camera travel remains exclusively owned by `CameraRig`.
+
+Jiu-Jitsu contains the Hyperbolic Time Chamber as a review destination. The existing
+session logger is unchanged and remains available in the Jiu-Jitsu system. The landed
+dashboard derives weekly and monthly sessions, total hours, sparring rounds, recent
+sessions, unique techniques, reflections, mobility completion, and the current month's
+training calendar from that same session repository. It writes no parallel analytics
+state. Its translucent DOM instrument sits within a procedural chamber environment so
+the destination remains spatial while all controls and history remain accessible without
+WebGL.
+
+Reading contains the Celestial Library. Its landed dashboard supports adding books,
+explicit reading statuses, session logging, page ranges, time, reflections, current
+progress, history, planned books, ratings, and final reflections. A pure summary derives
+the current book, weekly time and pages, recent reflections, and the next reading queue.
+The library uses ordinary forms and semantic history outside WebGL, staged over a quiet
+procedural library environment. Records remain local to the current browser and origin.
 
 Strength and Physique contains three landed destinations: Beerus' Planet, Training
 Archive, and Gym Playlist. Shared definitions own system-space placement, label
@@ -239,12 +261,16 @@ Beerus' system marker is a procedural shader planet with a separate cloud shell,
 restrained atmosphere, and deterministic orbital debris. Its previous miniature tree
 silhouette was removed because its scale did not read coherently in the system view.
 The landed surface uses one higher-quality optimized 578 KB project-local environment
-plate, a deterministic foreground mote layer, and a single optimized transparent Whis
-image plate. Whis is statically grounded with a contact shadow; character bobbing is
-intentionally absent. This is a deliberate 2.5D cinematic staging boundary rather than
-a free-roaming world. It adds no post-processing, shadows, physics, texture pack, or
-independent render loop. Atmosphere and planet motion share the existing 30 FPS
-invalidation scheduler and remain static for reduced-motion users.
+plate, a deterministic foreground atmosphere, and a single optimized transparent Whis
+image plate. The environment plate has restrained ambient parallax while one inexpensive
+procedural veil supplies readable cloud drift, horizon breathing, and a slow travelling
+light front; two bounded static particle buffers create dust and distant blossom movement
+at separate depths. Whis is
+statically grounded with a contact shadow; character bobbing is intentionally absent.
+This is a deliberate 2.5D cinematic staging boundary rather than a free-roaming world.
+It adds no post-processing, shadows, physics, texture pack, or independent render loop.
+All atmosphere motion shares the existing 30 FPS invalidation scheduler and remains
+fully static for reduced-motion users.
 
 Whis' semantic training assistant stays outside WebGL and composes the existing
 `WorkoutSplit` and `StrengthRecords` components. It therefore reads and mutates the
@@ -259,10 +285,14 @@ Training Archive stores the user-supplied original PDF as a project-local static
 and derives a compact typed presentation of its four-week, four-day, two-rotation
 powerbuilding structure. The original document remains directly accessible so the UI
 does not become a lossy replacement for source material. Gym Playlist is a separate
-planet whose DOM panel embeds the user-supplied Spotify playlist with lazy loading and
-an ordinary external link. Spotify owns media playback; Mission Control stores no audio,
-tokens, or playback state. Both supporting planets use lightweight procedural markers
-and static horizon surfaces rather than new texture packs or rendering loops.
+planet whose DOM panel presents two public user-supplied Spotify playlists side by side
+with lazy embedded playback and ordinary external links. Spotify owns media playback;
+Mission Control stores no audio or playback state. Both
+destination panels arrive as viewport workspaces beneath the persistent spatial navigation
+strip and remain present for the duration of the landed view; navigation, rather than a
+redundant panel toggle, is the only way to leave them. Both supporting planets use lightweight
+procedural markers and static horizon surfaces rather than new texture packs or
+rendering loops.
 
 This local-first persistence is intentionally private and useful before an
 account backend exists, but it is device-and-browser specific: it is not synced,

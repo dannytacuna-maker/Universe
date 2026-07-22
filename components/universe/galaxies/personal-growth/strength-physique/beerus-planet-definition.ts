@@ -1,4 +1,4 @@
-import type { StrengthPlanetDefinition } from "./strength-planet-definition";
+import type { PersonalGrowthPlanetDefinition } from "../personal-growth-planet-definition";
 
 export const beerusPlanetDefinition = {
   cameraLookTarget: [12, -1, -20.4],
@@ -23,4 +23,4 @@ export const beerusPlanetDefinition = {
   position: [5.3, -0.7, -9.86],
   seed: 721_909,
   systemId: "strength-physique",
-} as const satisfies StrengthPlanetDefinition;
+} as const satisfies PersonalGrowthPlanetDefinition;
