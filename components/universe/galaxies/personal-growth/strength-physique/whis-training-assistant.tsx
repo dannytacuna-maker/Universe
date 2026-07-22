@@ -49,11 +49,16 @@ export function WhisTrainingAssistant({
   const nextWorkout = strengthWorkoutSplit.find(
     (workout) => !progress.completedDayIds.includes(workout.id),
   );
-  const guidance = isLoading
+  const focusName = isLoading
+    ? "Preparing your session"
+    : nextWorkout === undefined
+      ? "Recovery"
+      : nextWorkout.name;
+  const focusDescription = isLoading
     ? "Reviewing your training records"
     : nextWorkout === undefined
-      ? "This week's training is complete. Prioritize recovery."
-      : `${nextWorkout.name} · ${nextWorkout.focus}`;
+      ? "This week's training is complete"
+      : nextWorkout.focus;
 
   if (!isVisible) {
     return null;
@@ -66,9 +71,15 @@ export function WhisTrainingAssistant({
       data-open={isOpen}
     >
       <div className="strength-tracker__summary whis-assistant__summary">
-        <div>
-          <span>Whis · Training attendant</span>
-          <strong>{guidance}</strong>
+        <div className="whis-assistant__welcome">
+          <span>Whis · Angel attendant</span>
+          <strong>Welcome back, Daniel.</strong>
+          <p>Your discipline is taking shape. Let us continue.</p>
+        </div>
+        <div className="whis-assistant__focus">
+          <span>Today&apos;s focus</span>
+          <strong>{focusName}</strong>
+          <p>{focusDescription}</p>
           <small>
             {progress.weeklyCompleted}/6 sessions
             {progress.latestWeightKg === null
@@ -82,7 +93,7 @@ export function WhisTrainingAssistant({
           onClick={() => setIsOpen((current) => !current)}
           type="button"
         >
-          {isOpen ? "Close" : "Review training"}
+          {isOpen ? "Close" : "Train with Whis"}
         </button>
       </div>
 

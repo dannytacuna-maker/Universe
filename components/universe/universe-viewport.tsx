@@ -14,7 +14,6 @@ import { JiuJitsuTrainingLog } from "./galaxies/personal-growth/jiu-jitsu/jiu-ji
 import { useJiuJitsuSessions } from "./galaxies/personal-growth/jiu-jitsu/use-jiu-jitsu-sessions";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
 import { beerusPlanetDefinition } from "./galaxies/personal-growth/strength-physique/beerus-planet-definition";
-import { StrengthPhysiqueTracker } from "./galaxies/personal-growth/strength-physique/strength-physique-tracker";
 import { useStrengthPhysique } from "./galaxies/personal-growth/strength-physique/use-strength-physique";
 import { WhisTrainingAssistant } from "./galaxies/personal-growth/strength-physique/whis-training-assistant";
 import { LazyUniverseCanvas } from "./lazy-universe-canvas";
@@ -367,10 +366,6 @@ export function UniverseViewport() {
     navigationLevel === "system" &&
     selectedGalaxyId === personalGrowthGalaxyId &&
     activeSystemId === jiuJitsuSystemId;
-  const isStrengthPhysiqueActive =
-    navigationLevel === "system" &&
-    selectedGalaxyId === personalGrowthGalaxyId &&
-    activeSystemId === strengthPhysiqueSystemId;
   const isBeerusPlanetActive =
     navigationLevel === "planet" &&
     selectedGalaxyId === personalGrowthGalaxyId &&
@@ -453,19 +448,6 @@ export function UniverseViewport() {
         storageError={trainingStorageError}
       />
 
-      <StrengthPhysiqueTracker
-        bodyWeightEntries={bodyWeightEntries}
-        isLoading={isStrengthLoading}
-        isVisible={isStrengthPhysiqueActive && isViewSettled}
-        onAddBodyWeight={addBodyWeight}
-        onRemoveBodyWeight={removeBodyWeight}
-        onToggleWorkout={toggleWorkout}
-        onUpdatePersonalRecord={updatePersonalRecord}
-        personalRecords={personalRecords}
-        progress={strengthProgress}
-        storageError={strengthStorageError}
-      />
-
       <WhisTrainingAssistant
         bodyWeightEntries={bodyWeightEntries}
         isLoading={isStrengthLoading}
@@ -493,7 +475,7 @@ export function UniverseViewport() {
               ? "Beerus' Planet training sanctuary. Whis provides access to the six-day training plan, personal records, and body-weight tracking."
               : selectedGalaxyId === personalGrowthGalaxyId
                 ? activeSystemId === strengthPhysiqueSystemId
-                  ? "Strength and Physique system. A flexible six-day push, pull, legs plan, personal records, and body weight can be tracked privately on this device."
+                  ? "Strength and Physique system. Beerus' Planet is available to enter. Training records are accessible after landing with Whis."
                   : "Jiu-Jitsu system. Training sessions can be logged privately on this device."
                 : activeCourse === null
                   ? "University course system."

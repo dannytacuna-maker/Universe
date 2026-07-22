@@ -13,6 +13,111 @@ import {
 
 import { beerusPlanetDefinition } from "./beerus-planet-definition";
 
+const planetVertexShader = /* glsl */ `
+  varying vec3 vLocalPosition;
+  varying vec3 vViewNormal;
+
+  void main() {
+    vLocalPosition = position;
+    vViewNormal = normalize(normalMatrix * normal);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const noiseFunctions = /* glsl */ `
+  float hash(vec3 value) {
+    return fract(sin(dot(value, vec3(127.1, 311.7, 74.7))) * 43758.5453123);
+  }
+
+  float noise(vec3 value) {
+    vec3 cell = floor(value);
+    vec3 blend = fract(value);
+    blend = blend * blend * (3.0 - 2.0 * blend);
+
+    return mix(
+      mix(
+        mix(hash(cell), hash(cell + vec3(1.0, 0.0, 0.0)), blend.x),
+        mix(hash(cell + vec3(0.0, 1.0, 0.0)), hash(cell + vec3(1.0, 1.0, 0.0)), blend.x),
+        blend.y
+      ),
+      mix(
+        mix(hash(cell + vec3(0.0, 0.0, 1.0)), hash(cell + vec3(1.0, 0.0, 1.0)), blend.x),
+        mix(hash(cell + vec3(0.0, 1.0, 1.0)), hash(cell + vec3(1.0, 1.0, 1.0)), blend.x),
+        blend.y
+      ),
+      blend.z
+    );
+  }
+
+  float fbm(vec3 value) {
+    float result = 0.0;
+    float amplitude = 0.5;
+
+    for (int octave = 0; octave < 4; octave += 1) {
+      result += noise(value) * amplitude;
+      value = value * 2.03 + vec3(1.7, 2.9, 0.8);
+      amplitude *= 0.5;
+    }
+
+    return result;
+  }
+`;
+
+const planetFragmentShader = /* glsl */ `
+  varying vec3 vLocalPosition;
+  varying vec3 vViewNormal;
+
+  ${noiseFunctions}
+
+  void main() {
+    float terrain = fbm(vLocalPosition * 17.0);
+    float detail = fbm(vLocalPosition * 39.0 + vec3(4.3, 1.1, 2.7));
+    float light = max(dot(vViewNormal, normalize(vec3(-0.48, 0.62, 0.72))), 0.0);
+    float rim = pow(1.0 - abs(vViewNormal.z), 2.4);
+
+    vec3 lowland = vec3(0.105, 0.045, 0.15);
+    vec3 highland = vec3(0.43, 0.22, 0.52);
+    vec3 bloom = vec3(0.68, 0.39, 0.73);
+    vec3 surface = mix(lowland, highland, smoothstep(0.28, 0.72, terrain));
+    surface = mix(surface, bloom, smoothstep(0.68, 0.9, detail) * 0.34);
+    surface *= 0.32 + light * 0.92;
+    surface += vec3(0.37, 0.18, 0.5) * rim * 0.42;
+
+    gl_FragColor = vec4(surface, 1.0);
+  }
+`;
+
+const cloudFragmentShader = /* glsl */ `
+  varying vec3 vLocalPosition;
+  varying vec3 vViewNormal;
+
+  ${noiseFunctions}
+
+  void main() {
+    float cloud = fbm(vLocalPosition * 31.0 + vec3(8.0, 3.0, 5.0));
+    float alpha = smoothstep(0.57, 0.78, cloud) * 0.22;
+    float rim = pow(1.0 - abs(vViewNormal.z), 2.0);
+    vec3 color = mix(vec3(0.72, 0.63, 0.82), vec3(0.91, 0.78, 0.95), rim);
+
+    gl_FragColor = vec4(color, alpha + rim * 0.025);
+  }
+`;
+
+const orbitalDebris = Array.from({ length: 18 }, (_, index) => {
+  const angle = (index / 18) * Math.PI * 2 + (index % 3) * 0.09;
+  const radius = 0.255 + (index % 4) * 0.012;
+
+  return {
+    id: index,
+    position: [
+      Math.cos(angle) * radius,
+      Math.sin(angle * 1.7) * 0.028,
+      Math.sin(angle) * radius * 0.58,
+    ] as const,
+    scale: 0.004 + (index % 3) * 0.0015,
+  };
+});
+
 type BeerusPlanetProps = Readonly<{
   isEmphasized: boolean;
   isHovered: boolean;
@@ -33,7 +138,8 @@ export function BeerusPlanet({
   onHoverChange,
 }: BeerusPlanetProps) {
   const planet = useRef<Mesh>(null);
-  const cloudShell = useRef<Group>(null);
+  const cloudShell = useRef<Mesh>(null);
+  const debris = useRef<Group>(null);
 
   useCursor(isHovered && isInteractive, "pointer", "auto");
 
@@ -45,12 +151,16 @@ export function BeerusPlanet({
     const safeDelta = Math.min(delta, 0.075);
 
     if (planet.current !== null) {
-      planet.current.rotation.y += safeDelta * 0.035;
+      planet.current.rotation.y += safeDelta * 0.032;
     }
 
     if (cloudShell.current !== null) {
-      cloudShell.current.rotation.y -= safeDelta * 0.018;
-      cloudShell.current.rotation.z += safeDelta * 0.004;
+      cloudShell.current.rotation.y -= safeDelta * 0.019;
+      cloudShell.current.rotation.z += safeDelta * 0.003;
+    }
+
+    if (debris.current !== null) {
+      debris.current.rotation.y += safeDelta * 0.006;
     }
   });
 
@@ -59,65 +169,93 @@ export function BeerusPlanet({
   return (
     <group
       position={beerusPlanetDefinition.position}
-      scale={isEmphasized ? 1.045 : 1}
+      scale={isEmphasized ? 1.035 : 1}
       visible={isVisible}
     >
-      <mesh ref={planet} rotation={[0.18, 0, -0.08]}>
-        <sphereGeometry args={[0.14, 40, 26]} />
-        <meshStandardMaterial
-          color="#67517d"
-          emissive="#23152f"
-          emissiveIntensity={0.54 + emphasis * 0.12}
-          metalness={0.05}
-          roughness={0.82}
+      <mesh ref={planet} rotation={[0.12, 0.25, -0.08]}>
+        <sphereGeometry args={[0.18, 56, 40]} />
+        <shaderMaterial
+          fragmentShader={planetFragmentShader}
+          vertexShader={planetVertexShader}
         />
       </mesh>
 
-      <group ref={cloudShell} rotation={[0.2, 0.2, -0.08]}>
-        <mesh scale={1.018}>
-          <sphereGeometry args={[0.14, 36, 24]} />
-          <meshBasicMaterial
-            blending={AdditiveBlending}
-            color="#d6c7ec"
-            depthWrite={false}
-            opacity={0.075 + emphasis * 0.045}
-            side={DoubleSide}
-            toneMapped={false}
-            transparent
-            wireframe
-          />
-        </mesh>
-      </group>
+      <mesh ref={cloudShell} rotation={[0.15, -0.2, -0.06]} scale={1.018}>
+        <sphereGeometry args={[0.18, 48, 32]} />
+        <shaderMaterial
+          depthWrite={false}
+          fragmentShader={cloudFragmentShader}
+          transparent
+          vertexShader={planetVertexShader}
+        />
+      </mesh>
 
-      <mesh scale={1.13}>
-        <sphereGeometry args={[0.14, 32, 20]} />
+      <mesh scale={1.1}>
+        <sphereGeometry args={[0.18, 40, 28]} />
         <meshBasicMaterial
           blending={AdditiveBlending}
-          color="#b997dd"
+          color="#a96ed2"
           depthWrite={false}
-          opacity={0.08 + emphasis * 0.06}
+          opacity={0.12 + emphasis * 0.06}
           side={BackSide}
           toneMapped={false}
           transparent
         />
       </mesh>
 
-      <mesh rotation={[Math.PI / 2.4, 0.18, 0.08]}>
-        <ringGeometry args={[0.205, 0.207, 96]} />
-        <meshBasicMaterial
-          blending={AdditiveBlending}
-          color="#c7ad79"
-          depthWrite={false}
-          opacity={0.16 + emphasis * 0.1}
-          side={DoubleSide}
-          toneMapped={false}
-          transparent
-        />
-      </mesh>
+      <group position={[0, 0.185, 0.008]} scale={0.92}>
+        <mesh position={[0, 0.006, 0]}>
+          <cylinderGeometry args={[0.038, 0.062, 0.045, 12]} />
+          <meshStandardMaterial color="#37213e" roughness={0.96} />
+        </mesh>
+        <mesh position={[0, 0.07, 0]}>
+          <cylinderGeometry args={[0.009, 0.014, 0.1, 9]} />
+          <meshStandardMaterial color="#45263f" roughness={0.92} />
+        </mesh>
+        <mesh position={[-0.025, 0.125, 0]} scale={[1.2, 0.72, 1]}>
+          <icosahedronGeometry args={[0.05, 1]} />
+          <meshStandardMaterial
+            color="#a34f9c"
+            emissive="#42163f"
+            emissiveIntensity={0.68}
+            roughness={0.8}
+          />
+        </mesh>
+        <mesh position={[0.03, 0.12, -0.008]} scale={[1.05, 0.76, 1]}>
+          <icosahedronGeometry args={[0.046, 1]} />
+          <meshStandardMaterial
+            color="#bd62b2"
+            emissive="#4a1946"
+            emissiveIntensity={0.74}
+            roughness={0.8}
+          />
+        </mesh>
+      </group>
 
-      <mesh position={[0.19, 0.055, 0.025]}>
-        <sphereGeometry args={[0.015, 16, 10]} />
-        <meshBasicMaterial color="#d7c9a5" toneMapped={false} />
+      <group ref={debris} rotation={[Math.PI / 2.65, 0.08, 0.14]}>
+        <mesh>
+          <ringGeometry args={[0.255, 0.257, 120]} />
+          <meshBasicMaterial
+            blending={AdditiveBlending}
+            color="#c58ce0"
+            depthWrite={false}
+            opacity={0.12 + emphasis * 0.07}
+            side={DoubleSide}
+            toneMapped={false}
+            transparent
+          />
+        </mesh>
+        {orbitalDebris.map(({ id, position, scale }) => (
+          <mesh key={id} position={position} scale={scale}>
+            <dodecahedronGeometry args={[1, 0]} />
+            <meshBasicMaterial color="#b486bf" toneMapped={false} />
+          </mesh>
+        ))}
+      </group>
+
+      <mesh position={[0.265, 0.072, 0.03]}>
+        <sphereGeometry args={[0.016, 16, 10]} />
+        <meshBasicMaterial color="#e6d2b0" toneMapped={false} />
       </mesh>
 
       {isInteractive ? (
@@ -135,7 +273,7 @@ export function BeerusPlanet({
             onHoverChange(true);
           }}
         >
-          <sphereGeometry args={[0.25, 16, 12]} />
+          <sphereGeometry args={[0.31, 16, 12]} />
           <meshBasicMaterial
             colorWrite={false}
             depthWrite={false}

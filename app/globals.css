@@ -79,10 +79,14 @@ body {
 
 .universe-viewport[data-navigation-level="planet"]::after {
   background:
-    radial-gradient(circle at 61% 34%, rgb(164 133 192 / 9%), transparent 32%),
-    radial-gradient(circle at 42% 82%, rgb(75 51 99 / 16%), transparent 48%),
-    linear-gradient(to bottom, rgb(24 13 37 / 7%), rgb(6 3 12 / 18%));
-  opacity: 0.94;
+    linear-gradient(
+      to bottom,
+      rgb(7 3 14 / 8%),
+      transparent 24% 68%,
+      rgb(4 1 9 / 28%)
+    ),
+    radial-gradient(ellipse at 51% 48%, transparent 47%, rgb(5 2 11 / 22%));
+  opacity: 1;
 }
 
 .universe-fallback {
@@ -1329,15 +1333,62 @@ body {
 .whis-assistant {
   right: auto;
   left: max(1.35rem, env(safe-area-inset-left));
+  width: min(20rem, calc(100vw - 2.7rem));
   border-color: rgb(178 157 206 / 17%);
-  background: rgb(8 5 14 / 78%);
+  background:
+    linear-gradient(145deg, rgb(28 16 39 / 78%), rgb(7 4 13 / 88%)),
+    rgb(8 5 14 / 82%);
   box-shadow:
     0 1.5rem 4.6rem rgb(3 1 7 / 48%),
     inset 0 1px rgb(241 232 248 / 6%);
   backdrop-filter: blur(1.45rem) saturate(112%);
 }
 
+.whis-assistant .whis-assistant__summary {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem;
+}
+
+.whis-assistant[data-open="true"] .whis-assistant__summary {
+  grid-template-columns: 1.25fr 1fr auto;
+  align-items: center;
+}
+
+.whis-assistant__welcome,
+.whis-assistant__focus {
+  display: grid;
+  gap: 0.24rem;
+}
+
+.whis-assistant__welcome p,
+.whis-assistant__focus p {
+  margin: 0;
+  color: rgb(204 189 214 / 58%);
+  font-size: 0.58rem;
+  line-height: 1.52;
+}
+
+.whis-assistant__welcome strong {
+  margin-top: 0.2rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.025em;
+}
+
+.whis-assistant__focus {
+  padding-top: 0.75rem;
+  border-top: 1px solid rgb(190 164 211 / 10%);
+}
+
+.whis-assistant[data-open="true"] .whis-assistant__focus {
+  padding-top: 0;
+  padding-left: 0.9rem;
+  border-top: 0;
+  border-left: 1px solid rgb(190 164 211 / 10%);
+}
+
 .whis-assistant__summary small {
+  margin-top: 0.12rem;
   color: rgb(191 169 208 / 51%);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 0.5rem;
@@ -1356,6 +1407,10 @@ body {
   border-color: rgb(179 160 206 / 23%);
   background: rgb(135 100 161 / 9%);
   color: rgb(228 216 237 / 82%);
+}
+
+.whis-assistant:not([data-open="true"]) .whis-assistant__summary > button {
+  width: 100%;
 }
 
 .whis-assistant button:hover,
@@ -1575,6 +1630,19 @@ select {
   .whis-assistant[data-open="true"] {
     right: max(0.7rem, env(safe-area-inset-right));
     left: max(0.7rem, env(safe-area-inset-left));
+  }
+
+  .whis-assistant[data-open="true"] .whis-assistant__summary {
+    grid-template-columns: 1fr auto;
+  }
+
+  .whis-assistant[data-open="true"] .whis-assistant__welcome {
+    grid-column: 1 / -1;
+  }
+
+  .whis-assistant[data-open="true"] .whis-assistant__focus {
+    padding-left: 0;
+    border-left: 0;
   }
 
   .strength-tracker__panel {

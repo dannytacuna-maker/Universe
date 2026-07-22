@@ -229,17 +229,23 @@ live in one focused definition. The marker uses a deliberately enlarged invisibl
 raycast sphere, while the equivalent DOM button remains the authoritative keyboard
 and non-WebGL interaction. Landing preserves `CameraRig` as the sole camera owner
 and hides the parent system field rather than leaving duplicate scene layers active.
-The surface uses bounded procedural geometry, local lights without shadows, and a
-single optimized transparent Whis image plate. It adds no post-processing, physics,
-texture pack, or independent render loop. Ambient character and planet motion share
-the existing 30 FPS invalidation scheduler and remain static for reduced-motion users.
+The system marker is a procedural shader planet with a separate cloud shell, restrained
+atmosphere, deterministic orbital debris, and a small sanctuary silhouette. The landed
+surface uses one optimized 230 KB project-local environment plate, a deterministic
+foreground mote layer, and a single optimized transparent Whis image plate. This is a
+deliberate 2.5D cinematic staging boundary rather than a free-roaming world. It adds no
+post-processing, shadows, physics, texture pack, or independent render loop. Ambient
+character, atmosphere, and planet motion share the existing 30 FPS invalidation
+scheduler and remain static for reduced-motion users.
 
 Whis' semantic training assistant stays outside WebGL and composes the existing
 `WorkoutSplit` and `StrengthRecords` components. It therefore reads and mutates the
-same IndexedDB-backed Strength records as the system-level tracker instead of creating
-parallel progress state. The planet view remains useful when WebGL is unavailable:
-the destination, back path, training program, personal records, and weight tracking
-all survive independently of the canvas.
+same IndexedDB-backed Strength records without creating parallel progress state. The
+system overview intentionally exposes only the planet destination; the training plan,
+personal records, and weight controls appear only after landing with Whis. The planet
+view remains useful when WebGL is unavailable: the destination, back path, Whis welcome,
+training program, personal records, and weight tracking all survive independently of
+the canvas.
 
 This local-first persistence is intentionally private and useful before an
 account backend exists, but it is device-and-browser specific: it is not synced,
