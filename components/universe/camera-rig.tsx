@@ -256,12 +256,12 @@ export function CameraRig({
     if (transitionProgress.current < 1) {
       const duration =
         navigationLevel === "galaxy"
-          ? 3.15
+          ? 3.45
           : navigationLevel === "planet"
-            ? 3.45
+            ? 4.25
             : navigationLevel === "system"
-              ? 2.65
-              : 2.95;
+              ? 3.15
+              : 3.25;
       const progress = Math.min(
         1,
         transitionProgress.current + safeDelta / duration,

@@ -187,13 +187,14 @@ contract: `destination=<galaxy>` selects a galaxy overview,
 `destination=<galaxy>/<system>/<planet>` selects a landed planet. Current deep-link
 examples are `destination=university/logistics` and
 `destination=personal-growth/jiu-jitsu` or
-`destination=personal-growth/strength-physique`. The first planet deep link is
-`destination=personal-growth/strength-physique/beerus-planet`. URL parsing is pure and
+`destination=personal-growth/strength-physique`. Strength planet deep links are
+`destination=personal-growth/strength-physique/beerus-planet`,
+`destination=personal-growth/strength-physique/training-archive`, and
+`destination=personal-growth/strength-physique/gym-playlist`. URL parsing is pure and
 colocated with the universe feature; `UniverseViewport` synchronizes browser history and
-Zustand through `pushState` and `popstate`. Unknown or future destinations fall
-back to the universe instead of fabricating unavailable navigation. This is
-client-side state reflection, not a replacement for future server-owned routes
-and domain data.
+Zustand through `pushState` and `popstate`. Unknown or future destinations fall back to
+the universe instead of fabricating unavailable navigation. This is client-side state
+reflection, not a replacement for future server-owned routes and domain data.
 
 ### Personal Growth and real-world visual state
 
@@ -223,29 +224,45 @@ date. Repository and hooks remain feature-colocated; data is not copied into
 Zustand. The UI creates no example records, and every base celestial system is a
 destination identity rather than a claim of progress.
 
-Strength and Physique contains the first landed destination, Beerus' Planet.
-Its system-space marker, planet-space camera pose, and surface staging coordinates
-live in one focused definition. The marker uses a deliberately enlarged invisible
-raycast sphere, while the equivalent DOM button remains the authoritative keyboard
-and non-WebGL interaction. Landing preserves `CameraRig` as the sole camera owner
-and hides the parent system field rather than leaving duplicate scene layers active.
-The system marker is a procedural shader planet with a separate cloud shell, restrained
-atmosphere, deterministic orbital debris, and a small sanctuary silhouette. The landed
-surface uses one optimized 230 KB project-local environment plate, a deterministic
-foreground mote layer, and a single optimized transparent Whis image plate. This is a
-deliberate 2.5D cinematic staging boundary rather than a free-roaming world. It adds no
-post-processing, shadows, physics, texture pack, or independent render loop. Ambient
-character, atmosphere, and planet motion share the existing 30 FPS invalidation
-scheduler and remain static for reduced-motion users.
+Strength and Physique contains three landed destinations: Beerus' Planet, Training
+Archive, and Gym Playlist. Shared definitions own system-space placement, label
+placement, camera pose, surface staging coordinates, identity, and palette. Each marker
+uses a deliberately enlarged invisible raycast sphere, while equivalent DOM buttons
+remain the authoritative keyboard and non-WebGL interaction. Landing preserves
+`CameraRig` as the sole camera owner and hides the parent system field rather than
+leaving duplicate scene layers active. Planet entry uses a bounded DOM cloud-cover
+transition: cloud layers close before navigation commits, remain over the deliberate
+camera path, and clear only after camera arrival. Reduced-motion and non-WebGL users
+skip that decorative cover and retain immediate navigation.
+
+Beerus' system marker is a procedural shader planet with a separate cloud shell,
+restrained atmosphere, and deterministic orbital debris. Its previous miniature tree
+silhouette was removed because its scale did not read coherently in the system view.
+The landed surface uses one higher-quality optimized 578 KB project-local environment
+plate, a deterministic foreground mote layer, and a single optimized transparent Whis
+image plate. Whis is statically grounded with a contact shadow; character bobbing is
+intentionally absent. This is a deliberate 2.5D cinematic staging boundary rather than
+a free-roaming world. It adds no post-processing, shadows, physics, texture pack, or
+independent render loop. Atmosphere and planet motion share the existing 30 FPS
+invalidation scheduler and remain static for reduced-motion users.
 
 Whis' semantic training assistant stays outside WebGL and composes the existing
 `WorkoutSplit` and `StrengthRecords` components. It therefore reads and mutates the
 same IndexedDB-backed Strength records without creating parallel progress state. The
-system overview intentionally exposes only the planet destination; the training plan,
-personal records, and weight controls appear only after landing with Whis. The planet
+system overview intentionally exposes only planet destinations; the current training
+plan, personal records, and weight controls appear only after landing with Whis. The planet
 view remains useful when WebGL is unavailable: the destination, back path, Whis welcome,
 training program, personal records, and weight tracking all survive independently of
 the canvas.
+
+Training Archive stores the user-supplied original PDF as a project-local static asset
+and derives a compact typed presentation of its four-week, four-day, two-rotation
+powerbuilding structure. The original document remains directly accessible so the UI
+does not become a lossy replacement for source material. Gym Playlist is a separate
+planet whose DOM panel embeds the user-supplied Spotify playlist with lazy loading and
+an ordinary external link. Spotify owns media playback; Mission Control stores no audio,
+tokens, or playback state. Both supporting planets use lightweight procedural markers
+and static horizon surfaces rather than new texture packs or rendering loops.
 
 This local-first persistence is intentionally private and useful before an
 account backend exists, but it is device-and-browser specific: it is not synced,

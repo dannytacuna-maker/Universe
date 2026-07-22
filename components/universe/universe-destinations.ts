@@ -2,7 +2,7 @@ import type { NavigationState } from "@/store/navigation-store";
 
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
-import { beerusPlanetDefinition } from "./galaxies/personal-growth/strength-physique/beerus-planet-definition";
+import { strengthPlanets } from "./galaxies/personal-growth/strength-physique/strength-planets";
 
 export const universityGalaxyId = "university";
 export const personalGrowthGalaxyId = "personal-growth";
@@ -60,9 +60,9 @@ export function findPlanet(
   systemId: string | null,
   planetId: string | null,
 ) {
-  return galaxyId === beerusPlanetDefinition.galaxyId &&
-    systemId === beerusPlanetDefinition.systemId &&
-    planetId === beerusPlanetDefinition.id
-    ? beerusPlanetDefinition
-    : null;
+  if (galaxyId !== personalGrowthGalaxyId || systemId !== "strength-physique") {
+    return null;
+  }
+
+  return strengthPlanets.find((planet) => planet.id === planetId) ?? null;
 }

@@ -98,6 +98,188 @@ body {
     #01030a;
 }
 
+.planet-arrival-transition {
+  position: absolute;
+  z-index: 6;
+  inset: -8%;
+  overflow: hidden;
+  background: rgb(4 5 12 / 0%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.planet-arrival-transition::before,
+.planet-arrival-transition::after,
+.planet-arrival-transition span {
+  position: absolute;
+  inset: -22%;
+  border-radius: 48%;
+  background:
+    radial-gradient(
+      ellipse at 20% 48%,
+      rgb(201 211 229 / 94%) 0 12%,
+      transparent 38%
+    ),
+    radial-gradient(
+      ellipse at 58% 22%,
+      rgb(158 172 201 / 88%) 0 15%,
+      transparent 43%
+    ),
+    radial-gradient(
+      ellipse at 78% 72%,
+      rgb(111 124 154 / 92%) 0 17%,
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 38% 83%,
+      rgb(222 224 235 / 78%) 0 12%,
+      transparent 39%
+    );
+  filter: blur(2.8rem);
+  content: "";
+  opacity: 0;
+  transform: translate3d(-28%, 4%, 0) scale(1.12);
+  will-change: opacity, transform;
+}
+
+.planet-arrival-transition::after {
+  background:
+    radial-gradient(
+      ellipse at 82% 28%,
+      rgb(224 220 236 / 90%) 0 13%,
+      transparent 40%
+    ),
+    radial-gradient(
+      ellipse at 42% 56%,
+      rgb(116 124 151 / 92%) 0 18%,
+      transparent 49%
+    ),
+    radial-gradient(
+      ellipse at 18% 82%,
+      rgb(187 194 216 / 82%) 0 14%,
+      transparent 42%
+    );
+  transform: translate3d(30%, -3%, 0) scale(1.18);
+}
+
+.planet-arrival-transition span:first-child {
+  background:
+    radial-gradient(
+      ellipse at 50% 48%,
+      rgb(48 53 74 / 88%) 0 22%,
+      transparent 57%
+    ),
+    radial-gradient(
+      ellipse at 12% 24%,
+      rgb(174 183 206 / 68%) 0 12%,
+      transparent 38%
+    );
+  transform: translate3d(0, 28%, 0) scale(1.26);
+}
+
+.planet-arrival-transition span:last-child {
+  background:
+    radial-gradient(
+      ellipse at 54% 46%,
+      rgb(232 230 238 / 58%) 0 8%,
+      transparent 34%
+    ),
+    radial-gradient(
+      ellipse at 74% 58%,
+      rgb(87 93 119 / 72%) 0 16%,
+      transparent 48%
+    );
+  filter: blur(4rem);
+  transform: scale(1.45);
+}
+
+.planet-arrival-transition[data-phase="covering"] {
+  pointer-events: auto;
+  animation: planet-cloud-cover 720ms ease-in both;
+}
+
+.planet-arrival-transition[data-phase="covering"]::before,
+.planet-arrival-transition[data-phase="covering"]::after,
+.planet-arrival-transition[data-phase="covering"] span {
+  animation: planet-cloud-layer-cover 820ms ease-out both;
+}
+
+.planet-arrival-transition[data-phase="covering"]::after {
+  animation-direction: reverse;
+}
+
+.planet-arrival-transition[data-phase="holding"] {
+  background: rgb(29 32 47 / 76%);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.planet-arrival-transition[data-phase="holding"]::before,
+.planet-arrival-transition[data-phase="holding"]::after,
+.planet-arrival-transition[data-phase="holding"] span {
+  opacity: 1;
+  transform: scale(1.18);
+}
+
+.planet-arrival-transition[data-phase="revealing"] {
+  pointer-events: auto;
+  animation: planet-cloud-reveal 1.1s var(--universe-ease) both;
+}
+
+.planet-arrival-transition[data-phase="revealing"]::before,
+.planet-arrival-transition[data-phase="revealing"]::after,
+.planet-arrival-transition[data-phase="revealing"] span {
+  animation: planet-cloud-layer-reveal 1.1s var(--universe-ease) both;
+}
+
+@keyframes planet-cloud-cover {
+  from {
+    background: rgb(4 5 12 / 0%);
+    opacity: 0;
+  }
+
+  to {
+    background: rgb(29 32 47 / 76%);
+    opacity: 1;
+  }
+}
+
+@keyframes planet-cloud-layer-cover {
+  from {
+    opacity: 0;
+    transform: translate3d(-28%, 4%, 0) scale(1.12);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1.18);
+  }
+}
+
+@keyframes planet-cloud-reveal {
+  from {
+    background: rgb(29 32 47 / 76%);
+    opacity: 1;
+  }
+
+  to {
+    background: rgb(4 5 12 / 0%);
+    opacity: 0;
+  }
+}
+
+@keyframes planet-cloud-layer-reveal {
+  from {
+    opacity: 1;
+    transform: scale(1.18);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(24%, -5%, 0) scale(1.34);
+  }
+}
+
 .university-galaxy-label {
   position: absolute;
   z-index: 2;
@@ -635,11 +817,11 @@ body {
   letter-spacing: 0.055em;
 }
 
-.beerus-planet-label {
+.strength-planet-label {
   position: absolute;
   z-index: 3;
-  top: 46%;
-  left: 68%;
+  top: var(--planet-label-desktop-y);
+  left: var(--planet-label-desktop-x);
   display: grid;
   min-width: 8rem;
   padding: 0.68rem 0.82rem;
@@ -666,25 +848,25 @@ body {
     text-shadow 240ms ease;
 }
 
-.beerus-planet-label[data-visible="true"] {
+.strength-planet-label[data-visible="true"] {
   opacity: 1;
   pointer-events: auto;
 }
 
-.beerus-planet-label[data-emphasized="true"],
-.beerus-planet-label:hover,
-.beerus-planet-label:focus-visible {
+.strength-planet-label[data-emphasized="true"],
+.strength-planet-label:hover,
+.strength-planet-label:focus-visible {
   border-color: rgb(194 169 216 / 17%);
   background: rgb(52 35 67 / 14%);
   color: rgb(245 237 250 / 88%);
   text-shadow: 0 0 1rem rgb(180 142 215 / 24%);
 }
 
-.beerus-planet-label:focus-visible {
+.strength-planet-label:focus-visible {
   outline-color: rgb(205 181 226 / 58%);
 }
 
-.beerus-planet-label small {
+.strength-planet-label small {
   margin-top: 0.3rem;
   color: rgb(196 171 128 / 56%);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
@@ -1435,6 +1617,200 @@ body {
   line-height: 1.6;
 }
 
+.destination-panel {
+  position: absolute;
+  z-index: 4;
+  right: max(1.35rem, env(safe-area-inset-right));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  width: min(24rem, calc(100vw - 2.7rem));
+  overflow: hidden;
+  border: 1px solid rgb(190 178 151 / 16%);
+  border-radius: 1rem;
+  background: rgb(6 8 12 / 78%);
+  box-shadow:
+    0 1.5rem 4rem rgb(0 2 5 / 44%),
+    inset 0 1px rgb(245 238 221 / 6%);
+  backdrop-filter: blur(1.35rem) saturate(110%);
+  animation: destination-label-arrival 520ms var(--universe-ease) both;
+  transition: width 360ms var(--universe-ease);
+}
+
+.destination-panel[data-open="true"] {
+  width: min(43rem, calc(100vw - 2.7rem));
+}
+
+.destination-panel__summary {
+  display: flex;
+  min-height: 5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+}
+
+.destination-panel__summary > div {
+  display: grid;
+  gap: 0.24rem;
+}
+
+.destination-panel__summary span {
+  color: rgb(194 177 144 / 58%);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.destination-panel__summary strong {
+  color: rgb(240 237 229 / 92%);
+  font-size: 0.74rem;
+  font-weight: 500;
+  letter-spacing: 0.035em;
+}
+
+.destination-panel__summary p,
+.destination-panel__intro {
+  margin: 0;
+  color: rgb(193 194 191 / 56%);
+  font-size: 0.56rem;
+  line-height: 1.5;
+}
+
+.destination-panel button,
+.destination-panel__link {
+  display: inline-flex;
+  min-height: 2.35rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.82rem;
+  border: 1px solid rgb(196 177 139 / 22%);
+  border-radius: 999px;
+  outline: 1px solid transparent;
+  outline-offset: 0.2rem;
+  background: rgb(172 142 89 / 7%);
+  color: rgb(229 220 199 / 78%);
+  font-size: 0.54rem;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.destination-panel button:hover,
+.destination-panel button:focus-visible,
+.destination-panel__link:hover,
+.destination-panel__link:focus-visible {
+  border-color: rgb(211 190 150 / 42%);
+  background: rgb(172 142 89 / 12%);
+  color: rgb(248 243 232 / 94%);
+}
+
+.destination-panel button:focus-visible,
+.destination-panel__link:focus-visible {
+  outline-color: rgb(218 197 157 / 62%);
+}
+
+.destination-panel__body {
+  overflow: auto;
+  max-height: min(72svh, 42rem);
+  padding: 0.9rem 1rem 1rem;
+  border-top: 1px solid rgb(196 177 139 / 10%);
+  scrollbar-color: rgb(192 170 128 / 25%) transparent;
+}
+
+.training-archive__progression {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.85rem 0;
+  padding: 0 0 0 1rem;
+  color: rgb(200 197 187 / 64%);
+  font-size: 0.56rem;
+  line-height: 1.55;
+}
+
+.training-archive__rotation {
+  display: flex;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+}
+
+.training-archive__rotation button[aria-pressed="true"] {
+  border-color: rgb(218 194 146 / 48%);
+  background: rgb(177 139 76 / 18%);
+  color: rgb(249 241 224 / 95%);
+}
+
+.training-archive__sessions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.training-archive__sessions details {
+  align-self: start;
+  border: 1px solid rgb(195 178 146 / 11%);
+  border-radius: 0.72rem;
+  background: rgb(122 105 75 / 4%);
+}
+
+.training-archive__sessions summary {
+  display: grid;
+  gap: 0.22rem;
+  padding: 0.7rem 0.75rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.training-archive__sessions summary::-webkit-details-marker {
+  display: none;
+}
+
+.training-archive__sessions summary span,
+.training-archive__sessions summary small {
+  color: rgb(188 172 141 / 52%);
+  font-size: 0.48rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.training-archive__sessions summary strong {
+  color: rgb(234 230 220 / 84%);
+  font-size: 0.67rem;
+  font-weight: 500;
+}
+
+.training-archive__sessions ol {
+  display: grid;
+  gap: 0.38rem;
+  margin: 0;
+  padding: 0 0.8rem 0.8rem 1.9rem;
+  color: rgb(198 197 191 / 62%);
+  font-size: 0.53rem;
+  line-height: 1.45;
+}
+
+.destination-panel__link {
+  margin-top: 0.85rem;
+}
+
+.gym-playlist {
+  width: min(26rem, calc(100vw - 2.7rem));
+  border-color: rgb(103 201 165 / 18%);
+}
+
+.gym-playlist__embed {
+  width: 100%;
+  height: 22rem;
+  border: 0;
+  border-radius: 0.75rem;
+}
+
+.gym-playlist .destination-panel__link {
+  width: 100%;
+}
+
 button,
 input,
 textarea,
@@ -1484,9 +1860,15 @@ select {
 
   .strength-tracker,
   .strength-tracker button,
-  .beerus-planet-label {
+  .strength-planet-label,
+  .destination-panel,
+  .destination-panel button {
     animation: none;
     transition: none;
+  }
+
+  .planet-arrival-transition {
+    display: none;
   }
 
   .universe-viewport::after {
@@ -1645,6 +2027,30 @@ select {
     border-left: 0;
   }
 
+  .destination-panel,
+  .destination-panel[data-open="true"] {
+    right: max(0.7rem, env(safe-area-inset-right));
+    bottom: max(0.7rem, env(safe-area-inset-bottom));
+    left: max(0.7rem, env(safe-area-inset-left));
+    width: auto;
+  }
+
+  .destination-panel__summary {
+    align-items: end;
+  }
+
+  .destination-panel__body {
+    max-height: min(68svh, 39rem);
+  }
+
+  .training-archive__sessions {
+    grid-template-columns: 1fr;
+  }
+
+  .gym-playlist__embed {
+    height: 9.5rem;
+  }
+
   .strength-tracker__panel {
     max-height: min(68svh, 39rem);
   }
@@ -1675,9 +2081,9 @@ select {
     bottom: 14%;
   }
 
-  .beerus-planet-label {
-    top: 43%;
-    left: 70%;
+  .strength-planet-label {
+    top: var(--planet-label-compact-y);
+    left: var(--planet-label-compact-x);
     min-width: 7.2rem;
   }
 
@@ -1719,6 +2125,11 @@ select {
   .active-course-label {
     right: 50%;
     bottom: 14%;
+  }
+
+  .strength-planet-label {
+    top: var(--planet-label-portrait-y);
+    left: var(--planet-label-portrait-x);
   }
 }
 
@@ -1777,7 +2188,7 @@ select {
     min-height: 2.75rem;
   }
 
-  .beerus-planet-label {
+  .strength-planet-label {
     min-height: 2.75rem;
   }
 }

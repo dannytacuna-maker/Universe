@@ -2,7 +2,7 @@ import type { NavigationLevel } from "@/store/navigation-store";
 
 import { personalGrowthGalaxyDefinition } from "./galaxies/personal-growth/personal-growth-galaxy-definition";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
-import { beerusPlanetDefinition } from "./galaxies/personal-growth/strength-physique/beerus-planet-definition";
+import { strengthPlanets } from "./galaxies/personal-growth/strength-physique/strength-planets";
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
 import {
   personalGrowthGalaxyId,
@@ -44,18 +44,22 @@ export function getCameraPose(
   selectedSystemId: string | null,
   selectedPlanetId: string | null,
 ): CameraPose {
-  if (
-    navigationLevel === "planet" &&
-    selectedGalaxyId === beerusPlanetDefinition.galaxyId &&
-    selectedSystemId === beerusPlanetDefinition.systemId &&
-    selectedPlanetId === beerusPlanetDefinition.id
-  ) {
-    return {
-      ambientScale: 0.08,
-      fov: 42,
-      lookTarget: beerusPlanetDefinition.cameraLookTarget,
-      position: beerusPlanetDefinition.cameraPosition,
-    };
+  if (navigationLevel === "planet") {
+    const planet = strengthPlanets.find(
+      (definition) =>
+        definition.galaxyId === selectedGalaxyId &&
+        definition.systemId === selectedSystemId &&
+        definition.id === selectedPlanetId,
+    );
+
+    if (planet !== undefined) {
+      return {
+        ambientScale: 0.08,
+        fov: 42,
+        lookTarget: planet.cameraLookTarget,
+        position: planet.cameraPosition,
+      };
+    }
   }
 
   if (navigationLevel === "system" && selectedGalaxyId !== null) {

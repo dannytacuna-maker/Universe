@@ -1,5 +1,6 @@
 "use client";
 
+import { useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { NavigationState } from "@/store/navigation-store";
@@ -14,9 +15,19 @@ import { JiuJitsuTrainingLog } from "./galaxies/personal-growth/jiu-jitsu/jiu-ji
 import { useJiuJitsuSessions } from "./galaxies/personal-growth/jiu-jitsu/use-jiu-jitsu-sessions";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
 import { beerusPlanetDefinition } from "./galaxies/personal-growth/strength-physique/beerus-planet-definition";
+import { GymPlaylistPlayer } from "./galaxies/personal-growth/strength-physique/gym-playlist-player";
+import {
+  gymPlaylistPlanetDefinition,
+  trainingArchivePlanetDefinition,
+} from "./galaxies/personal-growth/strength-physique/strength-planets";
+import { TrainingProgramArchive } from "./galaxies/personal-growth/strength-physique/training-program-archive";
 import { useStrengthPhysique } from "./galaxies/personal-growth/strength-physique/use-strength-physique";
 import { WhisTrainingAssistant } from "./galaxies/personal-growth/strength-physique/whis-training-assistant";
 import { LazyUniverseCanvas } from "./lazy-universe-canvas";
+import {
+  PlanetArrivalTransition,
+  type PlanetArrivalPhase,
+} from "./planet-arrival-transition";
 import {
   findGalaxy,
   findPlanet,
@@ -37,6 +48,7 @@ const jiuJitsuSystemId = "jiu-jitsu";
 const strengthPhysiqueSystemId = "strength-physique";
 
 export function UniverseViewport() {
+  const shouldReduceMotion = useReducedMotion();
   const webglSupport = useWebGLSupport();
   const navigationLevel = useNavigationStore((state) => state.level);
   const selectedGalaxyId = useNavigationStore(
@@ -68,7 +80,11 @@ export function UniverseViewport() {
   const [announcement, setAnnouncement] = useState("");
   const [cameraResetToken, setCameraResetToken] = useState(0);
   const [isCameraSettled, setIsCameraSettled] = useState(true);
+  const [planetArrivalPhase, setPlanetArrivalPhase] =
+    useState<PlanetArrivalPhase>("idle");
   const hasSyncedLocation = useRef(false);
+  const planetNavigationTimer = useRef<number | null>(null);
+  const planetRevealTimer = useRef<number | null>(null);
   const {
     addSession,
     isLoading: isTrainingLogLoading,
@@ -141,7 +157,15 @@ export function UniverseViewport() {
 
   const handleCameraArrive = useCallback(() => {
     setIsCameraSettled(true);
-  }, []);
+
+    if (planetArrivalPhase === "holding") {
+      setPlanetArrivalPhase("revealing");
+      planetRevealTimer.current = window.setTimeout(() => {
+        setPlanetArrivalPhase("idle");
+        planetRevealTimer.current = null;
+      }, 1100);
+    }
+  }, [planetArrivalPhase]);
 
   const pushNavigationUrl = useCallback((state: NavigationState) => {
     const nextUrl = createUniverseNavigationUrl(window.location.href, state);
@@ -214,6 +238,10 @@ export function UniverseViewport() {
 
   const handlePlanetActivate = useCallback(
     (planetId: string) => {
+      if (planetArrivalPhase !== "idle") {
+        return;
+      }
+
       const galaxy = findGalaxy(selectedGalaxyId);
       const system = findSystem(selectedGalaxyId, selectedSystemId);
       const planet = findPlanet(selectedGalaxyId, selectedSystemId, planetId);
@@ -222,29 +250,52 @@ export function UniverseViewport() {
         return;
       }
 
-      clearInteractionState();
-      beginCameraTravel();
-      setAnnouncement(`Descending to ${planet.name}.`);
-      const nextState: NavigationState = {
-        level: "planet",
-        selectedGalaxyId: galaxy.id,
-        selectedPlanetId: planet.id,
-        selectedSystemId: system.id,
+      const enterDestination = () => {
+        beginCameraTravel();
+        setAnnouncement(`Descending to ${planet.name}.`);
+        const nextState: NavigationState = {
+          level: "planet",
+          selectedGalaxyId: galaxy.id,
+          selectedPlanetId: planet.id,
+          selectedSystemId: system.id,
+        };
+        pushNavigationUrl(nextState);
+        enterPlanet(galaxy.id, system.id, planet.id);
       };
-      pushNavigationUrl(nextState);
-      enterPlanet(galaxy.id, system.id, planet.id);
+
+      clearInteractionState();
+
+      if (shouldReduceMotion === true || webglSupport !== "available") {
+        enterDestination();
+        return;
+      }
+
+      setAnnouncement(`Cloud cover forming around ${planet.name}.`);
+      setPlanetArrivalPhase("covering");
+      planetNavigationTimer.current = window.setTimeout(() => {
+        setPlanetArrivalPhase("holding");
+        enterDestination();
+        planetNavigationTimer.current = null;
+      }, 720);
     },
     [
       beginCameraTravel,
       clearInteractionState,
       enterPlanet,
+      planetArrivalPhase,
       pushNavigationUrl,
       selectedGalaxyId,
       selectedSystemId,
+      shouldReduceMotion,
+      webglSupport,
     ],
   );
 
   const handleBack = useCallback(() => {
+    if (planetArrivalPhase !== "idle") {
+      return;
+    }
+
     if (
       navigationLevel === "planet" &&
       selectedGalaxy !== null &&
@@ -289,6 +340,7 @@ export function UniverseViewport() {
     activeSystem,
     clearInteractionState,
     navigationLevel,
+    planetArrivalPhase,
     pushNavigationUrl,
     returnToGalaxy,
     returnToSystem,
@@ -311,10 +363,33 @@ export function UniverseViewport() {
   ]);
 
   useEffect(() => {
+    return () => {
+      if (planetNavigationTimer.current !== null) {
+        window.clearTimeout(planetNavigationTimer.current);
+      }
+
+      if (planetRevealTimer.current !== null) {
+        window.clearTimeout(planetRevealTimer.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     const syncFromLocation = () => {
       const nextNavigation = readUniverseNavigation(window.location.search);
 
+      if (planetNavigationTimer.current !== null) {
+        window.clearTimeout(planetNavigationTimer.current);
+        planetNavigationTimer.current = null;
+      }
+
+      if (planetRevealTimer.current !== null) {
+        window.clearTimeout(planetRevealTimer.current);
+        planetRevealTimer.current = null;
+      }
+
       clearInteractionState();
+      setPlanetArrivalPhase("idle");
 
       if (
         hasSyncedLocation.current ||
@@ -342,11 +417,11 @@ export function UniverseViewport() {
     }
 
     const fallbackId = window.setTimeout(() => {
-      setIsCameraSettled(true);
+      handleCameraArrive();
     }, 4500);
 
     return () => window.clearTimeout(fallbackId);
-  }, [isCameraSettled, webglSupport]);
+  }, [handleCameraArrive, isCameraSettled, webglSupport]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -371,6 +446,16 @@ export function UniverseViewport() {
     selectedGalaxyId === personalGrowthGalaxyId &&
     activeSystemId === strengthPhysiqueSystemId &&
     selectedPlanetId === beerusPlanetDefinition.id;
+  const isTrainingArchiveActive =
+    navigationLevel === "planet" &&
+    selectedGalaxyId === personalGrowthGalaxyId &&
+    activeSystemId === strengthPhysiqueSystemId &&
+    selectedPlanetId === trainingArchivePlanetDefinition.id;
+  const isGymPlaylistActive =
+    navigationLevel === "planet" &&
+    selectedGalaxyId === personalGrowthGalaxyId &&
+    activeSystemId === strengthPhysiqueSystemId &&
+    selectedPlanetId === gymPlaylistPlanetDefinition.id;
 
   return (
     <section
@@ -378,6 +463,7 @@ export function UniverseViewport() {
       className="universe-viewport"
       data-galaxy={selectedGalaxyId ?? "none"}
       data-navigation-level={navigationLevel}
+      data-planet-transition={planetArrivalPhase}
       data-webgl-state={webglSupport}
     >
       <div aria-hidden="true" className="universe-fallback" />
@@ -408,6 +494,8 @@ export function UniverseViewport() {
           />
         </WebGLBoundary>
       ) : null}
+
+      <PlanetArrivalTransition phase={planetArrivalPhase} />
 
       <UniverseNavigationOverlay
         activeSystemName={activeSystem?.name ?? null}
@@ -461,6 +549,12 @@ export function UniverseViewport() {
         storageError={strengthStorageError}
       />
 
+      <TrainingProgramArchive
+        isVisible={isTrainingArchiveActive && isViewSettled}
+      />
+
+      <GymPlaylistPlayer isVisible={isGymPlaylistActive && isViewSettled} />
+
       <span aria-live="polite" className="sr-only">
         {announcement}
       </span>
@@ -472,10 +566,12 @@ export function UniverseViewport() {
               ? "Four Personal Growth systems are mapped. Jiu-Jitsu and Strength and Physique are available to explore."
               : "Five University systems are mapped: four scheduled courses and Final Project. Logistics and Distribution is available to explore."
             : navigationLevel === "planet"
-              ? "Beerus' Planet training sanctuary. Whis provides access to the six-day training plan, personal records, and body-weight tracking."
+              ? activePlanet === null
+                ? "Strength and Physique planet."
+                : `${activePlanet.name}. ${activePlanet.description}`
               : selectedGalaxyId === personalGrowthGalaxyId
                 ? activeSystemId === strengthPhysiqueSystemId
-                  ? "Strength and Physique system. Beerus' Planet is available to enter. Training records are accessible after landing with Whis."
+                  ? "Strength and Physique system. Beerus' Planet, the Training Archive, and the Gym Playlist are available to enter."
                   : "Jiu-Jitsu system. Training sessions can be logged privately on this device."
                 : activeCourse === null
                   ? "University course system."

@@ -16,7 +16,7 @@ export function BeerusPlanetSurface({
   return (
     <group position={beerusPlanetDefinition.landingOrigin} visible={isVisible}>
       <BeerusSanctuaryEnvironment motionEnabled={motionEnabled} />
-      <WhisPresence motionEnabled={motionEnabled} />
+      <WhisPresence />
     </group>
   );
 }

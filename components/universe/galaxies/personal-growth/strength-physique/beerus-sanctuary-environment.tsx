@@ -40,7 +40,7 @@ export function BeerusSanctuaryEnvironment({
   const atmosphere = useRef<Group>(null);
   const elapsedTime = useRef(0);
   const texture = useTexture(sanctuaryTexturePath, (loadedTexture) => {
-    loadedTexture.anisotropy = 4;
+    loadedTexture.anisotropy = 8;
     loadedTexture.colorSpace = SRGBColorSpace;
   });
   const motes = useMemo(() => createAtmosphericMotes(), []);
@@ -93,11 +93,11 @@ export function BeerusSanctuaryEnvironment({
       </group>
 
       <mesh position={[1.35, 0.035, -0.24]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[0.46, 48]} />
+        <circleGeometry args={[0.52, 48]} />
         <meshBasicMaterial
           color="#170d20"
           depthWrite={false}
-          opacity={0.28}
+          opacity={0.4}
           transparent
         />
       </mesh>

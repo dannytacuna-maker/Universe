@@ -203,35 +203,6 @@ export function BeerusPlanet({
         />
       </mesh>
 
-      <group position={[0, 0.185, 0.008]} scale={0.92}>
-        <mesh position={[0, 0.006, 0]}>
-          <cylinderGeometry args={[0.038, 0.062, 0.045, 12]} />
-          <meshStandardMaterial color="#37213e" roughness={0.96} />
-        </mesh>
-        <mesh position={[0, 0.07, 0]}>
-          <cylinderGeometry args={[0.009, 0.014, 0.1, 9]} />
-          <meshStandardMaterial color="#45263f" roughness={0.92} />
-        </mesh>
-        <mesh position={[-0.025, 0.125, 0]} scale={[1.2, 0.72, 1]}>
-          <icosahedronGeometry args={[0.05, 1]} />
-          <meshStandardMaterial
-            color="#a34f9c"
-            emissive="#42163f"
-            emissiveIntensity={0.68}
-            roughness={0.8}
-          />
-        </mesh>
-        <mesh position={[0.03, 0.12, -0.008]} scale={[1.05, 0.76, 1]}>
-          <icosahedronGeometry args={[0.046, 1]} />
-          <meshStandardMaterial
-            color="#bd62b2"
-            emissive="#4a1946"
-            emissiveIntensity={0.74}
-            roughness={0.8}
-          />
-        </mesh>
-      </group>
-
       <group ref={debris} rotation={[Math.PI / 2.65, 0.08, 0.14]}>
         <mesh>
           <ringGeometry args={[0.255, 0.257, 120]} />

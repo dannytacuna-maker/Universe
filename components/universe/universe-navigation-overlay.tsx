@@ -4,7 +4,7 @@ import type { NavigationLevel } from "@/store/navigation-store";
 
 import { PersonalGrowthGalaxyLabel } from "./galaxies/personal-growth/personal-growth-galaxy-label";
 import { PersonalGrowthSystemLabels } from "./galaxies/personal-growth/personal-growth-system-labels";
-import { BeerusPlanetLabel } from "./galaxies/personal-growth/strength-physique/beerus-planet-label";
+import { StrengthPlanetLabels } from "./galaxies/personal-growth/strength-physique/strength-planet-labels";
 import { UniversityCourseSystemLabels } from "./galaxies/university/university-course-system-labels";
 import { UniversityWeeklySchedule } from "./galaxies/university/university-weekly-schedule";
 import { UniversityGalaxyLabel } from "./galaxies/university-galaxy-label";
@@ -122,21 +122,17 @@ export function UniverseNavigationOverlay({
         onHoverChange={onSystemHoverChange}
       />
 
-      <BeerusPlanetLabel
-        isEmphasized={emphasizedPlanetId === "beerus-planet"}
+      <StrengthPlanetLabels
+        emphasizedPlanetId={emphasizedPlanetId}
         isVisible={
           selectedGalaxyId === personalGrowthGalaxyId &&
           selectedSystemId === "strength-physique" &&
           level === "system" &&
           isViewSettled
         }
-        onActivate={() => onPlanetActivate("beerus-planet")}
-        onFocusChange={(isFocused) =>
-          onPlanetFocusChange(isFocused ? "beerus-planet" : null)
-        }
-        onHoverChange={(isHovered) =>
-          onPlanetHoverChange(isHovered ? "beerus-planet" : null)
-        }
+        onActivate={onPlanetActivate}
+        onFocusChange={onPlanetFocusChange}
+        onHoverChange={onPlanetHoverChange}
       />
 
       {level !== "universe" ? (

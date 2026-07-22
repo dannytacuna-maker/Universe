@@ -20,6 +20,9 @@ import type { StrengthProgress } from "./galaxies/personal-growth/strength-physi
 import { BeerusPlanet } from "./galaxies/personal-growth/strength-physique/beerus-planet";
 import { beerusPlanetDefinition } from "./galaxies/personal-growth/strength-physique/beerus-planet-definition";
 import { BeerusPlanetSurface } from "./galaxies/personal-growth/strength-physique/beerus-planet-surface";
+import { StrengthDestinationPlanet } from "./galaxies/personal-growth/strength-physique/strength-destination-planet";
+import { StrengthDestinationSurface } from "./galaxies/personal-growth/strength-physique/strength-destination-surface";
+import { supportingStrengthPlanets } from "./galaxies/personal-growth/strength-physique/strength-planets";
 import { PersonalGrowthGalaxy } from "./galaxies/personal-growth/personal-growth-galaxy";
 import { PersonalGrowthInteriorField } from "./galaxies/personal-growth/personal-growth-interior-field";
 import { PersonalGrowthSystemGroup } from "./galaxies/personal-growth/personal-growth-system-group";
@@ -223,6 +226,29 @@ export function UniverseScene({
           onPlanetHoverChange(isHovered ? beerusPlanetDefinition.id : null)
         }
       />
+      {supportingStrengthPlanets.map((planet) => (
+        <StrengthDestinationPlanet
+          definition={planet}
+          isEmphasized={emphasizedPlanetId === planet.id}
+          isHovered={hoveredPlanetId === planet.id}
+          isInteractive={
+            personalGrowthSelected &&
+            navigationLevel === "system" &&
+            activeSystemId === planet.systemId
+          }
+          isVisible={
+            personalGrowthSelected &&
+            navigationLevel === "system" &&
+            activeSystemId === planet.systemId
+          }
+          key={planet.id}
+          motionEnabled={motionEnabled}
+          onActivate={() => onPlanetActivate(planet.id)}
+          onHoverChange={(isHovered) =>
+            onPlanetHoverChange(isHovered ? planet.id : null)
+          }
+        />
+      ))}
       <Suspense fallback={null}>
         <BeerusPlanetSurface
           isVisible={
@@ -231,6 +257,16 @@ export function UniverseScene({
           }
           motionEnabled={motionEnabled}
         />
+        {supportingStrengthPlanets.map((planet) => (
+          <StrengthDestinationSurface
+            definition={planet}
+            isVisible={
+              navigationLevel === "planet" && selectedPlanetId === planet.id
+            }
+            key={planet.id}
+            motionEnabled={motionEnabled}
+          />
+        ))}
       </Suspense>
       <CameraRig
         motionEnabled={motionEnabled}
