@@ -184,7 +184,8 @@ The current spatial level is reflected in a deliberately small query-string
 contract: `destination=<galaxy>` selects a galaxy overview and
 `destination=<galaxy>/<system>` selects an explorable system. Current deep-link
 examples are `destination=university/logistics` and
-`destination=personal-growth/jiu-jitsu`. URL parsing is pure and colocated with
+`destination=personal-growth/jiu-jitsu` or
+`destination=personal-growth/strength-physique`. URL parsing is pure and colocated with
 the universe feature; `UniverseViewport` synchronizes browser history and
 Zustand through `pushState` and `popstate`. Unknown or future destinations fall
 back to the universe instead of fabricating unavailable navigation. This is
@@ -195,19 +196,28 @@ and domain data.
 
 Personal Growth is a feature-owned galaxy with four first-class system
 definitions: Jiu-Jitsu, Strength and Physique, Reading, and Daily Discipline.
-Only Jiu-Jitsu is explorable. The remaining systems are visible, semantic future
-destinations; they intentionally do not expose simulated metrics or empty
-product screens. The Jiu-Jitsu renderer receives a compact derived progress
-signal. Recent attention affects halo clarity, active-week consistency affects
-orbital stability, accumulated sessions affect field depth, and each recorded
-session contributes one bounded marker. The visualization never reads storage
-and never owns authoritative records.
+Jiu-Jitsu and Strength and Physique are explorable. The remaining systems are
+visible, semantic future destinations; they intentionally do not expose
+simulated metrics or empty product screens. Each explorable renderer receives a
+compact derived progress signal. For Jiu-Jitsu, recent attention affects halo
+clarity, active-week consistency affects orbital stability, accumulated
+sessions affect field depth, and each recorded session contributes one bounded
+marker. For Strength and Physique, the six restrained markers correspond to the
+current week's Push, Pull, Legs, Push, Pull, Legs rhythm; completed sessions
+clarify those markers while recorded lifts modestly strengthen the surrounding
+structure. The visualization never reads storage and never owns authoritative
+records.
 
-Jiu-Jitsu sessions are currently stored in a feature-owned IndexedDB repository
-under the `mission-control` database. Records include the session date and type,
-duration, sparring rounds, techniques, mobility work, and reflection. The
-repository and hook remain colocated with Jiu-Jitsu; data is not copied into
-Zustand. The UI creates no example sessions, and the base celestial system is a
+Personal Growth records are stored in a feature-owned IndexedDB database named
+`mission-control`. Schema version 2 preserves the original Jiu-Jitsu session
+store and adds separate Strength stores for weekly workout completion, personal
+records, and body weight. The Strength plan describes muscle groups and bounded
+exercise counts rather than prescribing exercises: Push covers chest,
+shoulders, and triceps; Pull covers back, rear delts, and biceps; Legs covers
+legs and calves, repeated over six sessions. Personal records are limited to
+bench press, squat, and deadlift, and body-weight entries retain their measured
+date. Repository and hooks remain feature-colocated; data is not copied into
+Zustand. The UI creates no example records, and every base celestial system is a
 destination identity rather than a claim of progress.
 
 This local-first persistence is intentionally private and useful before an

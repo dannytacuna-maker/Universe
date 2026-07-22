@@ -16,6 +16,7 @@ import { UniversityGalaxy } from "./galaxies/university-galaxy";
 import { UniversityCourseSystemGroup } from "./galaxies/university/university-course-system-group";
 import { UniversityInteriorField } from "./galaxies/university/university-interior-field";
 import type { JiuJitsuProgress } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-progress";
+import type { StrengthProgress } from "./galaxies/personal-growth/strength-physique/strength-physique-progress";
 import { PersonalGrowthGalaxy } from "./galaxies/personal-growth/personal-growth-galaxy";
 import { PersonalGrowthInteriorField } from "./galaxies/personal-growth/personal-growth-interior-field";
 import { PersonalGrowthSystemGroup } from "./galaxies/personal-growth/personal-growth-system-group";
@@ -40,6 +41,7 @@ type UniverseSceneProps = Readonly<{
   onSystemActivate: (systemId: string) => void;
   onSystemHoverChange: (systemId: string | null) => void;
   selectedGalaxyId: string | null;
+  strengthProgress: StrengthProgress;
 }>;
 
 export function UniverseScene({
@@ -57,6 +59,7 @@ export function UniverseScene({
   onSystemActivate,
   onSystemHoverChange,
   selectedGalaxyId,
+  strengthProgress,
 }: UniverseSceneProps) {
   const shouldReduceMotion = useReducedMotion();
   const motionEnabled = shouldReduceMotion === false;
@@ -174,6 +177,7 @@ export function UniverseScene({
         motionEnabled={motionEnabled}
         onActivate={onSystemActivate}
         onHoverChange={onSystemHoverChange}
+        strengthProgress={strengthProgress}
       />
       <CameraRig
         motionEnabled={motionEnabled}

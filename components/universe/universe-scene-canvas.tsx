@@ -2,6 +2,7 @@
 
 import type { NavigationLevel } from "@/store/navigation-store";
 import type { JiuJitsuProgress } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-progress";
+import type { StrengthProgress } from "./galaxies/personal-growth/strength-physique/strength-physique-progress";
 
 import { UniverseCanvas } from "./universe-canvas";
 import { UniverseScene } from "./universe-scene";
@@ -28,6 +29,7 @@ export type UniverseSceneCanvasProps = Readonly<{
   onSystemActivate: (systemId: string) => void;
   onSystemHoverChange: (systemId: string | null) => void;
   selectedGalaxyId: string | null;
+  strengthProgress: StrengthProgress;
 }>;
 
 export function UniverseSceneCanvas({
@@ -45,6 +47,7 @@ export function UniverseSceneCanvas({
   onSystemActivate,
   onSystemHoverChange,
   selectedGalaxyId,
+  strengthProgress,
 }: UniverseSceneCanvasProps) {
   return (
     <div aria-hidden="true" style={{ inset: 0, position: "absolute" }}>
@@ -64,6 +67,7 @@ export function UniverseSceneCanvas({
           onSystemActivate={onSystemActivate}
           onSystemHoverChange={onSystemHoverChange}
           selectedGalaxyId={selectedGalaxyId}
+          strengthProgress={strengthProgress}
         />
       </UniverseCanvas>
     </div>

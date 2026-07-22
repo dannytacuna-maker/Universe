@@ -879,6 +879,364 @@ body {
   display: none;
 }
 
+.strength-tracker {
+  position: absolute;
+  z-index: 4;
+  right: max(1.35rem, env(safe-area-inset-right));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  width: min(28rem, calc(100vw - 2.7rem));
+  border: 1px solid rgb(169 183 155 / 14%);
+  border-radius: 1rem;
+  background: rgb(5 9 10 / 76%);
+  box-shadow:
+    0 1.5rem 4.2rem rgb(0 2 4 / 42%),
+    inset 0 1px rgb(237 242 230 / 5%);
+  backdrop-filter: blur(1.35rem) saturate(108%);
+  animation: destination-label-arrival 520ms var(--universe-ease) both;
+  transition: width 320ms var(--universe-ease);
+}
+
+.strength-tracker[data-open="true"] {
+  width: min(39rem, calc(100vw - 2.7rem));
+}
+
+.strength-tracker__summary {
+  display: flex;
+  min-height: 4.15rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.78rem 0.85rem 0.78rem 1rem;
+}
+
+.strength-tracker__summary > div {
+  display: grid;
+  gap: 0.22rem;
+}
+
+.strength-tracker__summary span,
+.strength-tracker__section-heading span {
+  color: rgb(169 183 155 / 58%);
+  font-size: 0.51rem;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.strength-tracker__summary strong,
+.strength-tracker__section-heading strong {
+  color: rgb(235 239 230 / 88%);
+  font-size: 0.71rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.strength-tracker button {
+  min-height: 2.35rem;
+  border: 1px solid rgb(160 181 145 / 20%);
+  border-radius: 999px;
+  outline: 1px solid transparent;
+  outline-offset: 0.2rem;
+  background: rgb(139 160 123 / 7%);
+  color: rgb(220 230 211 / 76%);
+  font-size: 0.56rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    color 220ms ease,
+    opacity 220ms ease;
+}
+
+.strength-tracker button:hover,
+.strength-tracker button:focus-visible {
+  border-color: rgb(171 194 153 / 40%);
+  background: rgb(139 160 123 / 12%);
+  color: rgb(241 244 237 / 94%);
+}
+
+.strength-tracker button:focus-visible,
+.strength-tracker input:focus-visible {
+  outline-color: rgb(178 200 159 / 64%);
+}
+
+.strength-tracker button:disabled {
+  cursor: wait;
+  opacity: 0.48;
+}
+
+.strength-tracker__summary button {
+  padding: 0.55rem 0.8rem;
+}
+
+.strength-tracker__panel {
+  overflow: auto;
+  max-height: min(75svh, 47rem);
+  padding: 0 1rem 1rem;
+  border-top: 1px solid rgb(169 183 155 / 9%);
+  scrollbar-color: rgb(151 171 135 / 24%) transparent;
+}
+
+.strength-tracker__section {
+  padding: 1rem 0;
+}
+
+.strength-tracker__section + .strength-tracker__section {
+  border-top: 1px solid rgb(169 183 155 / 9%);
+}
+
+.strength-tracker__section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.2rem;
+  margin-bottom: 0.8rem;
+}
+
+.strength-tracker__section-heading > div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.strength-tracker__section-heading p {
+  max-width: 17rem;
+  margin: 0;
+  color: rgb(166 177 157 / 48%);
+  font-size: 0.55rem;
+  line-height: 1.45;
+  text-align: right;
+}
+
+.strength-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.strength-split > li {
+  overflow: hidden;
+  border: 1px solid rgb(158 177 142 / 10%);
+  border-radius: 0.72rem;
+  background: rgb(147 165 132 / 3%);
+}
+
+.strength-split > li[data-completed="true"] {
+  border-color: rgb(174 198 155 / 23%);
+  background: rgb(145 169 126 / 6%);
+}
+
+.strength-split > li > button {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: 4.4rem;
+  justify-items: start;
+  gap: 0.18rem;
+  padding: 0.68rem 3.25rem 0.6rem 0.75rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: left;
+}
+
+.strength-split > li > button strong {
+  color: rgb(231 236 226 / 86%);
+  font-size: 0.67rem;
+  font-weight: 500;
+  letter-spacing: 0.035em;
+  text-transform: none;
+}
+
+.strength-split > li > button > span:not(.strength-split__day) {
+  overflow: hidden;
+  max-width: 100%;
+  color: rgb(163 176 153 / 54%);
+  font-size: 0.51rem;
+  letter-spacing: 0.02em;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.strength-split__day {
+  color: rgb(165 181 151 / 47%);
+  font-size: 0.46rem;
+  letter-spacing: 0.12em;
+}
+
+.strength-split > li > button i {
+  position: absolute;
+  top: 50%;
+  right: 0.72rem;
+  color: rgb(163 185 146 / 52%);
+  font-size: 0.46rem;
+  font-style: normal;
+  letter-spacing: 0.09em;
+  transform: translateY(-50%);
+}
+
+.strength-split > li[data-completed="true"] > button i {
+  color: rgb(206 221 194 / 78%);
+}
+
+.strength-split > li > ul {
+  display: grid;
+  gap: 0.28rem;
+  margin: 0;
+  padding: 0.5rem 0.75rem 0.62rem;
+  border-top: 1px solid rgb(158 177 142 / 8%);
+  list-style: none;
+}
+
+.strength-split > li > ul li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  color: rgb(167 180 158 / 55%);
+  font-size: 0.5rem;
+}
+
+.strength-split > li > ul li span:last-child {
+  color: rgb(187 198 179 / 67%);
+  white-space: nowrap;
+}
+
+.strength-records__lifts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.strength-records fieldset {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0.62rem;
+  border: 1px solid rgb(158 177 142 / 10%);
+  border-radius: 0.68rem;
+}
+
+.strength-records legend,
+.strength-records__weight > strong {
+  padding: 0 0.18rem;
+  color: rgb(224 231 218 / 78%);
+  font-size: 0.58rem;
+  font-weight: 500;
+}
+
+.strength-records label {
+  display: grid;
+  gap: 0.24rem;
+}
+
+.strength-records label span {
+  color: rgb(159 174 148 / 52%);
+  font-size: 0.46rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.strength-records input {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.1rem;
+  padding: 0.48rem 0.55rem;
+  border: 1px solid rgb(158 177 142 / 13%);
+  border-radius: 0.5rem;
+  outline: 1px solid transparent;
+  outline-offset: 0.12rem;
+  background: rgb(151 170 137 / 4%);
+  color: rgb(230 236 225 / 86%);
+  font-size: 0.61rem;
+  color-scheme: dark;
+}
+
+.strength-records__lifts > button {
+  grid-column: 1 / -1;
+  justify-self: end;
+  padding-inline: 0.85rem;
+}
+
+.strength-records__weight {
+  display: grid;
+  grid-template-columns: 1fr 6.5rem 8.5rem auto;
+  align-items: end;
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgb(158 177 142 / 8%);
+}
+
+.strength-records__weight > strong {
+  align-self: center;
+}
+
+.strength-records__weight > button {
+  padding-inline: 0.8rem;
+}
+
+.strength-records__history {
+  display: grid;
+  gap: 0;
+  margin: 0.7rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.strength-records__history li {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: center;
+  gap: 0.7rem;
+  min-height: 2.2rem;
+  border-top: 1px solid rgb(158 177 142 / 7%);
+  color: rgb(162 175 152 / 58%);
+  font-size: 0.53rem;
+}
+
+.strength-records__history strong {
+  color: rgb(215 224 208 / 77%);
+  font-weight: 500;
+}
+
+.strength-records__history li button {
+  min-height: 1.7rem;
+  padding-inline: 0.5rem;
+  border: 0;
+  background: transparent;
+  color: rgb(159 173 150 / 44%);
+  font-size: 0.45rem;
+}
+
+.strength-tracker__feedback,
+.strength-tracker__storage,
+.strength-tracker__error {
+  margin: 0.55rem 0 0;
+  color: rgb(158 173 148 / 54%);
+  font-size: 0.54rem;
+  line-height: 1.5;
+}
+
+.strength-tracker__feedback:empty {
+  display: none;
+}
+
+.strength-tracker__storage {
+  padding-top: 0.7rem;
+  border-top: 1px solid rgb(158 177 142 / 8%);
+}
+
+.strength-tracker__error {
+  color: rgb(218 157 151 / 78%);
+}
+
 button,
 input,
 textarea,
@@ -922,6 +1280,12 @@ select {
   }
 
   .jiu-jitsu-log button {
+    transition: none;
+  }
+
+  .strength-tracker,
+  .strength-tracker button {
+    animation: none;
     transition: none;
   }
 
@@ -1052,6 +1416,39 @@ select {
 
   .jiu-jitsu-log__panel {
     max-height: min(65svh, 35rem);
+  }
+
+  .strength-tracker,
+  .strength-tracker[data-open="true"] {
+    right: max(0.7rem, env(safe-area-inset-right));
+    bottom: max(0.7rem, env(safe-area-inset-bottom));
+    left: max(0.7rem, env(safe-area-inset-left));
+    width: auto;
+  }
+
+  .strength-tracker__panel {
+    max-height: min(68svh, 39rem);
+  }
+
+  .strength-tracker__section-heading {
+    align-items: start;
+  }
+
+  .strength-tracker__section-heading p {
+    max-width: 11rem;
+  }
+
+  .strength-split,
+  .strength-records__lifts {
+    grid-template-columns: 1fr;
+  }
+
+  .strength-records__weight {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .strength-records__weight > strong {
+    grid-column: 1 / -1;
   }
 
   .active-course-label {

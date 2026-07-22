@@ -9,6 +9,8 @@ import { StellarGlow } from "../university/stellar-glow";
 import type { JiuJitsuProgress } from "./jiu-jitsu/jiu-jitsu-progress";
 import { JiuJitsuSystemField } from "./jiu-jitsu/jiu-jitsu-system-field";
 import type { PersonalGrowthSystemDefinition } from "./personal-growth-system-definition";
+import type { StrengthProgress } from "./strength-physique/strength-physique-progress";
+import { StrengthPhysiqueSystemField } from "./strength-physique/strength-physique-system-field";
 
 type PersonalGrowthSystemProps = Readonly<{
   definition: PersonalGrowthSystemDefinition;
@@ -21,6 +23,7 @@ type PersonalGrowthSystemProps = Readonly<{
   motionEnabled: boolean;
   onActivate: (systemId: string) => void;
   onHoverChange: (systemId: string | null) => void;
+  strengthProgress: StrengthProgress;
 }>;
 
 export function PersonalGrowthSystem({
@@ -34,12 +37,19 @@ export function PersonalGrowthSystem({
   motionEnabled,
   onActivate,
   onHoverChange,
+  strengthProgress,
 }: PersonalGrowthSystemProps) {
   const orbitalGroup = useRef<Group>(null);
   const isExplorable = definition.status === "explorable";
+  const isJiuJitsu = definition.id === "jiu-jitsu";
+  const isStrengthPhysique = definition.id === "strength-physique";
   const emphasis = isEmphasized ? 1 : 0;
   const activeScale = isActive && isExplorable ? 1.62 : 1;
-  const recentAttention = isExplorable ? jiuJitsuProgress.recentAttention : 0;
+  const recentAttention = isJiuJitsu
+    ? jiuJitsuProgress.recentAttention
+    : isStrengthPhysique
+      ? strengthProgress.weeklyCompletionRatio
+      : 0;
 
   useCursor(isHovered && isInteractive, "pointer", "auto");
 
@@ -89,10 +99,15 @@ export function PersonalGrowthSystem({
       />
 
       <group ref={orbitalGroup}>
-        {isExplorable ? (
+        {isJiuJitsu ? (
           <JiuJitsuSystemField
             emphasis={emphasis}
             progress={jiuJitsuProgress}
+          />
+        ) : isStrengthPhysique ? (
+          <StrengthPhysiqueSystemField
+            emphasis={emphasis}
+            progress={strengthProgress}
           />
         ) : (
           <mesh rotation={[Math.PI / 2, 0, 0]}>

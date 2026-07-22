@@ -41,7 +41,7 @@ export const personalGrowthSystems = [
     position: [4.95, -0.78, -10],
     scale: 0.78,
     seed: 412_887,
-    status: "future",
+    status: "explorable",
   },
   {
     cameraPosition: [4.55, -1.58, -7.7],
@@ -88,3 +88,4 @@ export const personalGrowthSystems = [
 ] as const satisfies readonly PersonalGrowthSystemDefinition[];
 
 export const jiuJitsuSystem = personalGrowthSystems[0];
+export const strengthPhysiqueSystem = personalGrowthSystems[1];

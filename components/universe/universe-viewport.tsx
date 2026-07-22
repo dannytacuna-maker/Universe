@@ -12,6 +12,9 @@ import {
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
 import { JiuJitsuTrainingLog } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-training-log";
 import { useJiuJitsuSessions } from "./galaxies/personal-growth/jiu-jitsu/use-jiu-jitsu-sessions";
+import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
+import { StrengthPhysiqueTracker } from "./galaxies/personal-growth/strength-physique/strength-physique-tracker";
+import { useStrengthPhysique } from "./galaxies/personal-growth/strength-physique/use-strength-physique";
 import { LazyUniverseCanvas } from "./lazy-universe-canvas";
 import {
   findGalaxy,
@@ -29,6 +32,7 @@ import { useWebGLSupport } from "./use-webgl-support";
 import { WebGLBoundary } from "./webgl-boundary";
 
 const jiuJitsuSystemId = "jiu-jitsu";
+const strengthPhysiqueSystemId = "strength-physique";
 
 export function UniverseViewport() {
   const webglSupport = useWebGLSupport();
@@ -62,8 +66,19 @@ export function UniverseViewport() {
     progress: jiuJitsuProgress,
     removeSession,
     sessions: jiuJitsuSessions,
-    storageError,
+    storageError: trainingStorageError,
   } = useJiuJitsuSessions();
+  const {
+    addBodyWeight,
+    bodyWeightEntries,
+    isLoading: isStrengthLoading,
+    personalRecords,
+    progress: strengthProgress,
+    removeBodyWeight,
+    storageError: strengthStorageError,
+    toggleWorkout,
+    updatePersonalRecord,
+  } = useStrengthPhysique();
   const emphasizedGalaxyId = hoveredGalaxyId ?? focusedGalaxyId;
   const emphasizedSystemId = hoveredSystemId ?? focusedSystemId;
   const activeSystemId = navigationLevel === "system" ? selectedSystemId : null;
@@ -79,6 +94,15 @@ export function UniverseViewport() {
     () =>
       selectedGalaxyId === universityGalaxyId
         ? (universityCourseSystems.find(
+            (definition) => definition.id === activeSystemId,
+          ) ?? null)
+        : null,
+    [activeSystemId, selectedGalaxyId],
+  );
+  const activeGrowthSystem = useMemo(
+    () =>
+      selectedGalaxyId === personalGrowthGalaxyId
+        ? (personalGrowthSystems.find(
             (definition) => definition.id === activeSystemId,
           ) ?? null)
         : null,
@@ -266,6 +290,10 @@ export function UniverseViewport() {
     navigationLevel === "system" &&
     selectedGalaxyId === personalGrowthGalaxyId &&
     activeSystemId === jiuJitsuSystemId;
+  const isStrengthPhysiqueActive =
+    navigationLevel === "system" &&
+    selectedGalaxyId === personalGrowthGalaxyId &&
+    activeSystemId === strengthPhysiqueSystemId;
 
   return (
     <section
@@ -294,6 +322,7 @@ export function UniverseViewport() {
             onSystemActivate={handleSystemActivate}
             onSystemHoverChange={setHoveredSystemId}
             selectedGalaxyId={selectedGalaxyId}
+            strengthProgress={strengthProgress}
           />
         </WebGLBoundary>
       ) : null}
@@ -302,7 +331,7 @@ export function UniverseViewport() {
         activeSystemName={activeSystem?.name ?? null}
         activeSystemSummary={
           activeCourse === null
-            ? null
+            ? (activeGrowthSystem?.description ?? null)
             : formatCourseScheduleSummary(activeCourse.schedule)
         }
         emphasizedGalaxyId={emphasizedGalaxyId}
@@ -328,7 +357,20 @@ export function UniverseViewport() {
         onRemoveSession={removeSession}
         progress={jiuJitsuProgress}
         sessions={jiuJitsuSessions}
-        storageError={storageError}
+        storageError={trainingStorageError}
+      />
+
+      <StrengthPhysiqueTracker
+        bodyWeightEntries={bodyWeightEntries}
+        isLoading={isStrengthLoading}
+        isVisible={isStrengthPhysiqueActive && isViewSettled}
+        onAddBodyWeight={addBodyWeight}
+        onRemoveBodyWeight={removeBodyWeight}
+        onToggleWorkout={toggleWorkout}
+        onUpdatePersonalRecord={updatePersonalRecord}
+        personalRecords={personalRecords}
+        progress={strengthProgress}
+        storageError={strengthStorageError}
       />
 
       <span aria-live="polite" className="sr-only">
@@ -339,10 +381,12 @@ export function UniverseViewport() {
           ? "University and Personal Growth galaxies are available to explore."
           : navigationLevel === "galaxy"
             ? selectedGalaxyId === personalGrowthGalaxyId
-              ? "Four Personal Growth systems are mapped. Jiu-Jitsu is available to explore."
+              ? "Four Personal Growth systems are mapped. Jiu-Jitsu and Strength and Physique are available to explore."
               : "Five University systems are mapped: four scheduled courses and Final Project. Logistics and Distribution is available to explore."
             : selectedGalaxyId === personalGrowthGalaxyId
-              ? "Jiu-Jitsu system. Training sessions can be logged privately on this device."
+              ? activeSystemId === strengthPhysiqueSystemId
+                ? "Strength and Physique system. A flexible six-day push, pull, legs plan, personal records, and body weight can be tracked privately on this device."
+                : "Jiu-Jitsu system. Training sessions can be logged privately on this device."
               : activeCourse === null
                 ? "University course system."
                 : `${activeCourse.name} course system. ${formatCourseScheduleDetails(activeCourse.schedule)}. Workspaces have not been introduced yet.`}
