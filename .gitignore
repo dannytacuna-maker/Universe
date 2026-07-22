@@ -1,0 +1,37 @@
+# dependencies
+/node_modules
+/.pnpm-store
+
+# Next.js output
+/.next
+/out
+
+# production output
+/build
+
+# local environment files
+.env*
+!.env.example
+
+# logs
+*.log
+pnpm-debug.log*
+
+# operating systems and editors
+.DS_Store
+Thumbs.db
+.idea
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# deployment
+.vercel
+
+# local agent workspace metadata
+/.agents
+/.codex

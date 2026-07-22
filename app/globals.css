@@ -1,0 +1,1145 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+  --background: #01030a;
+  --foreground: #f8fafc;
+  --universe-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.universe-viewport {
+  position: fixed;
+  inset: 0;
+  isolation: isolate;
+  min-height: 100svh;
+  overflow: hidden;
+  background: var(--background);
+}
+
+.universe-viewport::before,
+.universe-viewport::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+}
+
+.universe-viewport::before {
+  background:
+    linear-gradient(
+      to bottom,
+      rgb(1 3 10 / 16%),
+      transparent 20% 76%,
+      rgb(0 1 5 / 28%)
+    ),
+    radial-gradient(ellipse at center, transparent 48%, rgb(0 1 6 / 48%) 100%);
+  box-shadow: inset 0 0 9rem rgb(0 1 6 / 32%);
+}
+
+.universe-viewport::after {
+  background:
+    radial-gradient(circle at 10% 34%, rgb(55 88 150 / 7%), transparent 34%),
+    radial-gradient(circle at 88% 68%, rgb(71 58 131 / 5%), transparent 38%);
+  opacity: 0.72;
+  transition: opacity 1.4s var(--universe-ease);
+}
+
+.universe-viewport[data-navigation-level="galaxy"]::after {
+  background:
+    radial-gradient(circle at 38% 44%, rgb(61 113 171 / 7%), transparent 36%),
+    radial-gradient(circle at 77% 28%, rgb(79 66 145 / 4%), transparent 40%);
+  opacity: 0.82;
+}
+
+.universe-viewport[data-navigation-level="system"]::after {
+  background:
+    radial-gradient(circle at 50% 48%, rgb(57 115 169 / 6%), transparent 31%),
+    radial-gradient(circle at 12% 22%, rgb(62 67 129 / 4%), transparent 38%);
+  opacity: 0.9;
+}
+
+.universe-fallback {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 22%, rgb(16 29 58 / 13%), transparent 44%),
+    radial-gradient(circle at 82% 72%, rgb(13 25 48 / 10%), transparent 48%),
+    #01030a;
+}
+
+.university-galaxy-label {
+  position: absolute;
+  z-index: 2;
+  top: 64%;
+  left: 44%;
+  appearance: none;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.75rem;
+  transform: translate(-50%, -50%);
+  border: 0;
+  outline: 1px solid transparent;
+  outline-offset: 0.32rem;
+  background: transparent;
+  color: rgb(205 220 234 / 64%);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(0.61rem, 0.57rem + 0.12vw, 0.67rem);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    transform 700ms var(--universe-ease),
+    color 280ms ease,
+    opacity 500ms ease,
+    text-shadow 280ms ease;
+}
+
+.university-galaxy-label[data-visible="false"] {
+  pointer-events: none;
+  transform: translate(-50%, -42%) scale(0.96);
+  opacity: 0;
+}
+
+.university-galaxy-label:hover,
+.university-galaxy-label[data-emphasized="true"] {
+  color: rgb(229 240 250 / 92%);
+  text-shadow: 0 0 1rem rgb(104 181 233 / 24%);
+}
+
+.university-galaxy-label:focus-visible {
+  color: rgb(238 246 252);
+  outline-color: rgb(139 180 212 / 64%);
+  text-shadow: 0 0 1rem rgb(110 183 233 / 24%);
+}
+
+.personal-growth-galaxy-label {
+  top: 69%;
+  left: 72%;
+  color: rgb(197 220 213 / 62%);
+}
+
+.personal-growth-galaxy-label:hover,
+.personal-growth-galaxy-label[data-emphasized="true"],
+.personal-growth-galaxy-label:focus-visible {
+  color: rgb(229 242 237 / 92%);
+  text-shadow: 0 0 1rem rgb(105 190 178 / 22%);
+}
+
+.universe-navigation-overlay {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+}
+
+.universe-navigation-overlay button {
+  pointer-events: auto;
+}
+
+.course-system-labels {
+  position: absolute;
+  inset: 0;
+}
+
+.course-system-label {
+  position: absolute;
+  top: var(--course-label-y);
+  left: var(--course-label-x);
+  min-height: 2.75rem;
+  min-width: clamp(7.25rem, 11vw, 9.5rem);
+  appearance: none;
+  padding: 0.65rem 0.72rem;
+  transform: translate(-50%, -50%);
+  border: 0;
+  outline: 1px solid transparent;
+  outline-offset: 0.28rem;
+  background: transparent;
+  color: rgb(202 218 232 / 62%);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(0.58rem, 0.54rem + 0.14vw, 0.65rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.11em;
+  text-align: left;
+  text-transform: uppercase;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    color 260ms ease,
+    opacity 520ms ease 180ms,
+    text-shadow 260ms ease,
+    transform 520ms var(--universe-ease) 180ms;
+}
+
+.course-system-label__name {
+  display: block;
+  max-width: 10rem;
+  text-wrap: balance;
+}
+
+.course-system-label__preview {
+  display: block;
+  overflow: hidden;
+  max-height: 0;
+  margin-top: 0;
+  color: rgb(154 190 217 / 0%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.51rem;
+  font-weight: 400;
+  letter-spacing: 0.045em;
+  line-height: 1.35;
+  white-space: nowrap;
+  transform: translateY(0.2rem);
+  opacity: 0;
+  transition:
+    color 260ms ease,
+    margin-top 320ms var(--universe-ease),
+    max-height 320ms var(--universe-ease),
+    opacity 260ms ease,
+    transform 320ms var(--universe-ease);
+}
+
+.course-system-label[data-emphasized="true"] .course-system-label__preview,
+.course-system-label:hover .course-system-label__preview,
+.course-system-label:focus-visible .course-system-label__preview {
+  max-height: 1.2rem;
+  margin-top: 0.28rem;
+  color: rgb(154 190 217 / 62%);
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.course-system-label[data-visible="true"] {
+  transform: translate(-50%, -50%);
+  opacity: 1;
+}
+
+.course-system-label[data-visible="false"] {
+  pointer-events: none;
+  transform: translate(-50%, -40%);
+}
+
+.course-system-label[data-status="future"] {
+  color: rgb(178 191 204 / 54%);
+}
+
+.growth-system-label__purpose {
+  color: rgb(143 190 180 / 0%);
+}
+
+.growth-system-label[data-emphasized="true"] .growth-system-label__purpose,
+.growth-system-label:hover .growth-system-label__purpose,
+.growth-system-label:focus-visible .growth-system-label__purpose {
+  color: rgb(143 190 180 / 60%);
+}
+
+.course-system-label:hover,
+.course-system-label[data-emphasized="true"] {
+  color: rgb(230 240 249 / 92%);
+  text-shadow: 0 0 0.95rem rgb(106 178 226 / 22%);
+}
+
+.course-system-label:focus-visible {
+  color: rgb(239 246 252);
+  outline-color: rgb(139 180 212 / 64%);
+  text-shadow: 0 0 1rem rgb(110 183 233 / 24%);
+}
+
+.university-weekly-schedule {
+  position: absolute;
+  z-index: 3;
+  top: max(0.85rem, env(safe-area-inset-top));
+  left: 50%;
+  overflow: hidden;
+  width: min(61rem, calc(100vw - 12rem));
+  transform: translateX(-50%);
+  border: 1px solid rgb(133 167 197 / 11%);
+  border-radius: 0.9rem;
+  background:
+    linear-gradient(180deg, rgb(8 15 26 / 62%), rgb(3 8 16 / 48%)),
+    rgb(2 6 13 / 36%);
+  box-shadow:
+    0 1.2rem 3.4rem rgb(0 2 7 / 24%),
+    inset 0 1px rgb(224 238 249 / 4%);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  pointer-events: auto;
+  backdrop-filter: blur(1rem) saturate(108%);
+  animation: university-schedule-arrival 640ms var(--universe-ease) both;
+}
+
+@keyframes university-schedule-arrival {
+  from {
+    transform: translate(-50%, -0.4rem);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+.university-weekly-schedule > header {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.58rem 0.82rem 0.52rem;
+  border-bottom: 1px solid rgb(133 167 197 / 8%);
+}
+
+.university-weekly-schedule > header div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+}
+
+.university-weekly-schedule > header span,
+.university-weekly-schedule > header p,
+.university-weekly-schedule th {
+  color: rgb(143 166 188 / 52%);
+  font-size: 0.48rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.university-weekly-schedule > header h2 {
+  margin: 0;
+  color: rgb(217 229 239 / 80%);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.university-weekly-schedule > header p {
+  margin: 0;
+}
+
+.university-weekly-schedule__scroll {
+  overflow-x: auto;
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+  scrollbar-color: rgb(130 164 194 / 18%) transparent;
+  scrollbar-width: thin;
+}
+
+.university-weekly-schedule__scroll:focus-visible {
+  outline-color: rgb(139 180 212 / 52%);
+}
+
+.university-weekly-schedule table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.university-weekly-schedule th {
+  height: 1.65rem;
+  padding: 0.35rem 0.65rem 0.25rem;
+  text-align: left;
+}
+
+.university-weekly-schedule td {
+  min-width: 0;
+  height: 5.5rem;
+  padding: 0.28rem 0.65rem 0.65rem;
+  border-left: 1px solid rgb(133 167 197 / 7%);
+  vertical-align: top;
+}
+
+.university-weekly-schedule th + th {
+  border-left: 1px solid rgb(133 167 197 / 7%);
+}
+
+.university-weekly-schedule th:first-child,
+.university-weekly-schedule td:first-child {
+  border-left: 0;
+}
+
+.university-weekly-schedule ul {
+  display: grid;
+  gap: 0.42rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.university-weekly-schedule li {
+  min-width: 0;
+}
+
+.university-weekly-schedule__meeting {
+  display: grid;
+  width: 100%;
+  grid-template-columns: max-content 1fr;
+  column-gap: 0.48rem;
+  align-items: baseline;
+  appearance: none;
+  min-width: 0;
+  margin: -0.18rem -0.3rem;
+  padding: 0.18rem 0.3rem;
+  border: 0;
+  border-radius: 0.35rem;
+  outline: 1px solid transparent;
+  outline-offset: 0.08rem;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 220ms ease,
+    outline-color 220ms ease;
+}
+
+.university-weekly-schedule__meeting:hover,
+.university-weekly-schedule__meeting[data-emphasized="true"] {
+  background: rgb(87 153 202 / 6%);
+}
+
+.university-weekly-schedule__meeting:focus-visible {
+  outline-color: rgb(139 180 212 / 48%);
+  background: rgb(87 153 202 / 8%);
+}
+
+.university-weekly-schedule__meeting[data-status="future"] {
+  cursor: default;
+}
+
+.university-weekly-schedule__meeting time {
+  grid-row: 1 / span 2;
+  color: rgb(159 197 226 / 68%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.025em;
+}
+
+.university-weekly-schedule__meeting strong {
+  overflow: hidden;
+  color: rgb(211 224 235 / 72%);
+  font-size: 0.53rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.university-weekly-schedule__meeting span {
+  color: rgb(139 163 184 / 48%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.46rem;
+  letter-spacing: 0.04em;
+}
+
+.university-weekly-schedule__empty {
+  color: rgb(130 151 170 / 34%);
+  font-size: 0.49rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.universe-back-control {
+  position: absolute;
+  top: max(1.35rem, env(safe-area-inset-top));
+  left: max(1.35rem, env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  appearance: none;
+  min-height: 2.75rem;
+  padding: 0.6rem 0.68rem;
+  border: 0;
+  outline: 1px solid transparent;
+  outline-offset: 0.22rem;
+  background: transparent;
+  color: rgb(194 209 222 / 62%);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(0.58rem, 0.55rem + 0.1vw, 0.63rem);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 240ms ease,
+    text-shadow 240ms ease;
+}
+
+.universe-back-control:hover,
+.universe-back-control:focus-visible {
+  color: rgb(234 241 247 / 92%);
+  text-shadow: 0 0 0.9rem rgb(105 173 219 / 20%);
+}
+
+.universe-back-control:focus-visible {
+  outline-color: rgb(139 180 212 / 64%);
+}
+
+.universe-origin-control {
+  position: absolute;
+  bottom: max(1.35rem, env(safe-area-inset-bottom));
+  left: max(4.55rem, env(safe-area-inset-left));
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  appearance: none;
+  min-height: 2.75rem;
+  padding: 0.45rem 0.58rem;
+  border: 0;
+  outline: 1px solid transparent;
+  outline-offset: 0.2rem;
+  background: transparent;
+  color: rgb(158 180 199 / 42%);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.56rem;
+  font-weight: 500;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color 240ms ease,
+    opacity 320ms ease,
+    text-shadow 240ms ease;
+}
+
+.universe-origin-control[data-active="true"],
+.universe-origin-control:hover,
+.universe-origin-control:focus-visible {
+  color: rgb(220 233 243 / 78%);
+  text-shadow: 0 0 0.9rem rgb(105 173 219 / 18%);
+}
+
+.universe-origin-control:focus-visible {
+  outline-color: rgb(139 180 212 / 64%);
+}
+
+.universe-origin-mark {
+  position: relative;
+  display: grid;
+  width: 1.45rem;
+  height: 1.45rem;
+  place-items: center;
+  border: 1px solid rgb(139 180 212 / 24%);
+  border-radius: 50%;
+}
+
+.universe-origin-mark::before {
+  width: 0.2rem;
+  height: 0.2rem;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0.45rem rgb(139 180 212 / 32%);
+  content: "";
+}
+
+.university-context-label,
+.active-course-label {
+  position: absolute;
+  right: max(1.8rem, env(safe-area-inset-right));
+  bottom: max(1.65rem, env(safe-area-inset-bottom));
+  display: grid;
+  justify-items: end;
+  color: rgb(153 176 196 / 50%);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  animation: destination-label-arrival 520ms var(--universe-ease) both;
+}
+
+@keyframes destination-label-arrival {
+  from {
+    transform: translateY(0.3rem);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.university-context-label strong,
+.active-course-label strong {
+  color: rgb(213 225 235 / 72%);
+  font-size: clamp(0.64rem, 0.6rem + 0.12vw, 0.71rem);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+}
+
+.active-course-label {
+  right: 50%;
+  bottom: 17%;
+  animation-name: active-destination-label-arrival;
+  justify-items: center;
+}
+
+@keyframes active-destination-label-arrival {
+  from {
+    transform: translate(50%, 0.3rem);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(50%, 0);
+    opacity: 1;
+  }
+}
+
+.active-course-label strong {
+  color: rgb(232 241 248 / 88%);
+  font-size: clamp(0.72rem, 0.68rem + 0.18vw, 0.82rem);
+  text-shadow: 0 0 1rem rgb(104 174 222 / 18%);
+}
+
+.active-course-label span {
+  margin-top: 0.38rem;
+  color: rgb(149 181 206 / 58%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.53rem;
+  font-weight: 400;
+  letter-spacing: 0.055em;
+}
+
+.jiu-jitsu-log {
+  position: absolute;
+  z-index: 4;
+  right: max(1.35rem, env(safe-area-inset-right));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  width: min(25rem, calc(100vw - 2.7rem));
+  border: 1px solid rgb(148 184 177 / 14%);
+  border-radius: 1rem;
+  background: rgb(4 10 15 / 72%);
+  box-shadow:
+    0 1.4rem 4rem rgb(0 2 6 / 38%),
+    inset 0 1px rgb(225 242 237 / 5%);
+  backdrop-filter: blur(1.3rem) saturate(112%);
+  animation: destination-label-arrival 520ms var(--universe-ease) both;
+}
+
+.jiu-jitsu-log__summary {
+  display: flex;
+  min-height: 4.15rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.78rem 0.85rem 0.78rem 1rem;
+}
+
+.jiu-jitsu-log__summary > div {
+  display: grid;
+  gap: 0.22rem;
+}
+
+.jiu-jitsu-log__summary span,
+.jiu-jitsu-log__history > strong {
+  color: rgb(151 183 176 / 58%);
+  font-size: 0.51rem;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.jiu-jitsu-log__summary strong {
+  color: rgb(231 240 236 / 88%);
+  font-size: 0.71rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.jiu-jitsu-log button {
+  min-height: 2.35rem;
+  border: 1px solid rgb(139 185 176 / 20%);
+  border-radius: 999px;
+  outline: 1px solid transparent;
+  outline-offset: 0.2rem;
+  background: rgb(118 169 159 / 7%);
+  color: rgb(211 229 223 / 76%);
+  font-size: 0.58rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    color 220ms ease;
+}
+
+.jiu-jitsu-log button:hover,
+.jiu-jitsu-log button:focus-visible {
+  border-color: rgb(139 190 180 / 42%);
+  background: rgb(118 169 159 / 12%);
+  color: rgb(236 244 241 / 94%);
+}
+
+.jiu-jitsu-log button:focus-visible,
+.jiu-jitsu-log input:focus-visible,
+.jiu-jitsu-log select:focus-visible,
+.jiu-jitsu-log textarea:focus-visible {
+  outline-color: rgb(142 197 187 / 64%);
+}
+
+.jiu-jitsu-log__summary button {
+  padding: 0.55rem 0.8rem;
+}
+
+.jiu-jitsu-log__panel {
+  overflow: auto;
+  max-height: min(68svh, 39rem);
+  padding: 0 1rem 1rem;
+  border-top: 1px solid rgb(148 184 177 / 10%);
+  scrollbar-color: rgb(132 174 166 / 24%) transparent;
+}
+
+.jiu-jitsu-log__metrics {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+  padding: 0.9rem 0 0.85rem;
+}
+
+.jiu-jitsu-log__metrics span {
+  display: grid;
+  gap: 0.2rem;
+  color: rgb(150 174 169 / 58%);
+  font-size: 0.52rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.jiu-jitsu-log__metrics strong {
+  color: rgb(226 237 232 / 88%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.jiu-jitsu-log__form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.68rem;
+}
+
+.jiu-jitsu-log__form label {
+  display: grid;
+  gap: 0.34rem;
+  color: rgb(166 189 183 / 66%);
+  font-size: 0.55rem;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.jiu-jitsu-log__form label > span {
+  margin-left: 0.2rem;
+  color: rgb(137 158 153 / 42%);
+  font-size: 0.47rem;
+  letter-spacing: 0.035em;
+  text-transform: none;
+}
+
+.jiu-jitsu-log__form input,
+.jiu-jitsu-log__form select,
+.jiu-jitsu-log__form textarea {
+  width: 100%;
+  min-height: 2.35rem;
+  padding: 0.58rem 0.65rem;
+  border: 1px solid rgb(145 181 173 / 14%);
+  border-radius: 0.56rem;
+  outline: 1px solid transparent;
+  outline-offset: 0.12rem;
+  background: rgb(166 199 192 / 4%);
+  color: rgb(224 235 231 / 86%);
+  font-size: 0.66rem;
+  letter-spacing: 0.015em;
+  color-scheme: dark;
+}
+
+.jiu-jitsu-log__form textarea {
+  min-height: 3.5rem;
+  resize: vertical;
+}
+
+.jiu-jitsu-log__wide-field {
+  grid-column: 1 / -1;
+}
+
+.jiu-jitsu-log__form .jiu-jitsu-log__check {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.35rem;
+  text-transform: none;
+}
+
+.jiu-jitsu-log__check input {
+  width: 0.9rem;
+  min-height: 0.9rem;
+  accent-color: #70a99e;
+}
+
+.jiu-jitsu-log .jiu-jitsu-log__save {
+  align-self: end;
+  padding-inline: 0.8rem;
+  border-color: rgb(139 190 180 / 30%);
+  background: rgb(118 169 159 / 12%);
+}
+
+.jiu-jitsu-log__save:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
+.jiu-jitsu-log__history {
+  padding-top: 1rem;
+}
+
+.jiu-jitsu-log__history p,
+.jiu-jitsu-log__storage,
+.jiu-jitsu-log__error,
+.jiu-jitsu-log__feedback {
+  margin: 0.5rem 0 0;
+  color: rgb(149 174 168 / 54%);
+  font-size: 0.57rem;
+  line-height: 1.5;
+}
+
+.jiu-jitsu-log__history ul {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.jiu-jitsu-log__history li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid rgb(145 181 173 / 8%);
+  color: rgb(161 184 179 / 62%);
+  font-size: 0.58rem;
+}
+
+.jiu-jitsu-log__history li > span {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.jiu-jitsu-log__history li strong {
+  color: rgb(216 229 224 / 78%);
+  font-weight: 500;
+}
+
+.jiu-jitsu-log__history li button {
+  min-height: 1.8rem;
+  padding-inline: 0.55rem;
+  border: 0;
+  background: transparent;
+  color: rgb(155 175 170 / 44%);
+  font-size: 0.48rem;
+}
+
+.jiu-jitsu-log__storage {
+  padding-top: 0.7rem;
+  border-top: 1px solid rgb(145 181 173 / 8%);
+}
+
+.jiu-jitsu-log__error {
+  color: rgb(218 157 151 / 78%);
+}
+
+.jiu-jitsu-log__feedback:empty {
+  display: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+  }
+
+  .university-galaxy-label {
+    transition: none;
+  }
+
+  .course-system-label,
+  .universe-back-control,
+  .universe-origin-control {
+    transition: none;
+  }
+
+  .course-system-label__preview {
+    transition: none;
+  }
+
+  .university-weekly-schedule__meeting {
+    transition: none;
+  }
+
+  .university-context-label,
+  .active-course-label,
+  .university-weekly-schedule {
+    animation: none;
+  }
+
+  .jiu-jitsu-log {
+    animation: none;
+  }
+
+  .jiu-jitsu-log button {
+    transition: none;
+  }
+
+  .universe-viewport::after {
+    transition: none;
+  }
+}
+
+@media (max-width: 40rem) {
+  .university-galaxy-label {
+    top: 62%;
+    left: 29%;
+  }
+
+  .personal-growth-galaxy-label {
+    top: 70%;
+    left: 73%;
+  }
+
+  .course-system-label {
+    top: var(--course-label-compact-y);
+    left: var(--course-label-compact-x);
+    min-width: 7rem;
+    padding: 0.6rem 0.58rem;
+    text-align: center;
+  }
+
+  .university-weekly-schedule {
+    top: max(4.15rem, calc(env(safe-area-inset-top) + 3.2rem));
+    width: calc(100vw - 1.4rem);
+  }
+
+  .university-weekly-schedule > header {
+    min-height: 2.45rem;
+    padding-inline: 0.68rem;
+  }
+
+  .university-weekly-schedule > header span,
+  .university-weekly-schedule > header p {
+    display: none;
+  }
+
+  .university-weekly-schedule table {
+    display: block;
+    width: 100%;
+  }
+
+  .university-weekly-schedule__scroll {
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: min(31svh, 17rem);
+  }
+
+  .university-weekly-schedule thead {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .university-weekly-schedule tbody,
+  .university-weekly-schedule tr {
+    display: block;
+    width: 100%;
+  }
+
+  .university-weekly-schedule td {
+    display: grid;
+    grid-template-columns: 3.45rem minmax(0, 1fr);
+    gap: 0.7rem;
+    width: 100%;
+    height: auto;
+    min-height: 3rem;
+    padding: 0.58rem 0.68rem;
+    border-top: 1px solid rgb(133 167 197 / 7%);
+    border-left: 0;
+  }
+
+  .university-weekly-schedule td:first-child {
+    border-top: 0;
+  }
+
+  .university-weekly-schedule td::before {
+    color: rgb(143 166 188 / 52%);
+    font-size: 0.48rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    content: attr(data-day);
+  }
+
+  .university-weekly-schedule td > ul,
+  .university-weekly-schedule td > .university-weekly-schedule__empty {
+    min-width: 0;
+  }
+
+  .university-weekly-schedule__meeting {
+    min-height: 2.15rem;
+    margin-block: -0.25rem;
+    padding-block: 0.34rem;
+  }
+
+  .universe-back-control {
+    top: max(0.9rem, env(safe-area-inset-top));
+    left: max(0.85rem, env(safe-area-inset-left));
+  }
+
+  .universe-origin-control {
+    bottom: max(0.85rem, env(safe-area-inset-bottom));
+    left: max(4.15rem, env(safe-area-inset-left));
+  }
+
+  .university-context-label,
+  .active-course-label {
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .jiu-jitsu-log {
+    right: max(0.7rem, env(safe-area-inset-right));
+    bottom: max(0.7rem, env(safe-area-inset-bottom));
+    left: max(0.7rem, env(safe-area-inset-left));
+    width: auto;
+  }
+
+  .jiu-jitsu-log__panel {
+    max-height: min(65svh, 35rem);
+  }
+
+  .active-course-label {
+    right: 50%;
+    bottom: 14%;
+  }
+}
+
+@media (min-aspect-ratio: 3 / 5) and (max-aspect-ratio: 4 / 5) {
+  .university-galaxy-label {
+    top: 62%;
+    left: 29%;
+  }
+
+  .personal-growth-galaxy-label {
+    top: 70%;
+    left: 73%;
+  }
+
+  .course-system-label {
+    top: var(--course-label-portrait-y);
+    left: var(--course-label-portrait-x);
+  }
+
+  .university-context-label,
+  .active-course-label {
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .active-course-label {
+    right: 50%;
+    bottom: 14%;
+  }
+}
+
+@media (max-width: 24rem) {
+  .course-system-label {
+    min-width: 6.5rem;
+    padding-inline: 0.42rem;
+    font-size: 0.56rem;
+    letter-spacing: 0.075em;
+  }
+
+  .university-galaxy-label {
+    left: 31%;
+    letter-spacing: 0.11em;
+  }
+
+  .personal-growth-galaxy-label {
+    left: 72%;
+  }
+}
+
+@media (max-height: 34rem) {
+  .universe-back-control {
+    top: max(0.45rem, env(safe-area-inset-top));
+  }
+
+  .university-context-label {
+    bottom: max(0.65rem, env(safe-area-inset-bottom));
+  }
+
+  .university-weekly-schedule {
+    top: max(0.45rem, env(safe-area-inset-top));
+    width: min(58rem, calc(100vw - 9.5rem));
+  }
+
+  .university-weekly-schedule > header {
+    display: none;
+  }
+
+  .university-weekly-schedule td {
+    height: 4.45rem;
+    padding-bottom: 0.4rem;
+  }
+
+  .active-course-label {
+    bottom: 9%;
+  }
+}
+
+@media (pointer: coarse) {
+  .university-galaxy-label,
+  .personal-growth-galaxy-label,
+  .course-system-label,
+  .universe-back-control,
+  .universe-origin-control {
+    min-height: 2.75rem;
+  }
+}
