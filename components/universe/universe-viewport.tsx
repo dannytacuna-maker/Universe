@@ -50,6 +50,8 @@ import { useWebGLSupport } from "./use-webgl-support";
 import { WebGLBoundary } from "./webgl-boundary";
 
 const jiuJitsuSystemId = "jiu-jitsu";
+const planetCloudCoverDurationMs = 1180;
+const planetCloudRevealDurationMs = 1500;
 const readingSystemId = "reading";
 const strengthPhysiqueSystemId = "strength-physique";
 
@@ -179,7 +181,7 @@ export function UniverseViewport() {
       planetRevealTimer.current = window.setTimeout(() => {
         setPlanetArrivalPhase("idle");
         planetRevealTimer.current = null;
-      }, 1100);
+      }, planetCloudRevealDurationMs);
     }
   }, [planetArrivalPhase]);
 
@@ -191,6 +193,26 @@ export function UniverseViewport() {
       window.history.pushState(null, "", nextUrl);
     }
   }, []);
+
+  const travelThroughPlanetClouds = useCallback(
+    (cloudAnnouncement: string, travel: () => void) => {
+      clearInteractionState();
+
+      if (shouldReduceMotion === true || webglSupport !== "available") {
+        travel();
+        return;
+      }
+
+      setAnnouncement(cloudAnnouncement);
+      setPlanetArrivalPhase("covering");
+      planetNavigationTimer.current = window.setTimeout(() => {
+        setPlanetArrivalPhase("holding");
+        travel();
+        planetNavigationTimer.current = null;
+      }, planetCloudCoverDurationMs);
+    },
+    [clearInteractionState, shouldReduceMotion, webglSupport],
+  );
 
   const handleGalaxyActivate = useCallback(
     (galaxyId: string) => {
@@ -279,31 +301,19 @@ export function UniverseViewport() {
         enterPlanet(galaxy.id, system.id, planet.id);
       };
 
-      clearInteractionState();
-
-      if (shouldReduceMotion === true || webglSupport !== "available") {
-        enterDestination();
-        return;
-      }
-
-      setAnnouncement(`Cloud cover forming around ${planet.name}.`);
-      setPlanetArrivalPhase("covering");
-      planetNavigationTimer.current = window.setTimeout(() => {
-        setPlanetArrivalPhase("holding");
-        enterDestination();
-        planetNavigationTimer.current = null;
-      }, 720);
+      travelThroughPlanetClouds(
+        `A wave of cloud is closing around ${planet.name}.`,
+        enterDestination,
+      );
     },
     [
       beginCameraTravel,
-      clearInteractionState,
       enterPlanet,
       planetArrivalPhase,
       pushNavigationUrl,
       selectedGalaxyId,
       selectedSystemId,
-      shouldReduceMotion,
-      webglSupport,
+      travelThroughPlanetClouds,
     ],
   );
 
@@ -317,17 +327,23 @@ export function UniverseViewport() {
       selectedGalaxy !== null &&
       activeSystem !== null
     ) {
-      clearInteractionState();
-      beginCameraTravel();
-      setAnnouncement(`Returning to the ${activeSystem.name} system.`);
-      const nextState: NavigationState = {
-        level: "system",
-        selectedGalaxyId: selectedGalaxy.id,
-        selectedPlanetId: null,
-        selectedSystemId: activeSystem.id,
+      const returnFromPlanet = () => {
+        beginCameraTravel();
+        setAnnouncement(`Returning to the ${activeSystem.name} system.`);
+        const nextState: NavigationState = {
+          level: "system",
+          selectedGalaxyId: selectedGalaxy.id,
+          selectedPlanetId: null,
+          selectedSystemId: activeSystem.id,
+        };
+        pushNavigationUrl(nextState);
+        returnToSystem(selectedGalaxy.id, activeSystem.id);
       };
-      pushNavigationUrl(nextState);
-      returnToSystem(selectedGalaxy.id, activeSystem.id);
+
+      travelThroughPlanetClouds(
+        `A wave of cloud is rising for the return to ${activeSystem.name}.`,
+        returnFromPlanet,
+      );
       return;
     }
 
@@ -362,20 +378,40 @@ export function UniverseViewport() {
     returnToSystem,
     returnToUniverse,
     selectedGalaxy,
+    travelThroughPlanetClouds,
   ]);
 
   const handleReturnToOrigin = useCallback(() => {
+    if (planetArrivalPhase !== "idle") {
+      return;
+    }
+
+    const returnToOrigin = () => {
+      beginCameraTravel();
+      setAnnouncement("Returning to the universe origin.");
+      pushNavigationUrl(universeOriginState);
+      returnToUniverse();
+      setCameraResetToken((token) => token + 1);
+    };
+
+    if (navigationLevel === "planet") {
+      travelThroughPlanetClouds(
+        "A wave of cloud is rising for the return to origin.",
+        returnToOrigin,
+      );
+      return;
+    }
+
     clearInteractionState();
-    beginCameraTravel();
-    setAnnouncement("Returning to the universe origin.");
-    pushNavigationUrl(universeOriginState);
-    returnToUniverse();
-    setCameraResetToken((token) => token + 1);
+    returnToOrigin();
   }, [
     beginCameraTravel,
     clearInteractionState,
+    navigationLevel,
+    planetArrivalPhase,
     pushNavigationUrl,
     returnToUniverse,
+    travelThroughPlanetClouds,
   ]);
 
   useEffect(() => {

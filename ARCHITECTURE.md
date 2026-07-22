@@ -235,9 +235,15 @@ session logger is unchanged and remains available in the Jiu-Jitsu system. The l
 dashboard derives weekly and monthly sessions, total hours, sparring rounds, recent
 sessions, unique techniques, reflections, mobility completion, and the current month's
 training calendar from that same session repository. It writes no parallel analytics
-state. Its translucent DOM instrument sits within a procedural chamber environment so
-the destination remains spatial while all controls and history remain accessible without
-WebGL.
+state. The landing uses a project-owned, optimized chamber environment plate with a
+separate transparent Goku presence, restrained contact grounding, and a low-opacity
+procedural aurora and particulate layer. Those layers create a cinematic 2.5D chamber
+without models, post-processing, shadows, or new render schedulers; motion uses the shared
+30 FPS invalidation cadence and becomes static for reduced-motion users. Goku's semantic
+welcome remains outside WebGL and exposes the derived review dashboard through an explicit
+keyboard-accessible open/close control. The translucent review instrument therefore sits
+within the chamber rather than replacing it, while all metrics and history remain usable
+when WebGL is unavailable.
 
 Reading contains the Celestial Library. Its landed dashboard supports adding books,
 explicit reading statuses, session logging, page ranges, time, reflections, current
@@ -253,9 +259,13 @@ uses a deliberately enlarged invisible raycast sphere, while equivalent DOM butt
 remain the authoritative keyboard and non-WebGL interaction. Landing preserves
 `CameraRig` as the sole camera owner and hides the parent system field rather than
 leaving duplicate scene layers active. Planet entry uses a bounded DOM cloud-cover
-transition: cloud layers close before navigation commits, remain over the deliberate
-camera path, and clear only after camera arrival. Reduced-motion and non-WebGL users
-skip that decorative cover and retain immediate navigation.
+transition shared by landing and departure: six staggered gradient layers sweep in from
+different edges before navigation commits, remain settled over the deliberate camera
+path, and peel away in a second directional wave only after camera arrival. The darker
+layered hold avoids a full-screen white flash while still concealing scene replacement.
+The same boundary wraps return-to-system and return-to-origin actions from a planet.
+Reduced-motion and non-WebGL users skip that decorative cover and retain immediate
+navigation.
 
 Beerus' system marker is a procedural shader planet with a separate cloud shell,
 restrained atmosphere, and deterministic orbital debris. Its previous miniature tree

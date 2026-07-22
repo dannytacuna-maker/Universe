@@ -17,6 +17,8 @@ export function PlanetArrivalTransition({
     >
       <span />
       <span />
+      <span />
+      <span />
     </div>
   );
 }

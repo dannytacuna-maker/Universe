@@ -101,9 +101,12 @@ body {
 .planet-arrival-transition {
   position: absolute;
   z-index: 6;
-  inset: -8%;
+  inset: -12%;
+  isolation: isolate;
   overflow: hidden;
-  background: rgb(4 5 12 / 0%);
+  background:
+    radial-gradient(circle at 50% 46%, rgb(108 122 147 / 36%), transparent 70%),
+    rgb(8 12 21 / 58%);
   opacity: 0;
   pointer-events: none;
 }
@@ -111,105 +114,188 @@ body {
 .planet-arrival-transition::before,
 .planet-arrival-transition::after,
 .planet-arrival-transition span {
+  --cloud-delay: 0ms;
+  --cloud-exit-x: 38%;
+  --cloud-exit-y: -5%;
+  --cloud-from-x: -48%;
+  --cloud-from-y: 4%;
+  --cloud-opacity: 0.94;
+  --cloud-reveal-delay: 0ms;
+  --cloud-settle-scale: 1.18;
   position: absolute;
-  inset: -22%;
-  border-radius: 48%;
+  inset: -24%;
   background:
     radial-gradient(
-      ellipse at 20% 48%,
-      rgb(201 211 229 / 94%) 0 12%,
-      transparent 38%
+      ellipse at 14% 44%,
+      rgb(157 171 193 / 96%) 0 18%,
+      transparent 44%
     ),
     radial-gradient(
-      ellipse at 58% 22%,
-      rgb(158 172 201 / 88%) 0 15%,
-      transparent 43%
+      ellipse at 48% 28%,
+      rgb(104 119 145 / 94%) 0 24%,
+      transparent 52%
     ),
     radial-gradient(
-      ellipse at 78% 72%,
-      rgb(111 124 154 / 92%) 0 17%,
-      transparent 45%
+      ellipse at 84% 68%,
+      rgb(190 198 214 / 94%) 0 20%,
+      transparent 48%
     ),
     radial-gradient(
-      ellipse at 38% 83%,
-      rgb(222 224 235 / 78%) 0 12%,
-      transparent 39%
+      ellipse at 40% 82%,
+      rgb(72 84 110 / 96%) 0 26%,
+      transparent 55%
     );
-  filter: blur(2.8rem);
+  filter: blur(clamp(1.8rem, 4.2vw, 4.6rem));
   content: "";
   opacity: 0;
-  transform: translate3d(-28%, 4%, 0) scale(1.12);
+  transform: translate3d(var(--cloud-from-x), var(--cloud-from-y), 0)
+    scale(0.96);
   will-change: opacity, transform;
 }
 
 .planet-arrival-transition::after {
+  --cloud-delay: 70ms;
+  --cloud-exit-x: -42%;
+  --cloud-exit-y: 3%;
+  --cloud-from-x: 52%;
+  --cloud-from-y: -4%;
+  --cloud-opacity: 0.9;
+  --cloud-reveal-delay: 80ms;
+  --cloud-settle-scale: 1.14;
   background:
     radial-gradient(
-      ellipse at 82% 28%,
-      rgb(224 220 236 / 90%) 0 13%,
-      transparent 40%
+      ellipse at 84% 26%,
+      rgb(182 191 211 / 92%) 0 22%,
+      transparent 48%
     ),
     radial-gradient(
-      ellipse at 42% 56%,
-      rgb(116 124 151 / 92%) 0 18%,
-      transparent 49%
+      ellipse at 58% 54%,
+      rgb(87 101 128 / 96%) 0 30%,
+      transparent 58%
     ),
     radial-gradient(
-      ellipse at 18% 82%,
-      rgb(187 194 216 / 82%) 0 14%,
-      transparent 42%
+      ellipse at 16% 78%,
+      rgb(203 208 220 / 88%) 0 19%,
+      transparent 46%
     );
-  transform: translate3d(30%, -3%, 0) scale(1.18);
 }
 
-.planet-arrival-transition span:first-child {
+.planet-arrival-transition span:nth-child(1) {
+  --cloud-delay: 120ms;
+  --cloud-exit-x: 4%;
+  --cloud-exit-y: -48%;
+  --cloud-from-x: -5%;
+  --cloud-from-y: 52%;
+  --cloud-opacity: 0.96;
+  --cloud-reveal-delay: 35ms;
+  --cloud-settle-scale: 1.24;
   background:
     radial-gradient(
-      ellipse at 50% 48%,
-      rgb(48 53 74 / 88%) 0 22%,
+      ellipse at 22% 74%,
+      rgb(52 66 93 / 98%) 0 28%,
       transparent 57%
     ),
     radial-gradient(
-      ellipse at 12% 24%,
-      rgb(174 183 206 / 68%) 0 12%,
-      transparent 38%
-    );
-  transform: translate3d(0, 28%, 0) scale(1.26);
-}
-
-.planet-arrival-transition span:last-child {
-  background:
-    radial-gradient(
-      ellipse at 54% 46%,
-      rgb(232 230 238 / 58%) 0 8%,
-      transparent 34%
+      ellipse at 58% 66%,
+      rgb(131 145 169 / 96%) 0 32%,
+      transparent 61%
     ),
     radial-gradient(
-      ellipse at 74% 58%,
-      rgb(87 93 119 / 72%) 0 16%,
+      ellipse at 88% 82%,
+      rgb(214 216 226 / 84%) 0 20%,
       transparent 48%
     );
-  filter: blur(4rem);
-  transform: scale(1.45);
+}
+
+.planet-arrival-transition span:nth-child(2) {
+  --cloud-delay: 35ms;
+  --cloud-exit-x: -8%;
+  --cloud-exit-y: 44%;
+  --cloud-from-x: 6%;
+  --cloud-from-y: -50%;
+  --cloud-opacity: 0.86;
+  --cloud-reveal-delay: 120ms;
+  --cloud-settle-scale: 1.2;
+  background:
+    radial-gradient(
+      ellipse at 18% 18%,
+      rgb(194 202 217 / 90%) 0 22%,
+      transparent 50%
+    ),
+    radial-gradient(
+      ellipse at 52% 30%,
+      rgb(76 91 118 / 94%) 0 29%,
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse at 86% 12%,
+      rgb(150 164 188 / 92%) 0 24%,
+      transparent 52%
+    );
+  filter: blur(clamp(2.4rem, 5vw, 5.4rem));
+}
+
+.planet-arrival-transition span:nth-child(3) {
+  --cloud-delay: 175ms;
+  --cloud-exit-x: 48%;
+  --cloud-exit-y: 12%;
+  --cloud-from-x: -56%;
+  --cloud-from-y: -12%;
+  --cloud-opacity: 0.78;
+  --cloud-reveal-delay: 145ms;
+  --cloud-settle-scale: 1.32;
+  inset: -32%;
+  background:
+    radial-gradient(
+      ellipse at 28% 40%,
+      rgb(218 220 228 / 82%) 0 15%,
+      transparent 43%
+    ),
+    radial-gradient(
+      ellipse at 68% 58%,
+      rgb(119 133 157 / 88%) 0 28%,
+      transparent 58%
+    );
+  filter: blur(clamp(3.2rem, 6vw, 6.5rem));
+}
+
+.planet-arrival-transition span:nth-child(4) {
+  --cloud-delay: 90ms;
+  --cloud-exit-x: -52%;
+  --cloud-exit-y: -10%;
+  --cloud-from-x: 58%;
+  --cloud-from-y: 10%;
+  --cloud-opacity: 0.72;
+  --cloud-reveal-delay: 185ms;
+  --cloud-settle-scale: 1.38;
+  inset: -34%;
+  background:
+    radial-gradient(
+      ellipse at 72% 40%,
+      rgb(220 221 229 / 78%) 0 18%,
+      transparent 46%
+    ),
+    radial-gradient(
+      ellipse at 34% 60%,
+      rgb(65 78 104 / 88%) 0 32%,
+      transparent 62%
+    );
+  filter: blur(clamp(3.6rem, 6.5vw, 7rem));
 }
 
 .planet-arrival-transition[data-phase="covering"] {
   pointer-events: auto;
-  animation: planet-cloud-cover 720ms ease-in both;
+  animation: planet-cloud-veil-cover 1.18s cubic-bezier(0.36, 0, 0.2, 1) both;
 }
 
 .planet-arrival-transition[data-phase="covering"]::before,
 .planet-arrival-transition[data-phase="covering"]::after,
 .planet-arrival-transition[data-phase="covering"] span {
-  animation: planet-cloud-layer-cover 820ms ease-out both;
-}
-
-.planet-arrival-transition[data-phase="covering"]::after {
-  animation-direction: reverse;
+  animation: planet-cloud-wave-cover 1s cubic-bezier(0.2, 0.72, 0.18, 1) both;
+  animation-delay: var(--cloud-delay);
 }
 
 .planet-arrival-transition[data-phase="holding"] {
-  background: rgb(29 32 47 / 76%);
   opacity: 1;
   pointer-events: auto;
 }
@@ -217,66 +303,65 @@ body {
 .planet-arrival-transition[data-phase="holding"]::before,
 .planet-arrival-transition[data-phase="holding"]::after,
 .planet-arrival-transition[data-phase="holding"] span {
-  opacity: 1;
-  transform: scale(1.18);
+  opacity: var(--cloud-opacity);
+  transform: translate3d(0, 0, 0) scale(var(--cloud-settle-scale));
 }
 
 .planet-arrival-transition[data-phase="revealing"] {
   pointer-events: auto;
-  animation: planet-cloud-reveal 1.1s var(--universe-ease) both;
+  animation: planet-cloud-veil-reveal 1.5s cubic-bezier(0.22, 0.7, 0.16, 1) both;
 }
 
 .planet-arrival-transition[data-phase="revealing"]::before,
 .planet-arrival-transition[data-phase="revealing"]::after,
 .planet-arrival-transition[data-phase="revealing"] span {
-  animation: planet-cloud-layer-reveal 1.1s var(--universe-ease) both;
+  animation: planet-cloud-wave-reveal 1.28s cubic-bezier(0.32, 0, 0.32, 1) both;
+  animation-delay: var(--cloud-reveal-delay);
 }
 
-@keyframes planet-cloud-cover {
+@keyframes planet-cloud-veil-cover {
   from {
-    background: rgb(4 5 12 / 0%);
     opacity: 0;
   }
 
   to {
-    background: rgb(29 32 47 / 76%);
     opacity: 1;
   }
 }
 
-@keyframes planet-cloud-layer-cover {
+@keyframes planet-cloud-wave-cover {
   from {
     opacity: 0;
-    transform: translate3d(-28%, 4%, 0) scale(1.12);
+    transform: translate3d(var(--cloud-from-x), var(--cloud-from-y), 0)
+      scale(0.96);
   }
 
   to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1.18);
+    opacity: var(--cloud-opacity);
+    transform: translate3d(0, 0, 0) scale(var(--cloud-settle-scale));
   }
 }
 
-@keyframes planet-cloud-reveal {
+@keyframes planet-cloud-veil-reveal {
   from {
-    background: rgb(29 32 47 / 76%);
     opacity: 1;
   }
 
   to {
-    background: rgb(4 5 12 / 0%);
     opacity: 0;
   }
 }
 
-@keyframes planet-cloud-layer-reveal {
+@keyframes planet-cloud-wave-reveal {
   from {
-    opacity: 1;
-    transform: scale(1.18);
+    opacity: var(--cloud-opacity);
+    transform: translate3d(0, 0, 0) scale(var(--cloud-settle-scale));
   }
 
   to {
     opacity: 0;
-    transform: translate3d(24%, -5%, 0) scale(1.34);
+    transform: translate3d(var(--cloud-exit-x), var(--cloud-exit-y), 0)
+      scale(1.52);
   }
 }
 
@@ -1881,6 +1966,118 @@ body {
   animation: immersive-dashboard-arrival 620ms var(--universe-ease) both;
 }
 
+.time-chamber-guide {
+  position: absolute;
+  z-index: 5;
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  left: max(1.35rem, env(safe-area-inset-left));
+  display: grid;
+  width: min(20rem, calc(100vw - 2.7rem));
+  gap: 0.8rem;
+  padding: 1rem;
+  border: 1px solid rgb(161 221 215 / 18%);
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 12% 0%, rgb(91 180 171 / 12%), transparent 44%),
+    linear-gradient(145deg, rgb(7 27 31 / 79%), rgb(3 10 16 / 88%));
+  box-shadow:
+    0 1.5rem 4.6rem rgb(0 7 13 / 42%),
+    inset 0 1px rgb(224 255 250 / 7%);
+  backdrop-filter: blur(1.35rem) saturate(110%);
+  animation: destination-label-arrival 520ms var(--universe-ease) both;
+}
+
+.time-chamber-guide[data-open="true"] {
+  display: none;
+}
+
+.time-chamber-guide__welcome,
+.time-chamber-guide__signal {
+  display: grid;
+  gap: 0.24rem;
+}
+
+.time-chamber-guide__welcome span,
+.time-chamber-guide__signal span {
+  color: rgb(148 219 211 / 66%);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.time-chamber-guide__welcome strong,
+.time-chamber-guide__signal strong {
+  color: rgb(237 250 247 / 92%);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+.time-chamber-guide__welcome p,
+.time-chamber-guide__signal small {
+  margin: 0;
+  color: rgb(187 220 215 / 59%);
+  font-size: 0.57rem;
+  line-height: 1.55;
+}
+
+.time-chamber-guide__signal {
+  padding-top: 0.72rem;
+  border-top: 1px solid rgb(157 218 210 / 10%);
+}
+
+.time-chamber-guide__signal small {
+  color: rgb(154 194 188 / 52%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.49rem;
+}
+
+.time-chamber-guide > button,
+.immersive-dashboard__close {
+  min-height: 2.35rem;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid rgb(151 220 211 / 24%);
+  border-radius: 999px;
+  outline: 1px solid transparent;
+  outline-offset: 0.2rem;
+  background: rgb(82 173 163 / 10%);
+  color: rgb(223 246 241 / 82%);
+  font-size: 0.53rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    border-color 220ms ease,
+    background 220ms ease,
+    color 220ms ease;
+}
+
+.time-chamber-guide > button:hover,
+.time-chamber-guide > button:focus-visible,
+.immersive-dashboard__close:hover,
+.immersive-dashboard__close:focus-visible {
+  border-color: rgb(178 239 231 / 46%);
+  background: rgb(94 192 181 / 16%);
+  color: rgb(246 255 253 / 96%);
+}
+
+.time-chamber-guide > button:focus-visible,
+.immersive-dashboard__close:focus-visible {
+  outline-color: rgb(171 236 228 / 66%);
+}
+
+.time-chamber-dashboard__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.immersive-dashboard__close {
+  flex: 0 0 auto;
+}
+
 @keyframes immersive-dashboard-arrival {
   from {
     opacity: 0;
@@ -2392,6 +2589,13 @@ select {
     animation: none;
   }
 
+  .time-chamber-guide,
+  .time-chamber-guide > button,
+  .immersive-dashboard__close {
+    animation: none;
+    transition: none;
+  }
+
   .planet-arrival-transition {
     display: none;
   }
@@ -2603,9 +2807,25 @@ select {
     animation: none;
   }
 
+  .time-chamber-guide {
+    right: max(0.7rem, env(safe-area-inset-right));
+    bottom: max(0.7rem, env(safe-area-inset-bottom));
+    left: max(0.7rem, env(safe-area-inset-left));
+    width: auto;
+  }
+
   .immersive-dashboard__header {
     display: grid;
     align-items: start;
+  }
+
+  .time-chamber-dashboard__header-actions {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .immersive-dashboard__close {
+    justify-self: end;
   }
 
   .immersive-metrics {

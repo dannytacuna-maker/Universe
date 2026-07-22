@@ -16,6 +16,8 @@ import { UniversityGalaxy } from "./galaxies/university-galaxy";
 import { UniversityCourseSystemGroup } from "./galaxies/university/university-course-system-group";
 import { UniversityInteriorField } from "./galaxies/university/university-interior-field";
 import type { JiuJitsuProgress } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-progress";
+import { hyperbolicTimeChamberDefinition } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-planets";
+import { TimeChamberSurface } from "./galaxies/personal-growth/jiu-jitsu/time-chamber-surface";
 import { PersonalGrowthDestinationPlanet } from "./galaxies/personal-growth/personal-growth-destination-planet";
 import { PersonalGrowthDestinationSurface } from "./galaxies/personal-growth/personal-growth-destination-surface";
 import { standardPersonalGrowthPlanets } from "./galaxies/personal-growth/personal-growth-planets";
@@ -54,6 +56,10 @@ type UniverseSceneProps = Readonly<{
   selectedPlanetId: string | null;
   strengthProgress: StrengthProgress;
 }>;
+
+const genericPersonalGrowthSurfaces = standardPersonalGrowthPlanets.filter(
+  (planet) => planet.kind !== "time-chamber",
+);
 
 export function UniverseScene({
   activeSystemId,
@@ -257,7 +263,14 @@ export function UniverseScene({
           }
           motionEnabled={motionEnabled}
         />
-        {standardPersonalGrowthPlanets.map((planet) => (
+        <TimeChamberSurface
+          isVisible={
+            navigationLevel === "planet" &&
+            selectedPlanetId === hyperbolicTimeChamberDefinition.id
+          }
+          motionEnabled={motionEnabled}
+        />
+        {genericPersonalGrowthSurfaces.map((planet) => (
           <PersonalGrowthDestinationSurface
             definition={planet}
             isVisible={
