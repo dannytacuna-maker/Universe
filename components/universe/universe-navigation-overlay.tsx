@@ -4,6 +4,7 @@ import type { NavigationLevel } from "@/store/navigation-store";
 
 import { PersonalGrowthGalaxyLabel } from "./galaxies/personal-growth/personal-growth-galaxy-label";
 import { PersonalGrowthSystemLabels } from "./galaxies/personal-growth/personal-growth-system-labels";
+import { BeerusPlanetLabel } from "./galaxies/personal-growth/strength-physique/beerus-planet-label";
 import { UniversityCourseSystemLabels } from "./galaxies/university/university-course-system-labels";
 import { UniversityWeeklySchedule } from "./galaxies/university/university-weekly-schedule";
 import { UniversityGalaxyLabel } from "./galaxies/university-galaxy-label";
@@ -13,9 +14,11 @@ import {
 } from "./universe-destinations";
 
 type UniverseNavigationOverlayProps = Readonly<{
+  activePlanetName: string | null;
   activeSystemName: string | null;
   activeSystemSummary: string | null;
   emphasizedGalaxyId: string | null;
+  emphasizedPlanetId: string | null;
   emphasizedSystemId: string | null;
   isViewSettled: boolean;
   level: NavigationLevel;
@@ -23,18 +26,24 @@ type UniverseNavigationOverlayProps = Readonly<{
   onGalaxyActivate: (galaxyId: string) => void;
   onGalaxyFocusChange: (galaxyId: string | null) => void;
   onGalaxyHoverChange: (galaxyId: string | null) => void;
+  onPlanetActivate: (planetId: string) => void;
+  onPlanetFocusChange: (planetId: string | null) => void;
+  onPlanetHoverChange: (planetId: string | null) => void;
   onReturnToOrigin: () => void;
   onSystemActivate: (systemId: string) => void;
   onSystemFocusChange: (systemId: string | null) => void;
   onSystemHoverChange: (systemId: string | null) => void;
   selectedGalaxyId: string | null;
   selectedGalaxyName: string | null;
+  selectedSystemId: string | null;
 }>;
 
 export function UniverseNavigationOverlay({
+  activePlanetName,
   activeSystemName,
   activeSystemSummary,
   emphasizedGalaxyId,
+  emphasizedPlanetId,
   emphasizedSystemId,
   isViewSettled,
   level,
@@ -42,12 +51,16 @@ export function UniverseNavigationOverlay({
   onGalaxyActivate,
   onGalaxyFocusChange,
   onGalaxyHoverChange,
+  onPlanetActivate,
+  onPlanetFocusChange,
+  onPlanetHoverChange,
   onReturnToOrigin,
   onSystemActivate,
   onSystemFocusChange,
   onSystemHoverChange,
   selectedGalaxyId,
   selectedGalaxyName,
+  selectedSystemId,
 }: UniverseNavigationOverlayProps) {
   const isUniversityOverviewVisible =
     selectedGalaxyId === universityGalaxyId &&
@@ -109,6 +122,23 @@ export function UniverseNavigationOverlay({
         onHoverChange={onSystemHoverChange}
       />
 
+      <BeerusPlanetLabel
+        isEmphasized={emphasizedPlanetId === "beerus-planet"}
+        isVisible={
+          selectedGalaxyId === personalGrowthGalaxyId &&
+          selectedSystemId === "strength-physique" &&
+          level === "system" &&
+          isViewSettled
+        }
+        onActivate={() => onPlanetActivate("beerus-planet")}
+        onFocusChange={(isFocused) =>
+          onPlanetFocusChange(isFocused ? "beerus-planet" : null)
+        }
+        onHoverChange={(isHovered) =>
+          onPlanetHoverChange(isHovered ? "beerus-planet" : null)
+        }
+      />
+
       {level !== "universe" ? (
         <button
           className="universe-back-control"
@@ -116,7 +146,13 @@ export function UniverseNavigationOverlay({
           type="button"
         >
           <span aria-hidden="true">←</span>
-          <span>{level === "system" ? selectedGalaxyName : "Universe"}</span>
+          <span>
+            {level === "planet"
+              ? "Strength system"
+              : level === "system"
+                ? selectedGalaxyName
+                : "Universe"}
+          </span>
         </button>
       ) : null}
 
@@ -132,6 +168,13 @@ export function UniverseNavigationOverlay({
           {activeSystemSummary !== null ? (
             <span>{activeSystemSummary}</span>
           ) : null}
+        </div>
+      ) : null}
+
+      {level === "planet" && isViewSettled && activePlanetName !== null ? (
+        <div className="planet-context-label">
+          <span>Strength &amp; Physique</span>
+          <strong>{activePlanetName}</strong>
         </div>
       ) : null}
 

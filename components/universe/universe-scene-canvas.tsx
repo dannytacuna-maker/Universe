@@ -18,17 +18,22 @@ export type UniverseSceneCanvasProps = Readonly<{
   activeSystemId: string | null;
   cameraResetToken: number;
   emphasizedGalaxyId: string | null;
+  emphasizedPlanetId: string | null;
   emphasizedSystemId: string | null;
   hoveredGalaxyId: string | null;
+  hoveredPlanetId: string | null;
   hoveredSystemId: string | null;
   jiuJitsuProgress: JiuJitsuProgress;
   navigationLevel: NavigationLevel;
   onCameraArrive: () => void;
   onGalaxyActivate: (galaxyId: string) => void;
   onGalaxyHoverChange: (galaxyId: string | null) => void;
+  onPlanetActivate: (planetId: string) => void;
+  onPlanetHoverChange: (planetId: string | null) => void;
   onSystemActivate: (systemId: string) => void;
   onSystemHoverChange: (systemId: string | null) => void;
   selectedGalaxyId: string | null;
+  selectedPlanetId: string | null;
   strengthProgress: StrengthProgress;
 }>;
 
@@ -36,17 +41,22 @@ export function UniverseSceneCanvas({
   activeSystemId,
   cameraResetToken,
   emphasizedGalaxyId,
+  emphasizedPlanetId,
   emphasizedSystemId,
   hoveredGalaxyId,
+  hoveredPlanetId,
   hoveredSystemId,
   jiuJitsuProgress,
   navigationLevel,
   onCameraArrive,
   onGalaxyActivate,
   onGalaxyHoverChange,
+  onPlanetActivate,
+  onPlanetHoverChange,
   onSystemActivate,
   onSystemHoverChange,
   selectedGalaxyId,
+  selectedPlanetId,
   strengthProgress,
 }: UniverseSceneCanvasProps) {
   return (
@@ -56,17 +66,22 @@ export function UniverseSceneCanvas({
           activeSystemId={activeSystemId}
           cameraResetToken={cameraResetToken}
           emphasizedGalaxyId={emphasizedGalaxyId}
+          emphasizedPlanetId={emphasizedPlanetId}
           emphasizedSystemId={emphasizedSystemId}
           hoveredGalaxyId={hoveredGalaxyId}
+          hoveredPlanetId={hoveredPlanetId}
           hoveredSystemId={hoveredSystemId}
           jiuJitsuProgress={jiuJitsuProgress}
           navigationLevel={navigationLevel}
           onCameraArrive={onCameraArrive}
           onGalaxyActivate={onGalaxyActivate}
           onGalaxyHoverChange={onGalaxyHoverChange}
+          onPlanetActivate={onPlanetActivate}
+          onPlanetHoverChange={onPlanetHoverChange}
           onSystemActivate={onSystemActivate}
           onSystemHoverChange={onSystemHoverChange}
           selectedGalaxyId={selectedGalaxyId}
+          selectedPlanetId={selectedPlanetId}
           strengthProgress={strengthProgress}
         />
       </UniverseCanvas>

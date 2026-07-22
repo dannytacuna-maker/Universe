@@ -2,6 +2,7 @@ import type { NavigationLevel } from "@/store/navigation-store";
 
 import { personalGrowthGalaxyDefinition } from "./galaxies/personal-growth/personal-growth-galaxy-definition";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
+import { beerusPlanetDefinition } from "./galaxies/personal-growth/strength-physique/beerus-planet-definition";
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
 import {
   personalGrowthGalaxyId,
@@ -41,7 +42,22 @@ export function getCameraPose(
   navigationLevel: NavigationLevel,
   selectedGalaxyId: string | null,
   selectedSystemId: string | null,
+  selectedPlanetId: string | null,
 ): CameraPose {
+  if (
+    navigationLevel === "planet" &&
+    selectedGalaxyId === beerusPlanetDefinition.galaxyId &&
+    selectedSystemId === beerusPlanetDefinition.systemId &&
+    selectedPlanetId === beerusPlanetDefinition.id
+  ) {
+    return {
+      ambientScale: 0.08,
+      fov: 42,
+      lookTarget: beerusPlanetDefinition.cameraLookTarget,
+      position: beerusPlanetDefinition.cameraPosition,
+    };
+  }
+
   if (navigationLevel === "system" && selectedGalaxyId !== null) {
     const systems =
       selectedGalaxyId === personalGrowthGalaxyId

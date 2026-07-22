@@ -13,11 +13,14 @@ import { universityCourseSystems } from "./galaxies/university/university-course
 import { JiuJitsuTrainingLog } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-training-log";
 import { useJiuJitsuSessions } from "./galaxies/personal-growth/jiu-jitsu/use-jiu-jitsu-sessions";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
+import { beerusPlanetDefinition } from "./galaxies/personal-growth/strength-physique/beerus-planet-definition";
 import { StrengthPhysiqueTracker } from "./galaxies/personal-growth/strength-physique/strength-physique-tracker";
 import { useStrengthPhysique } from "./galaxies/personal-growth/strength-physique/use-strength-physique";
+import { WhisTrainingAssistant } from "./galaxies/personal-growth/strength-physique/whis-training-assistant";
 import { LazyUniverseCanvas } from "./lazy-universe-canvas";
 import {
   findGalaxy,
+  findPlanet,
   findSystem,
   personalGrowthGalaxyId,
   universityGalaxyId,
@@ -43,9 +46,14 @@ export function UniverseViewport() {
   const selectedSystemId = useNavigationStore(
     (state) => state.selectedSystemId,
   );
+  const selectedPlanetId = useNavigationStore(
+    (state) => state.selectedPlanetId,
+  );
   const enterGalaxy = useNavigationStore((state) => state.enterGalaxy);
+  const enterPlanet = useNavigationStore((state) => state.enterPlanet);
   const enterSystem = useNavigationStore((state) => state.enterSystem);
   const returnToGalaxy = useNavigationStore((state) => state.returnToGalaxy);
+  const returnToSystem = useNavigationStore((state) => state.returnToSystem);
   const returnToUniverse = useNavigationStore(
     (state) => state.returnToUniverse,
   );
@@ -56,6 +64,8 @@ export function UniverseViewport() {
   const [focusedGalaxyId, setFocusedGalaxyId] = useState<string | null>(null);
   const [hoveredSystemId, setHoveredSystemId] = useState<string | null>(null);
   const [focusedSystemId, setFocusedSystemId] = useState<string | null>(null);
+  const [hoveredPlanetId, setHoveredPlanetId] = useState<string | null>(null);
+  const [focusedPlanetId, setFocusedPlanetId] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
   const [cameraResetToken, setCameraResetToken] = useState(0);
   const [isCameraSettled, setIsCameraSettled] = useState(true);
@@ -81,7 +91,11 @@ export function UniverseViewport() {
   } = useStrengthPhysique();
   const emphasizedGalaxyId = hoveredGalaxyId ?? focusedGalaxyId;
   const emphasizedSystemId = hoveredSystemId ?? focusedSystemId;
-  const activeSystemId = navigationLevel === "system" ? selectedSystemId : null;
+  const emphasizedPlanetId = hoveredPlanetId ?? focusedPlanetId;
+  const activeSystemId =
+    navigationLevel === "system" || navigationLevel === "planet"
+      ? selectedSystemId
+      : null;
   const selectedGalaxy = useMemo(
     () => findGalaxy(selectedGalaxyId),
     [selectedGalaxyId],
@@ -89,6 +103,10 @@ export function UniverseViewport() {
   const activeSystem = useMemo(
     () => findSystem(selectedGalaxyId, activeSystemId),
     [activeSystemId, selectedGalaxyId],
+  );
+  const activePlanet = useMemo(
+    () => findPlanet(selectedGalaxyId, selectedSystemId, selectedPlanetId),
+    [selectedGalaxyId, selectedPlanetId, selectedSystemId],
   );
   const activeCourse = useMemo(
     () =>
@@ -114,6 +132,8 @@ export function UniverseViewport() {
     setFocusedGalaxyId(null);
     setHoveredSystemId(null);
     setFocusedSystemId(null);
+    setHoveredPlanetId(null);
+    setFocusedPlanetId(null);
   }, []);
 
   const beginCameraTravel = useCallback(() => {
@@ -147,6 +167,7 @@ export function UniverseViewport() {
       const nextState: NavigationState = {
         level: "galaxy",
         selectedGalaxyId: galaxy.id,
+        selectedPlanetId: null,
         selectedSystemId: null,
       };
       pushNavigationUrl(nextState);
@@ -171,6 +192,7 @@ export function UniverseViewport() {
         const nextState: NavigationState = {
           level: "system",
           selectedGalaxyId: galaxy.id,
+          selectedPlanetId: null,
           selectedSystemId: system.id,
         };
         pushNavigationUrl(nextState);
@@ -191,7 +213,58 @@ export function UniverseViewport() {
     ],
   );
 
+  const handlePlanetActivate = useCallback(
+    (planetId: string) => {
+      const galaxy = findGalaxy(selectedGalaxyId);
+      const system = findSystem(selectedGalaxyId, selectedSystemId);
+      const planet = findPlanet(selectedGalaxyId, selectedSystemId, planetId);
+
+      if (galaxy === null || system === null || planet === null) {
+        return;
+      }
+
+      clearInteractionState();
+      beginCameraTravel();
+      setAnnouncement(`Descending to ${planet.name}.`);
+      const nextState: NavigationState = {
+        level: "planet",
+        selectedGalaxyId: galaxy.id,
+        selectedPlanetId: planet.id,
+        selectedSystemId: system.id,
+      };
+      pushNavigationUrl(nextState);
+      enterPlanet(galaxy.id, system.id, planet.id);
+    },
+    [
+      beginCameraTravel,
+      clearInteractionState,
+      enterPlanet,
+      pushNavigationUrl,
+      selectedGalaxyId,
+      selectedSystemId,
+    ],
+  );
+
   const handleBack = useCallback(() => {
+    if (
+      navigationLevel === "planet" &&
+      selectedGalaxy !== null &&
+      activeSystem !== null
+    ) {
+      clearInteractionState();
+      beginCameraTravel();
+      setAnnouncement(`Returning to the ${activeSystem.name} system.`);
+      const nextState: NavigationState = {
+        level: "system",
+        selectedGalaxyId: selectedGalaxy.id,
+        selectedPlanetId: null,
+        selectedSystemId: activeSystem.id,
+      };
+      pushNavigationUrl(nextState);
+      returnToSystem(selectedGalaxy.id, activeSystem.id);
+      return;
+    }
+
     if (navigationLevel === "system" && selectedGalaxy !== null) {
       clearInteractionState();
       beginCameraTravel();
@@ -199,6 +272,7 @@ export function UniverseViewport() {
       const nextState: NavigationState = {
         level: "galaxy",
         selectedGalaxyId: selectedGalaxy.id,
+        selectedPlanetId: null,
         selectedSystemId: null,
       };
       pushNavigationUrl(nextState);
@@ -213,10 +287,12 @@ export function UniverseViewport() {
     returnToUniverse();
   }, [
     beginCameraTravel,
+    activeSystem,
     clearInteractionState,
     navigationLevel,
     pushNavigationUrl,
     returnToGalaxy,
+    returnToSystem,
     returnToUniverse,
     selectedGalaxy,
   ]);
@@ -245,7 +321,8 @@ export function UniverseViewport() {
         hasSyncedLocation.current ||
         nextNavigation.level !== "universe" ||
         nextNavigation.selectedGalaxyId !== null ||
-        nextNavigation.selectedSystemId !== null
+        nextNavigation.selectedSystemId !== null ||
+        nextNavigation.selectedPlanetId !== null
       ) {
         beginCameraTravel();
       }
@@ -294,6 +371,11 @@ export function UniverseViewport() {
     navigationLevel === "system" &&
     selectedGalaxyId === personalGrowthGalaxyId &&
     activeSystemId === strengthPhysiqueSystemId;
+  const isBeerusPlanetActive =
+    navigationLevel === "planet" &&
+    selectedGalaxyId === personalGrowthGalaxyId &&
+    activeSystemId === strengthPhysiqueSystemId &&
+    selectedPlanetId === beerusPlanetDefinition.id;
 
   return (
     <section
@@ -311,17 +393,22 @@ export function UniverseViewport() {
             activeSystemId={activeSystemId}
             cameraResetToken={cameraResetToken}
             emphasizedGalaxyId={emphasizedGalaxyId}
+            emphasizedPlanetId={emphasizedPlanetId}
             emphasizedSystemId={emphasizedSystemId}
             hoveredGalaxyId={hoveredGalaxyId}
+            hoveredPlanetId={hoveredPlanetId}
             hoveredSystemId={hoveredSystemId}
             jiuJitsuProgress={jiuJitsuProgress}
             navigationLevel={navigationLevel}
             onCameraArrive={handleCameraArrive}
             onGalaxyActivate={handleGalaxyActivate}
             onGalaxyHoverChange={setHoveredGalaxyId}
+            onPlanetActivate={handlePlanetActivate}
+            onPlanetHoverChange={setHoveredPlanetId}
             onSystemActivate={handleSystemActivate}
             onSystemHoverChange={setHoveredSystemId}
             selectedGalaxyId={selectedGalaxyId}
+            selectedPlanetId={selectedPlanetId}
             strengthProgress={strengthProgress}
           />
         </WebGLBoundary>
@@ -329,12 +416,14 @@ export function UniverseViewport() {
 
       <UniverseNavigationOverlay
         activeSystemName={activeSystem?.name ?? null}
+        activePlanetName={activePlanet?.name ?? null}
         activeSystemSummary={
           activeCourse === null
             ? (activeGrowthSystem?.description ?? null)
             : formatCourseScheduleSummary(activeCourse.schedule)
         }
         emphasizedGalaxyId={emphasizedGalaxyId}
+        emphasizedPlanetId={emphasizedPlanetId}
         emphasizedSystemId={emphasizedSystemId}
         isViewSettled={isViewSettled}
         level={navigationLevel}
@@ -342,12 +431,16 @@ export function UniverseViewport() {
         onGalaxyActivate={handleGalaxyActivate}
         onGalaxyFocusChange={setFocusedGalaxyId}
         onGalaxyHoverChange={setHoveredGalaxyId}
+        onPlanetActivate={handlePlanetActivate}
+        onPlanetFocusChange={setFocusedPlanetId}
+        onPlanetHoverChange={setHoveredPlanetId}
         onReturnToOrigin={handleReturnToOrigin}
         onSystemActivate={handleSystemActivate}
         onSystemFocusChange={setFocusedSystemId}
         onSystemHoverChange={setHoveredSystemId}
         selectedGalaxyId={selectedGalaxyId}
         selectedGalaxyName={selectedGalaxy?.name ?? null}
+        selectedSystemId={activeSystemId}
       />
 
       <JiuJitsuTrainingLog
@@ -373,6 +466,19 @@ export function UniverseViewport() {
         storageError={strengthStorageError}
       />
 
+      <WhisTrainingAssistant
+        bodyWeightEntries={bodyWeightEntries}
+        isLoading={isStrengthLoading}
+        isVisible={isBeerusPlanetActive && isViewSettled}
+        onAddBodyWeight={addBodyWeight}
+        onRemoveBodyWeight={removeBodyWeight}
+        onToggleWorkout={toggleWorkout}
+        onUpdatePersonalRecord={updatePersonalRecord}
+        personalRecords={personalRecords}
+        progress={strengthProgress}
+        storageError={strengthStorageError}
+      />
+
       <span aria-live="polite" className="sr-only">
         {announcement}
       </span>
@@ -383,13 +489,15 @@ export function UniverseViewport() {
             ? selectedGalaxyId === personalGrowthGalaxyId
               ? "Four Personal Growth systems are mapped. Jiu-Jitsu and Strength and Physique are available to explore."
               : "Five University systems are mapped: four scheduled courses and Final Project. Logistics and Distribution is available to explore."
-            : selectedGalaxyId === personalGrowthGalaxyId
-              ? activeSystemId === strengthPhysiqueSystemId
-                ? "Strength and Physique system. A flexible six-day push, pull, legs plan, personal records, and body weight can be tracked privately on this device."
-                : "Jiu-Jitsu system. Training sessions can be logged privately on this device."
-              : activeCourse === null
-                ? "University course system."
-                : `${activeCourse.name} course system. ${formatCourseScheduleDetails(activeCourse.schedule)}. Workspaces have not been introduced yet.`}
+            : navigationLevel === "planet"
+              ? "Beerus' Planet training sanctuary. Whis provides access to the six-day training plan, personal records, and body-weight tracking."
+              : selectedGalaxyId === personalGrowthGalaxyId
+                ? activeSystemId === strengthPhysiqueSystemId
+                  ? "Strength and Physique system. A flexible six-day push, pull, legs plan, personal records, and body weight can be tracked privately on this device."
+                  : "Jiu-Jitsu system. Training sessions can be logged privately on this device."
+                : activeCourse === null
+                  ? "University course system."
+                  : `${activeCourse.name} course system. ${formatCourseScheduleDetails(activeCourse.schedule)}. Workspaces have not been introduced yet.`}
       </span>
       <span className="sr-only">
         Use the scroll wheel or plus and minus keys to adjust camera distance.

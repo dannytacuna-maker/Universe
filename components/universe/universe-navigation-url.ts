@@ -2,6 +2,7 @@ import type { NavigationState } from "@/store/navigation-store";
 
 import {
   findGalaxy,
+  findPlanet,
   findSystem,
   universeOriginState,
 } from "./universe-destinations";
@@ -13,7 +14,8 @@ export function readUniverseNavigation(search: string): NavigationState {
   const destination = parameters.get(destinationParameter);
 
   if (destination !== null) {
-    const [galaxyId, systemId, ...remainingSegments] = destination.split("/");
+    const [galaxyId, systemId, planetId, ...remainingSegments] =
+      destination.split("/");
     const galaxy = findGalaxy(galaxyId ?? null);
 
     if (galaxy !== null && remainingSegments.length === 0) {
@@ -21,16 +23,33 @@ export function readUniverseNavigation(search: string): NavigationState {
         return {
           level: "galaxy",
           selectedGalaxyId: galaxy.id,
+          selectedPlanetId: null,
           selectedSystemId: null,
         };
       }
 
       const system = findSystem(galaxy.id, systemId);
 
-      if (system?.status === "explorable") {
+      if (system?.status === "explorable" && planetId === undefined) {
         return {
           level: "system",
           selectedGalaxyId: galaxy.id,
+          selectedPlanetId: null,
+          selectedSystemId: system.id,
+        };
+      }
+
+      const planet = findPlanet(
+        galaxy.id,
+        system?.id ?? null,
+        planetId ?? null,
+      );
+
+      if (system?.status === "explorable" && planet !== null) {
+        return {
+          level: "planet",
+          selectedGalaxyId: galaxy.id,
+          selectedPlanetId: planet.id,
           selectedSystemId: system.id,
         };
       }
@@ -51,13 +70,15 @@ export function createUniverseNavigationUrl(
       url.searchParams.set(destinationParameter, state.selectedGalaxyId);
     }
   } else if (
-    state.level === "system" &&
+    (state.level === "system" || state.level === "planet") &&
     state.selectedGalaxyId !== null &&
     state.selectedSystemId !== null
   ) {
     url.searchParams.set(
       destinationParameter,
-      `${state.selectedGalaxyId}/${state.selectedSystemId}`,
+      state.level === "planet" && state.selectedPlanetId !== null
+        ? `${state.selectedGalaxyId}/${state.selectedSystemId}/${state.selectedPlanetId}`
+        : `${state.selectedGalaxyId}/${state.selectedSystemId}`,
     );
   } else {
     url.searchParams.delete(destinationParameter);

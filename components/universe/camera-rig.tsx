@@ -10,6 +10,7 @@ import { getCameraPose } from "./universe-camera-poses";
 
 const CAMERA_ZOOM_LIMITS = {
   galaxy: [0.72, 1.42],
+  planet: [0.88, 1.16],
   system: [0.68, 1.48],
   universe: [0.78, 1.35],
 } as const satisfies Record<
@@ -26,6 +27,7 @@ type CameraRigProps = Readonly<{
   onArrive: () => void;
   resetToken: number;
   selectedGalaxyId: string | null;
+  selectedPlanetId: string | null;
   selectedSystemId: string | null;
 }>;
 
@@ -51,6 +53,7 @@ export function CameraRig({
   onArrive,
   resetToken,
   selectedGalaxyId,
+  selectedPlanetId,
   selectedSystemId,
 }: CameraRigProps) {
   const getThreeState = useThree((state) => state.get);
@@ -73,19 +76,31 @@ export function CameraRig({
     navigationLevel,
     selectedGalaxyId,
     selectedSystemId,
+    selectedPlanetId,
   );
+  const viewportAspect = viewportSize.width / viewportSize.height;
   const responsiveFov = getResponsiveFov(
     pose.fov,
     navigationLevel,
-    viewportSize.width / viewportSize.height,
+    viewportAspect,
   );
+  const planetPortraitOffset =
+    navigationLevel === "planet" && viewportAspect < 1
+      ? MathUtils.clamp((1 - viewportAspect) * 1.4, 0, 0.72)
+      : 0;
   const targetPosition = useMemo(
-    () => new Vector3(...pose.position),
-    [pose.position],
+    () =>
+      new Vector3(...pose.position).setX(
+        pose.position[0] + planetPortraitOffset,
+      ),
+    [planetPortraitOffset, pose.position],
   );
   const targetLook = useMemo(
-    () => new Vector3(...pose.lookTarget),
-    [pose.lookTarget],
+    () =>
+      new Vector3(...pose.lookTarget).setX(
+        pose.lookTarget[0] + planetPortraitOffset,
+      ),
+    [planetPortraitOffset, pose.lookTarget],
   );
 
   useEffect(() => {
@@ -114,6 +129,7 @@ export function CameraRig({
     responsiveFov,
     resetToken,
     selectedGalaxyId,
+    selectedPlanetId,
     selectedSystemId,
     targetLook,
     targetPosition,
@@ -241,9 +257,11 @@ export function CameraRig({
       const duration =
         navigationLevel === "galaxy"
           ? 3.15
-          : navigationLevel === "system"
-            ? 2.65
-            : 2.95;
+          : navigationLevel === "planet"
+            ? 3.45
+            : navigationLevel === "system"
+              ? 2.65
+              : 2.95;
       const progress = Math.min(
         1,
         transitionProgress.current + safeDelta / duration,
@@ -253,7 +271,12 @@ export function CameraRig({
       const horizontalDirection = Math.sign(
         targetPosition.x - transitionStartPosition.current.x,
       );
-      const arcHeight = navigationLevel === "galaxy" ? 0.34 : 0.18;
+      const arcHeight =
+        navigationLevel === "galaxy"
+          ? 0.34
+          : navigationLevel === "planet"
+            ? 0.28
+            : 0.18;
 
       transitionProgress.current = progress;
       destinationPosition.current

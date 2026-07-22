@@ -130,10 +130,11 @@ per-frame allocation.
 
 ### Staged spatial navigation
 
-Universe travel is modeled as three explicit levels: the wider universe, a
-galaxy overview, and an individual system. Navigation stores separate
-`selectedGalaxyId` and `selectedSystemId` values so a system ID never implies its
-parent galaxy. Zustand owns only this cross-component navigation state;
+Universe travel is modeled as four explicit levels: the wider universe, a
+galaxy overview, an individual system, and a landed planet destination.
+Navigation stores separate `selectedGalaxyId`, `selectedSystemId`, and
+`selectedPlanetId` values so a child ID never implies its parent. Zustand owns
+only this cross-component navigation state;
 `UniverseViewport` coordinates semantic DOM controls with the WebGL scene,
 while `CameraRig` remains the sole owner of camera position, look target, field
 of view, ambient drift, and reduced-motion snapping. Camera poses are resolved
@@ -181,12 +182,14 @@ integration point. Logistics currently uses this rule for its deterministic
 four-band orbital particle field.
 
 The current spatial level is reflected in a deliberately small query-string
-contract: `destination=<galaxy>` selects a galaxy overview and
-`destination=<galaxy>/<system>` selects an explorable system. Current deep-link
+contract: `destination=<galaxy>` selects a galaxy overview,
+`destination=<galaxy>/<system>` selects an explorable system, and
+`destination=<galaxy>/<system>/<planet>` selects a landed planet. Current deep-link
 examples are `destination=university/logistics` and
 `destination=personal-growth/jiu-jitsu` or
-`destination=personal-growth/strength-physique`. URL parsing is pure and colocated with
-the universe feature; `UniverseViewport` synchronizes browser history and
+`destination=personal-growth/strength-physique`. The first planet deep link is
+`destination=personal-growth/strength-physique/beerus-planet`. URL parsing is pure and
+colocated with the universe feature; `UniverseViewport` synchronizes browser history and
 Zustand through `pushState` and `popstate`. Unknown or future destinations fall
 back to the universe instead of fabricating unavailable navigation. This is
 client-side state reflection, not a replacement for future server-owned routes
@@ -219,6 +222,24 @@ bench press, squat, and deadlift, and body-weight entries retain their measured
 date. Repository and hooks remain feature-colocated; data is not copied into
 Zustand. The UI creates no example records, and every base celestial system is a
 destination identity rather than a claim of progress.
+
+Strength and Physique contains the first landed destination, Beerus' Planet.
+Its system-space marker, planet-space camera pose, and surface staging coordinates
+live in one focused definition. The marker uses a deliberately enlarged invisible
+raycast sphere, while the equivalent DOM button remains the authoritative keyboard
+and non-WebGL interaction. Landing preserves `CameraRig` as the sole camera owner
+and hides the parent system field rather than leaving duplicate scene layers active.
+The surface uses bounded procedural geometry, local lights without shadows, and a
+single optimized transparent Whis image plate. It adds no post-processing, physics,
+texture pack, or independent render loop. Ambient character and planet motion share
+the existing 30 FPS invalidation scheduler and remain static for reduced-motion users.
+
+Whis' semantic training assistant stays outside WebGL and composes the existing
+`WorkoutSplit` and `StrengthRecords` components. It therefore reads and mutates the
+same IndexedDB-backed Strength records as the system-level tracker instead of creating
+parallel progress state. The planet view remains useful when WebGL is unavailable:
+the destination, back path, training program, personal records, and weight tracking
+all survive independently of the canvas.
 
 This local-first persistence is intentionally private and useful before an
 account backend exists, but it is device-and-browser specific: it is not synced,

@@ -2,6 +2,7 @@ import type { NavigationState } from "@/store/navigation-store";
 
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
+import { beerusPlanetDefinition } from "./galaxies/personal-growth/strength-physique/beerus-planet-definition";
 
 export const universityGalaxyId = "university";
 export const personalGrowthGalaxyId = "personal-growth";
@@ -39,6 +40,7 @@ export const universeGalaxies = [
 export const universeOriginState: NavigationState = {
   level: "universe",
   selectedGalaxyId: null,
+  selectedPlanetId: null,
   selectedSystemId: null,
 };
 
@@ -51,4 +53,16 @@ export function findSystem(galaxyId: string | null, systemId: string | null) {
     findGalaxy(galaxyId)?.systems.find((system) => system.id === systemId) ??
     null
   );
+}
+
+export function findPlanet(
+  galaxyId: string | null,
+  systemId: string | null,
+  planetId: string | null,
+) {
+  return galaxyId === beerusPlanetDefinition.galaxyId &&
+    systemId === beerusPlanetDefinition.systemId &&
+    planetId === beerusPlanetDefinition.id
+    ? beerusPlanetDefinition
+    : null;
 }
