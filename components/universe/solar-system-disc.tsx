@@ -12,7 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { DoubleSide, MathUtils, type Group } from "three";
+import { DoubleSide, MathUtils, type Group, Vector3 } from "three";
 
 type SolarSystemDiscProps = PropsWithChildren<
   Readonly<{
@@ -36,8 +36,16 @@ const SolarSystemInteractionContext =
 
 const dragThreshold = 5;
 const clickSuppressionWindowMs = 260;
-const horizontalDragSensitivity = 0.0052;
-const verticalDragSensitivity = 0.0016;
+const minimumAngularRadiusPx = 32;
+const maximumAngularVelocity = 2.6;
+const velocitySampleWeight = 0.42;
+const releasePauseThresholdMs = 110;
+const inertiaDamping = 1.65;
+const inertiaStopVelocity = 0.006;
+
+function normalizeAngularDelta(delta: number) {
+  return Math.atan2(Math.sin(delta), Math.cos(delta));
+}
 
 export function useSolarSystemActivationGuard() {
   return useContext(SolarSystemInteractionContext).shouldSuppressActivation;
@@ -50,13 +58,15 @@ export function SolarSystemDisc({
   initialRotation = 0,
   motionEnabled,
 }: SolarSystemDiscProps) {
+  const getThreeState = useThree((state) => state.get);
   const invalidate = useThree((state) => state.invalidate);
   const disc = useRef<Group>(null);
   const isDragging = useRef(false);
   const pointerStartX = useRef(0);
   const pointerStartY = useRef(0);
-  const previousPointerX = useRef(0);
-  const previousPointerY = useRef(0);
+  const previousPointerAngle = useRef<number | null>(null);
+  const previousSampleTime = useRef(0);
+  const projectedCenter = useRef(new Vector3());
   const targetRotation = useRef(initialRotation);
   const angularVelocity = useRef(0);
   const dragEndedAt = useRef(Number.NEGATIVE_INFINITY);
@@ -91,6 +101,33 @@ export function SolarSystemDisc({
     invalidate();
   }, [enabled, initialRotation, invalidate]);
 
+  const getPointerAngle = useCallback(
+    (clientX: number, clientY: number) => {
+      const { camera, gl } = getThreeState();
+      const canvasBounds = gl.domElement.getBoundingClientRect();
+
+      projectedCenter.current
+        .set(center[0], center[1], center[2])
+        .project(camera);
+
+      const centerX =
+        canvasBounds.left +
+        (projectedCenter.current.x * 0.5 + 0.5) * canvasBounds.width;
+      const centerY =
+        canvasBounds.top +
+        (-projectedCenter.current.y * 0.5 + 0.5) * canvasBounds.height;
+      const offsetX = clientX - centerX;
+      const offsetY = clientY - centerY;
+
+      if (Math.hypot(offsetX, offsetY) < minimumAngularRadiusPx) {
+        return null;
+      }
+
+      return Math.atan2(offsetY, offsetX);
+    },
+    [center, getThreeState],
+  );
+
   const finishDrag = useCallback(
     (event: ThreeEvent<PointerEvent>) => {
       if (!isDragging.current) {
@@ -108,6 +145,16 @@ export function SolarSystemDisc({
 
       if (travelDistance >= dragThreshold) {
         dragEndedAt.current = performance.now();
+
+        const releasePause = event.timeStamp - previousSampleTime.current;
+
+        if (!motionEnabled) {
+          angularVelocity.current = 0;
+        } else if (releasePause > releasePauseThresholdMs) {
+          angularVelocity.current *= Math.exp(
+            -(releasePause - releasePauseThresholdMs) / 85,
+          );
+        }
       } else {
         angularVelocity.current = 0;
       }
@@ -122,7 +169,7 @@ export function SolarSystemDisc({
       }
       invalidate();
     },
-    [invalidate],
+    [invalidate, motionEnabled],
   );
 
   useFrame((_, delta) => {
@@ -131,21 +178,20 @@ export function SolarSystemDisc({
       !motionEnabled ||
       isDragging.current ||
       disc.current === null ||
-      Math.abs(angularVelocity.current) < 0.0002
+      Math.abs(angularVelocity.current) < inertiaStopVelocity
     ) {
+      if (Math.abs(angularVelocity.current) < inertiaStopVelocity) {
+        angularVelocity.current = 0;
+      }
+
       return;
     }
 
     const safeDelta = Math.min(delta, 0.075);
 
     targetRotation.current += angularVelocity.current * safeDelta;
-    angularVelocity.current *= Math.exp(-safeDelta * 2.85);
-    disc.current.rotation.z = MathUtils.damp(
-      disc.current.rotation.z,
-      targetRotation.current,
-      13,
-      safeDelta,
-    );
+    angularVelocity.current *= Math.exp(-safeDelta * inertiaDamping);
+    disc.current.rotation.z = targetRotation.current;
   });
 
   if (!enabled) {
@@ -167,8 +213,11 @@ export function SolarSystemDisc({
             isDragging.current = true;
             pointerStartX.current = event.clientX;
             pointerStartY.current = event.clientY;
-            previousPointerX.current = event.clientX;
-            previousPointerY.current = event.clientY;
+            previousPointerAngle.current = getPointerAngle(
+              event.clientX,
+              event.clientY,
+            );
+            previousSampleTime.current = event.timeStamp;
             angularVelocity.current = 0;
             setIsPointerDragging(true);
             const pointerTarget = event.nativeEvent.target;
@@ -190,26 +239,46 @@ export function SolarSystemDisc({
 
             event.stopPropagation();
 
-            const deltaX = event.clientX - previousPointerX.current;
-            const deltaY = event.clientY - previousPointerY.current;
-            const angularDelta =
-              deltaX * horizontalDragSensitivity +
-              deltaY * verticalDragSensitivity;
+            const nextPointerAngle = getPointerAngle(
+              event.clientX,
+              event.clientY,
+            );
+            const previousAngle = previousPointerAngle.current;
+
+            if (nextPointerAngle === null || previousAngle === null) {
+              previousPointerAngle.current = nextPointerAngle;
+              previousSampleTime.current = event.timeStamp;
+              return;
+            }
+
+            const angularDelta = normalizeAngularDelta(
+              nextPointerAngle - previousAngle,
+            );
+            const sampleDuration = MathUtils.clamp(
+              (event.timeStamp - previousSampleTime.current) / 1000,
+              1 / 240,
+              0.08,
+            );
+            const sampledVelocity = MathUtils.clamp(
+              angularDelta / sampleDuration,
+              -maximumAngularVelocity,
+              maximumAngularVelocity,
+            );
 
             targetRotation.current += angularDelta;
-            angularVelocity.current = MathUtils.clamp(
-              angularDelta * 15,
-              -2.2,
-              2.2,
+            angularVelocity.current = MathUtils.lerp(
+              angularVelocity.current,
+              sampledVelocity,
+              velocitySampleWeight,
             );
-            previousPointerX.current = event.clientX;
-            previousPointerY.current = event.clientY;
+            previousPointerAngle.current = nextPointerAngle;
+            previousSampleTime.current = event.timeStamp;
             disc.current.rotation.z = targetRotation.current;
             invalidate();
           }}
           onPointerUp={finishDrag}
         >
-          <planeGeometry args={[5.4, 4.1]} />
+          <planeGeometry args={[8, 5.6]} />
           <meshBasicMaterial
             colorWrite={false}
             depthWrite={false}

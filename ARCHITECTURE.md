@@ -434,9 +434,13 @@ until the ingestion workflow is implemented.
 Selected solar systems support a transient presentation-only disc rotation. A
 single intentional interaction plane rotates the system group about its star,
 so every planet and its projected semantic label follows the same transform.
-The gesture uses pointer capture, a drag threshold, short click suppression, and
-bounded inertia; reduced motion preserves direct manipulation but removes inertia.
-This transform is not persisted and does not change any planet's domain position.
+The gesture measures pointer angle around the camera-projected star rather than
+mapping raw horizontal movement to rotation, so the system behaves like a physical
+celestial platter. Time-sampled release velocity supplies bounded inertia with
+exponential damping. Pointer capture, a drag threshold, a short click-suppression
+window, and a canvas-level touch-action boundary keep the gesture reliable without
+stealing planet activation. Reduced motion preserves direct manipulation but removes
+inertia. This transform is not persisted and does not change any planet's domain position.
 The three-destination Strength & Physique disc begins with a restrained portrait
 rotation so its widest orbital axis uses the available vertical space; desktop
 world placement remains unchanged.
