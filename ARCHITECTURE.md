@@ -156,7 +156,9 @@ therefore extends definitions and poses without allowing scene objects or
 labels to mutate the camera directly.
 Motion-enabled travel uses a restrained smoothstep path, a small vertical arc,
 distance-aware depth displacement, and temporary field-of-view compression
-before returning to ambient drift. Portrait galaxy and system poses move farther
+before returning to ambient drift. The shared travel multiplier is `1.5`, so
+every deliberate journey completes in two-thirds of its original duration while
+retaining the same path and easing. Portrait galaxy and system poses move farther
 from their target to preserve the same spatial composition instead of compressing
 or clipping the world-space layout. The same poses snap immediately when reduced
 motion is requested. A monotonic reset token lets the semantic origin control
@@ -402,6 +404,13 @@ visibility state. Labels therefore remain semantic and outside WebGL but do not
 appear until the destination is framed. Reduced-motion travel reports arrival
 immediately after the camera snaps. A bounded watchdog restores labels if the
 canvas fails during travel, preserving the existing non-WebGL experience.
+Visible scene objects also expose lightweight world-space label anchors. Those
+anchors project through the active camera and imperatively update CSS custom
+properties on their matching semantic labels during scheduled ambient frames.
+This keeps labels attached through travel, bounded zoom, responsive camera poses,
+and system-disc rotation without moving accessibility into WebGL or causing React
+state updates per frame. Definition-owned percentage positions remain fallback
+coordinates for loading and non-WebGL rendering.
 
 ### External course sources
 
@@ -422,7 +431,17 @@ materials must retain source provenance and require explicit user intent before
 document contents are sent to an AI provider. No adapter or planet model is added
 until the ingestion workflow is implemented.
 
-Planet dragging should begin only after planets have a persisted domain model.
+Selected solar systems support a transient presentation-only disc rotation. A
+single intentional interaction plane rotates the system group about its star,
+so every planet and its projected semantic label follows the same transform.
+The gesture uses pointer capture, a drag threshold, short click suppression, and
+bounded inertia; reduced motion preserves direct manipulation but removes inertia.
+This transform is not persisted and does not change any planet's domain position.
+The three-destination Strength & Physique disc begins with a restrained portrait
+rotation so its widest orbital axis uses the available vertical space; desktop
+world placement remains unchanged.
+
+Dragging an individual planet should begin only after planets have a persisted domain model.
 The future interaction target will project pointer movement onto the system's
 orbital plane, convert that intersection to an orbital angle, enforce ordering or
 collision rules, and persist the new angle outside WebGL. Three.js transforms will

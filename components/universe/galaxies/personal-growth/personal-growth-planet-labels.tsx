@@ -59,6 +59,7 @@ export function PersonalGrowthPlanetLabels({
           className="strength-planet-label personal-growth-planet-label"
           data-emphasized={emphasizedPlanetId === planet.id}
           data-kind={planet.kind}
+          data-spatial-anchor={`planet:${planet.id}`}
           data-visible={isVisible}
           key={planet.id}
           onBlur={() => onFocusChange(null)}

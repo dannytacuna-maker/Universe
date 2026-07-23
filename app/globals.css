@@ -376,14 +376,17 @@ body {
 }
 
 .university-galaxy-label {
+  --galaxy-label-x: 44%;
+  --galaxy-label-y: 60%;
+  --spatial-label-offset-y: 7.2rem;
   position: absolute;
   z-index: 2;
-  top: 60%;
-  left: 44%;
+  top: var(--spatial-label-y, var(--galaxy-label-y));
+  left: var(--spatial-label-x, var(--galaxy-label-x));
   appearance: none;
   min-height: 2.75rem;
   padding: 0.65rem 0.75rem;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, calc(-50% + var(--spatial-label-offset-y)));
   border: 0;
   outline: 1px solid transparent;
   outline-offset: 0.32rem;
@@ -420,7 +423,8 @@ body {
 
 .university-galaxy-label[data-visible="false"] {
   pointer-events: none;
-  transform: translate(-50%, -42%) scale(0.96);
+  transform: translate(-50%, calc(-42% + var(--spatial-label-offset-y)))
+    scale(0.96);
   opacity: 0;
 }
 
@@ -444,9 +448,14 @@ body {
 }
 
 .personal-growth-galaxy-label {
-  top: 70%;
-  left: 72%;
+  --galaxy-label-x: 72%;
+  --galaxy-label-y: 70%;
   color: rgb(197 220 213 / 62%);
+}
+
+[data-spatial-anchor][data-spatial-projected="false"] {
+  pointer-events: none !important;
+  opacity: 0 !important;
 }
 
 .personal-growth-galaxy-label:hover,
@@ -473,14 +482,15 @@ body {
 }
 
 .course-system-label {
+  --spatial-label-offset-y: 3.1rem;
   position: absolute;
-  top: var(--course-label-y);
-  left: var(--course-label-x);
+  top: var(--spatial-label-y, var(--course-label-y));
+  left: var(--spatial-label-x, var(--course-label-x));
   min-height: 2.75rem;
   min-width: clamp(7.5rem, 12vw, 10.5rem);
   appearance: none;
   padding: 0.65rem 0.72rem;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, calc(-50% + var(--spatial-label-offset-y)));
   border: 0;
   outline: 1px solid transparent;
   outline-offset: 0.28rem;
@@ -557,13 +567,13 @@ body {
 }
 
 .course-system-label[data-visible="true"] {
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, calc(-50% + var(--spatial-label-offset-y)));
   opacity: 1;
 }
 
 .course-system-label[data-visible="false"] {
   pointer-events: none;
-  transform: translate(-50%, -40%);
+  transform: translate(-50%, calc(-40% + var(--spatial-label-offset-y)));
 }
 
 .course-system-label[data-status="future"] {
@@ -925,7 +935,7 @@ body {
 
 .active-course-label {
   right: 50%;
-  bottom: 17%;
+  bottom: max(2.25rem, calc(env(safe-area-inset-bottom) + 1rem));
   animation-name: active-destination-label-arrival;
   justify-items: center;
 }
@@ -958,10 +968,11 @@ body {
 }
 
 .strength-planet-label {
+  --spatial-label-offset-y: 2.5rem;
   position: absolute;
   z-index: 3;
-  top: var(--planet-label-desktop-y);
-  left: var(--planet-label-desktop-x);
+  top: var(--spatial-label-y, var(--planet-label-desktop-y));
+  left: var(--spatial-label-x, var(--planet-label-desktop-x));
   display: grid;
   min-width: 8.5rem;
   padding: 0.68rem 0.82rem;
@@ -975,7 +986,7 @@ body {
   letter-spacing: 0.1em;
   text-align: center;
   text-transform: uppercase;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, calc(-50% + var(--spatial-label-offset-y)));
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
@@ -1008,7 +1019,10 @@ body {
 .strength-planet-label:focus-visible {
   color: rgb(245 237 250 / 88%);
   text-shadow: 0 0 1rem rgb(180 142 215 / 24%);
-  transform: translate(-50%, calc(-50% - 0.16rem));
+  transform: translate(
+    -50%,
+    calc(-50% + var(--spatial-label-offset-y) - 0.16rem)
+  );
 }
 
 .strength-planet-label[data-emphasized="true"]::before,
@@ -2683,18 +2697,18 @@ select {
 
 @media (max-width: 40rem) {
   .university-galaxy-label {
-    top: 62%;
-    left: 29%;
+    --galaxy-label-x: 29%;
+    --galaxy-label-y: 62%;
   }
 
   .personal-growth-galaxy-label {
-    top: 70%;
-    left: 73%;
+    --galaxy-label-x: 73%;
+    --galaxy-label-y: 70%;
   }
 
   .course-system-label {
-    top: var(--course-label-compact-y);
-    left: var(--course-label-compact-x);
+    top: var(--spatial-label-y, var(--course-label-compact-y));
+    left: var(--spatial-label-x, var(--course-label-compact-x));
     min-width: 7rem;
     padding: 0.6rem 0.58rem;
     text-align: center;
@@ -2966,12 +2980,12 @@ select {
 
   .active-course-label {
     right: 50%;
-    bottom: 14%;
+    bottom: max(2.25rem, calc(env(safe-area-inset-bottom) + 1rem));
   }
 
   .strength-planet-label {
-    top: var(--planet-label-compact-y);
-    left: var(--planet-label-compact-x);
+    top: var(--spatial-label-y, var(--planet-label-compact-y));
+    left: var(--spatial-label-x, var(--planet-label-compact-x));
     min-width: 7.2rem;
   }
 
@@ -2990,18 +3004,18 @@ select {
 
 @media (min-aspect-ratio: 3 / 5) and (max-aspect-ratio: 4 / 5) {
   .university-galaxy-label {
-    top: 62%;
-    left: 29%;
+    --galaxy-label-x: 29%;
+    --galaxy-label-y: 62%;
   }
 
   .personal-growth-galaxy-label {
-    top: 70%;
-    left: 73%;
+    --galaxy-label-x: 73%;
+    --galaxy-label-y: 70%;
   }
 
   .course-system-label {
-    top: var(--course-label-portrait-y);
-    left: var(--course-label-portrait-x);
+    top: var(--spatial-label-y, var(--course-label-portrait-y));
+    left: var(--spatial-label-x, var(--course-label-portrait-x));
   }
 
   .university-context-label,
@@ -3012,12 +3026,12 @@ select {
 
   .active-course-label {
     right: 50%;
-    bottom: 14%;
+    bottom: max(2.25rem, calc(env(safe-area-inset-bottom) + 1rem));
   }
 
   .strength-planet-label {
-    top: var(--planet-label-portrait-y);
-    left: var(--planet-label-portrait-x);
+    top: var(--spatial-label-y, var(--planet-label-portrait-y));
+    left: var(--spatial-label-x, var(--planet-label-portrait-x));
   }
 }
 
@@ -3030,12 +3044,12 @@ select {
   }
 
   .university-galaxy-label {
-    left: 31%;
+    --galaxy-label-x: 31%;
     letter-spacing: 0.11em;
   }
 
   .personal-growth-galaxy-label {
-    left: 72%;
+    --galaxy-label-x: 72%;
   }
 }
 

@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import type { Group } from "three";
 
+import { SpatialLabelAnchor } from "../../spatial-label-anchor";
 import { SystemStellarCore } from "../system-stellar-core";
 import type { CourseSystemDefinition } from "./course-system-definition";
 import { LogisticsOrbitalField } from "./logistics-orbital-field";
@@ -60,6 +61,8 @@ export function CourseStarSystem({
       scale={definition.scale}
       visible={isVisible}
     >
+      <SpatialLabelAnchor anchorId={`system:${definition.id}`} />
+
       <SystemStellarCore
         activity={activeGlow * 8}
         coreColor={definition.palette.core}

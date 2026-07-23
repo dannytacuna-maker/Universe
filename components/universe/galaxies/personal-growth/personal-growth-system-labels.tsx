@@ -57,6 +57,7 @@ export function PersonalGrowthSystemLabels({
             aria-hidden={!isVisible}
             className="course-system-label growth-system-label"
             data-emphasized={emphasizedSystemId === definition.id}
+            data-spatial-anchor={`system:${definition.id}`}
             data-status={definition.status}
             data-visible={isVisible}
             key={definition.id}

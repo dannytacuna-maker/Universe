@@ -1,6 +1,7 @@
 "use client";
 
 import { universityGalaxyDefinition } from "./university-galaxy-definition";
+import { universityGalaxyId } from "../universe-destinations";
 
 const descriptionId = "university-galaxy-description";
 
@@ -26,6 +27,7 @@ export function UniversityGalaxyLabel({
         aria-hidden={!isVisible}
         className="university-galaxy-label"
         data-emphasized={isEmphasized}
+        data-spatial-anchor={`galaxy:${universityGalaxyId}`}
         data-visible={isVisible}
         onBlur={() => onFocusChange(false)}
         onClick={onActivate}

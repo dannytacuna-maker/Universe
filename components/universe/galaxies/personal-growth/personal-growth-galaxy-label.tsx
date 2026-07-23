@@ -1,5 +1,7 @@
 "use client";
 
+import { personalGrowthGalaxyId } from "../../universe-destinations";
+
 const descriptionId = "personal-growth-galaxy-description";
 
 type PersonalGrowthGalaxyLabelProps = Readonly<{
@@ -24,6 +26,7 @@ export function PersonalGrowthGalaxyLabel({
         aria-hidden={!isVisible}
         className="university-galaxy-label personal-growth-galaxy-label"
         data-emphasized={isEmphasized}
+        data-spatial-anchor={`galaxy:${personalGrowthGalaxyId}`}
         data-visible={isVisible}
         onBlur={() => onFocusChange(false)}
         onClick={onActivate}

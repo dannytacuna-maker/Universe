@@ -20,6 +20,7 @@ const CAMERA_ZOOM_LIMITS = {
 
 const CAMERA_ZOOM_STEP = 0.08;
 const WHEEL_ZOOM_SENSITIVITY = 0.00055;
+const TRAVEL_SPEED_MULTIPLIER = 1.5;
 
 function smootherStep(progress: number) {
   return progress * progress * progress * (progress * (progress * 6 - 15) + 10);
@@ -266,7 +267,7 @@ export function CameraRig({
     }
 
     if (transitionProgress.current < 1) {
-      const duration =
+      const baseDuration =
         navigationLevel === "galaxy"
           ? 3.15
           : navigationLevel === "planet"
@@ -274,6 +275,7 @@ export function CameraRig({
             : navigationLevel === "system"
               ? 2.9
               : 3.05;
+      const duration = baseDuration / TRAVEL_SPEED_MULTIPLIER;
       const progress = Math.min(
         1,
         transitionProgress.current + safeDelta / duration,

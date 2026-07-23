@@ -59,6 +59,7 @@ export function UniversityCourseSystemLabels({
             aria-label={definition.name}
             className="course-system-label"
             data-emphasized={emphasizedCourseId === definition.id}
+            data-spatial-anchor={`system:${definition.id}`}
             data-status={definition.status}
             data-visible={isVisible}
             key={definition.id}

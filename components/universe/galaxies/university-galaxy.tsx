@@ -1,5 +1,6 @@
 "use client";
 
+import { universityGalaxyId } from "../universe-destinations";
 import { ProceduralGalaxy } from "./procedural-galaxy";
 import { universityGalaxyDefinition } from "./university-galaxy-definition";
 
@@ -15,6 +16,10 @@ type UniversityGalaxyProps = Readonly<{
 
 export function UniversityGalaxy(props: UniversityGalaxyProps) {
   return (
-    <ProceduralGalaxy definition={universityGalaxyDefinition} {...props} />
+    <ProceduralGalaxy
+      definition={universityGalaxyDefinition}
+      labelAnchorId={`galaxy:${universityGalaxyId}`}
+      {...props}
+    />
   );
 }

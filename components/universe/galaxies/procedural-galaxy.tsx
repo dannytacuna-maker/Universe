@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import { AdditiveBlending, type Group } from "three";
 
+import { SpatialLabelAnchor } from "../spatial-label-anchor";
 import type { GalaxyDefinition } from "./galaxy-definition";
 import { GalaxyLuminousVeil } from "./galaxy-luminous-veil";
 import {
@@ -17,6 +18,7 @@ type ProceduralGalaxyProps = Readonly<{
   isEmphasized: boolean;
   isHovered: boolean;
   isInteractive: boolean;
+  labelAnchorId: string;
   motionEnabled: boolean;
   onActivate: () => void;
   onHoverChange: (isHovered: boolean) => void;
@@ -51,6 +53,7 @@ export function ProceduralGalaxy({
   isEmphasized,
   isHovered,
   isInteractive,
+  labelAnchorId,
   motionEnabled,
   onActivate,
   onHoverChange,
@@ -82,6 +85,8 @@ export function ProceduralGalaxy({
       rotation={definition.orientation}
       scale={definition.scale}
     >
+      <SpatialLabelAnchor anchorId={labelAnchorId} />
+
       <group ref={rotatingGroup}>
         <GalaxyLuminousVeil
           definition={definition}

@@ -1,5 +1,6 @@
 "use client";
 
+import { personalGrowthGalaxyId } from "../../universe-destinations";
 import { ProceduralGalaxy } from "../procedural-galaxy";
 import { personalGrowthGalaxyDefinition } from "./personal-growth-galaxy-definition";
 
@@ -15,6 +16,10 @@ type PersonalGrowthGalaxyProps = Readonly<{
 
 export function PersonalGrowthGalaxy(props: PersonalGrowthGalaxyProps) {
   return (
-    <ProceduralGalaxy definition={personalGrowthGalaxyDefinition} {...props} />
+    <ProceduralGalaxy
+      definition={personalGrowthGalaxyDefinition}
+      labelAnchorId={`galaxy:${personalGrowthGalaxyId}`}
+      {...props}
+    />
   );
 }

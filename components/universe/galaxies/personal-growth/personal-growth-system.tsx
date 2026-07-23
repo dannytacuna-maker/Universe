@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import type { Group } from "three";
 
+import { SpatialLabelAnchor } from "../../spatial-label-anchor";
 import { SystemStellarCore } from "../system-stellar-core";
 import type { JiuJitsuProgress } from "./jiu-jitsu/jiu-jitsu-progress";
 import { JiuJitsuSystemField } from "./jiu-jitsu/jiu-jitsu-system-field";
@@ -69,6 +70,8 @@ export function PersonalGrowthSystem({
       scale={definition.scale}
       visible={isVisible}
     >
+      <SpatialLabelAnchor anchorId={`system:${definition.id}`} />
+
       <SystemStellarCore
         activity={recentAttention}
         coreColor={definition.palette.core}
