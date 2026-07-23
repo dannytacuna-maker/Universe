@@ -21,6 +21,10 @@ const CAMERA_ZOOM_LIMITS = {
 const CAMERA_ZOOM_STEP = 0.08;
 const WHEEL_ZOOM_SENSITIVITY = 0.00055;
 
+function smootherStep(progress: number) {
+  return progress * progress * progress * (progress * (progress * 6 - 15) + 10);
+}
+
 type CameraRigProps = Readonly<{
   motionEnabled: boolean;
   navigationLevel: NavigationLevel;
@@ -88,12 +92,20 @@ export function CameraRig({
     navigationLevel === "planet" && viewportAspect < 1
       ? MathUtils.clamp((1 - viewportAspect) * 1.4, 0, 0.72)
       : 0;
+  const portraitDistanceOffset =
+    viewportAspect >= 1
+      ? 0
+      : navigationLevel === "galaxy"
+        ? MathUtils.clamp((1 - viewportAspect) * 2.35, 0, 1.35)
+        : navigationLevel === "system"
+          ? MathUtils.clamp((1 - viewportAspect) * 1.55, 0, 0.9)
+          : 0;
   const targetPosition = useMemo(
     () =>
-      new Vector3(...pose.position).setX(
-        pose.position[0] + planetPortraitOffset,
-      ),
-    [planetPortraitOffset, pose.position],
+      new Vector3(...pose.position)
+        .setX(pose.position[0] + planetPortraitOffset)
+        .setZ(pose.position[2] + portraitDistanceOffset),
+    [planetPortraitOffset, portraitDistanceOffset, pose.position],
   );
   const targetLook = useMemo(
     () =>
@@ -256,27 +268,28 @@ export function CameraRig({
     if (transitionProgress.current < 1) {
       const duration =
         navigationLevel === "galaxy"
-          ? 3.45
+          ? 3.15
           : navigationLevel === "planet"
-            ? 4.25
+            ? 3.65
             : navigationLevel === "system"
-              ? 3.15
-              : 3.25;
+              ? 2.9
+              : 3.05;
       const progress = Math.min(
         1,
         transitionProgress.current + safeDelta / duration,
       );
-      const easedProgress = progress * progress * (3 - 2 * progress);
+      const easedProgress = smootherStep(progress);
       const travelArc = Math.sin(progress * Math.PI);
+      const travelDistance =
+        transitionStartPosition.current.distanceTo(targetPosition);
       const horizontalDirection = Math.sign(
         targetPosition.x - transitionStartPosition.current.x,
       );
-      const arcHeight =
-        navigationLevel === "galaxy"
-          ? 0.34
-          : navigationLevel === "planet"
-            ? 0.28
-            : 0.18;
+      const arcHeight = MathUtils.clamp(
+        travelDistance * (navigationLevel === "planet" ? 0.024 : 0.04),
+        0.16,
+        navigationLevel === "galaxy" ? 0.48 : 0.38,
+      );
 
       transitionProgress.current = progress;
       destinationPosition.current
@@ -289,7 +302,7 @@ export function CameraRig({
           ambientOffset.current.set(
             horizontalDirection * travelArc * 0.08,
             travelArc * arcHeight,
-            -travelArc * 0.08,
+            -travelArc * Math.min(0.18, travelDistance * 0.018),
           ),
         );
       destinationLookTarget.current.lerpVectors(
@@ -306,7 +319,7 @@ export function CameraRig({
         camera.fov =
           transitionStartFov.current +
           (responsiveFov - transitionStartFov.current) * easedProgress -
-          travelArc * 1.15;
+          travelArc * Math.min(2.4, 1.15 + travelDistance * 0.12);
         camera.updateProjectionMatrix();
       }
 
@@ -335,9 +348,9 @@ export function CameraRig({
       .addScaledVector(zoomVector.current, currentZoom.current)
       .addScaledVector(
         ambientOffset.current.set(
-          Math.sin(time * 0.105) * 0.075,
-          Math.cos(time * 0.083) * 0.045,
-          Math.sin(time * 0.061) * 0.028,
+          Math.sin(time * 0.092) * 0.06,
+          Math.cos(time * 0.071) * 0.036,
+          Math.sin(time * 0.053) * 0.022,
         ),
         pose.ambientScale,
       );
@@ -347,8 +360,8 @@ export function CameraRig({
       .add(
         ambientOffset.current
           .set(
-            Math.sin(time * 0.071) * 0.035,
-            Math.cos(time * 0.059) * 0.022,
+            Math.sin(time * 0.063) * 0.027,
+            Math.cos(time * 0.051) * 0.017,
             0,
           )
           .multiplyScalar(pose.ambientScale),

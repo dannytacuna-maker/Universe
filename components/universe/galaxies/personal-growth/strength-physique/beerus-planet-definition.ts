@@ -9,9 +9,9 @@ export const beerusPlanetDefinition = {
   id: "beerus-planet",
   kind: "sanctuary",
   labelPosition: {
-    compact: [70, 43],
-    desktop: [68, 46],
-    portrait: [70, 43],
+    compact: [75, 42],
+    desktop: [75, 41],
+    portrait: [74, 42],
   },
   landingOrigin: [12, -2, -20],
   name: "Beerus' Planet",
@@ -20,7 +20,7 @@ export const beerusPlanetDefinition = {
     atmosphere: "#a96ed2",
     base: "#34143f",
   },
-  position: [5.3, -0.7, -9.86],
+  position: [7, -0.15, -10.18],
   seed: 721_909,
   systemId: "strength-physique",
 } as const satisfies PersonalGrowthPlanetDefinition;

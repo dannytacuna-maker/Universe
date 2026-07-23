@@ -9,9 +9,9 @@ export const hyperbolicTimeChamberDefinition = {
   id: "hyperbolic-time-chamber",
   kind: "time-chamber",
   labelPosition: {
-    compact: [55, 56],
-    desktop: [55, 54],
-    portrait: [54, 57],
+    compact: [68, 55],
+    desktop: [68, 53],
+    portrait: [67, 55],
   },
   landingOrigin: [30, -2, -33],
   name: "Hyperbolic Time Chamber",
@@ -20,7 +20,7 @@ export const hyperbolicTimeChamberDefinition = {
     atmosphere: "#62a8a3",
     base: "#0b1820",
   },
-  position: [3.76, -0.86, -9.68],
+  position: [4, -0.9, -9.5],
   seed: 294_731,
   systemId: "jiu-jitsu",
 } as const satisfies PersonalGrowthPlanetDefinition;

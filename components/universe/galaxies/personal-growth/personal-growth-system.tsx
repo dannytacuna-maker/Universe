@@ -9,6 +9,7 @@ import { SystemStellarCore } from "../system-stellar-core";
 import type { JiuJitsuProgress } from "./jiu-jitsu/jiu-jitsu-progress";
 import { JiuJitsuSystemField } from "./jiu-jitsu/jiu-jitsu-system-field";
 import type { PersonalGrowthSystemDefinition } from "./personal-growth-system-definition";
+import { ReadingSystemField } from "./reading/reading-system-field";
 import type { StrengthProgress } from "./strength-physique/strength-physique-progress";
 import { StrengthPhysiqueSystemField } from "./strength-physique/strength-physique-system-field";
 
@@ -43,8 +44,8 @@ export function PersonalGrowthSystem({
   const isExplorable = definition.status === "explorable";
   const isJiuJitsu = definition.id === "jiu-jitsu";
   const isStrengthPhysique = definition.id === "strength-physique";
+  const isReading = definition.id === "reading";
   const emphasis = isEmphasized ? 1 : 0;
-  const activeScale = isActive && isExplorable ? 1.62 : 1;
   const recentAttention = isJiuJitsu
     ? jiuJitsuProgress.recentAttention
     : isStrengthPhysique
@@ -65,7 +66,7 @@ export function PersonalGrowthSystem({
   return (
     <group
       position={definition.position}
-      scale={definition.scale * activeScale}
+      scale={definition.scale}
       visible={isVisible}
     >
       <SystemStellarCore
@@ -73,10 +74,10 @@ export function PersonalGrowthSystem({
         coreColor={definition.palette.core}
         emphasis={emphasis}
         haloColor={definition.palette.halo}
-        radius={isExplorable ? 0.029 : 0.022}
+        radius={isActive && isExplorable ? 0.115 : isExplorable ? 0.048 : 0.032}
       />
 
-      <group ref={orbitalGroup}>
+      <group ref={orbitalGroup} scale={isActive ? 3 : 1}>
         {isJiuJitsu ? (
           <JiuJitsuSystemField
             emphasis={emphasis}
@@ -87,9 +88,13 @@ export function PersonalGrowthSystem({
             emphasis={emphasis}
             progress={strengthProgress}
           />
+        ) : isReading ? (
+          <ReadingSystemField emphasis={emphasis} />
         ) : (
           <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[0.16, 0.1625, 72]} />
+            <ringGeometry
+              args={isActive ? [0.4, 0.4016, 112] : [0.16, 0.1625, 72]}
+            />
             <meshBasicMaterial
               color={definition.palette.orbit}
               depthWrite={false}

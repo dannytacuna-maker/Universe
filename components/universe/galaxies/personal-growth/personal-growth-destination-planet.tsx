@@ -185,10 +185,10 @@ export function PersonalGrowthDestinationPlanet({
 
   const radius =
     definition.kind === "program"
-      ? 0.13
+      ? 0.052
       : definition.kind === "library" || definition.kind === "time-chamber"
-        ? 0.14
-        : 0.115;
+        ? 0.058
+        : 0.046;
   const hasOrbit =
     definition.kind === "library" ||
     definition.kind === "program" ||
@@ -268,7 +268,7 @@ export function PersonalGrowthDestinationPlanet({
             onHoverChange(true);
           }}
         >
-          <sphereGeometry args={[0.25, 14, 10]} />
+          <sphereGeometry args={[0.17, 14, 10]} />
           <meshBasicMaterial
             colorWrite={false}
             depthWrite={false}

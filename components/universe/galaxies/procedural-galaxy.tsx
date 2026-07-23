@@ -90,32 +90,45 @@ export function ProceduralGalaxy({
         />
         <ParticleLayer
           data={data.halo}
-          opacity={(0.16 + clarity * 0.04) * presence}
-          size={0.014 * particleSizeScale}
+          opacity={(0.2 + clarity * 0.045) * presence}
+          size={0.017 * particleSizeScale}
         />
         <ParticleLayer
           data={data.dust}
-          opacity={(0.12 + clarity * 0.025) * presence}
-          size={0.042 * particleSizeScale}
+          opacity={(0.14 + clarity * 0.03) * presence}
+          size={0.046 * particleSizeScale}
         />
         <ParticleLayer
           data={data.arms}
-          opacity={(0.48 + clarity * 0.08) * presence}
-          size={0.023 * particleSizeScale}
+          opacity={(0.58 + clarity * 0.09) * presence}
+          size={0.028 * particleSizeScale}
+        />
+        <ParticleLayer
+          data={data.beacons}
+          opacity={(0.74 + clarity * 0.12) * presence}
+          size={0.045 * particleSizeScale}
         />
         <ParticleLayer
           data={data.core}
-          opacity={(0.62 + clarity * 0.08) * presence}
-          size={0.032 * particleSizeScale}
+          opacity={(0.72 + clarity * 0.08) * presence}
+          size={0.037 * particleSizeScale}
         />
 
-        <mesh scale={[0.3, 0.3, 0.13]}>
+        <mesh
+          scale={
+            definition.morphology === "grand-design"
+              ? [0.42, 0.15, 0.16]
+              : [0.31, 0.25, 0.19]
+          }
+        >
           <sphereGeometry args={[1, 18, 12]} />
           <meshBasicMaterial
             blending={AdditiveBlending}
-            color="#d5eaff"
+            color={
+              definition.morphology === "grand-design" ? "#d5eaff" : "#ffe3ad"
+            }
             depthWrite={false}
-            opacity={(0.068 + clarity * 0.018) * presence}
+            opacity={(0.11 + clarity * 0.022) * presence}
             toneMapped={false}
             transparent
           />

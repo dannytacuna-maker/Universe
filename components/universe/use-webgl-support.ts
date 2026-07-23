@@ -31,18 +31,19 @@ export function useWebGLSupport(): WebGLSupport {
     const nextSupport = context === null ? "unavailable" : "available";
     context?.getExtension("WEBGL_lose_context")?.loseContext();
 
-    if (typeof window.requestAnimationFrame !== "function") {
-      const timeoutId = window.setTimeout(() => setSupport(nextSupport), 0);
-
-      return () => window.clearTimeout(timeoutId);
-    }
-
-    const frameId = window.requestAnimationFrame(() => {
-      setSupport(nextSupport);
-    });
+    const commitSupport = () => setSupport(nextSupport);
+    const timeoutId = window.setTimeout(commitSupport, 240);
+    const frameId =
+      typeof window.requestAnimationFrame === "function"
+        ? window.requestAnimationFrame(commitSupport)
+        : null;
 
     return () => {
-      window.cancelAnimationFrame(frameId);
+      window.clearTimeout(timeoutId);
+
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
     };
   }, []);
 

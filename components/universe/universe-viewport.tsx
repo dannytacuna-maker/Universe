@@ -523,6 +523,7 @@ export function UniverseViewport() {
     <section
       aria-label="Mission Control universe"
       className="universe-viewport"
+      data-camera-settled={isViewSettled}
       data-galaxy={selectedGalaxyId ?? "none"}
       data-navigation-level={navigationLevel}
       data-planet-transition={planetArrivalPhase}

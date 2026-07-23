@@ -20,6 +20,7 @@ export type GalaxyParticleDistribution = Readonly<{
 }>;
 
 export type GalaxyDefinition = Readonly<{
+  morphology: "flocculent" | "grand-design";
   name: string;
   orientation: Vector3Tuple;
   palette: GalaxyPalette;

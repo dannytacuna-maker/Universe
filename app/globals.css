@@ -53,6 +53,16 @@ body {
     ),
     radial-gradient(ellipse at center, transparent 48%, rgb(0 1 6 / 48%) 100%);
   box-shadow: inset 0 0 9rem rgb(0 1 6 / 32%);
+  opacity: 0.96;
+  transform: scale(1);
+  transition:
+    opacity 900ms var(--universe-ease),
+    transform 1.8s var(--universe-ease);
+}
+
+.universe-viewport[data-camera-settled="false"]::before {
+  opacity: 1;
+  transform: scale(1.035);
 }
 
 .universe-viewport::after {
@@ -368,7 +378,7 @@ body {
 .university-galaxy-label {
   position: absolute;
   z-index: 2;
-  top: 64%;
+  top: 60%;
   left: 44%;
   appearance: none;
   min-height: 2.75rem;
@@ -378,12 +388,12 @@ body {
   outline: 1px solid transparent;
   outline-offset: 0.32rem;
   background: transparent;
-  color: rgb(205 220 234 / 64%);
+  color: rgb(205 220 234 / 72%);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(0.61rem, 0.57rem + 0.12vw, 0.67rem);
   font-weight: 500;
   line-height: 1;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   cursor: pointer;
   transition:
@@ -391,6 +401,21 @@ body {
     color 280ms ease,
     opacity 500ms ease,
     text-shadow 280ms ease;
+}
+
+.university-galaxy-label::after {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.22rem;
+  left: 0.75rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  content: "";
+  opacity: 0.16;
+  transform: scaleX(0.35);
+  transition:
+    opacity 280ms ease,
+    transform 520ms var(--universe-ease);
 }
 
 .university-galaxy-label[data-visible="false"] {
@@ -405,6 +430,13 @@ body {
   text-shadow: 0 0 1rem rgb(104 181 233 / 24%);
 }
 
+.university-galaxy-label:hover::after,
+.university-galaxy-label[data-emphasized="true"]::after,
+.university-galaxy-label:focus-visible::after {
+  opacity: 0.52;
+  transform: scaleX(1);
+}
+
 .university-galaxy-label:focus-visible {
   color: rgb(238 246 252);
   outline-color: rgb(139 180 212 / 64%);
@@ -412,7 +444,7 @@ body {
 }
 
 .personal-growth-galaxy-label {
-  top: 69%;
+  top: 70%;
   left: 72%;
   color: rgb(197 220 213 / 62%);
 }
@@ -445,7 +477,7 @@ body {
   top: var(--course-label-y);
   left: var(--course-label-x);
   min-height: 2.75rem;
-  min-width: clamp(7.25rem, 11vw, 9.5rem);
+  min-width: clamp(7.5rem, 12vw, 10.5rem);
   appearance: none;
   padding: 0.65rem 0.72rem;
   transform: translate(-50%, -50%);
@@ -453,13 +485,13 @@ body {
   outline: 1px solid transparent;
   outline-offset: 0.28rem;
   background: transparent;
-  color: rgb(202 218 232 / 62%);
+  color: rgb(202 218 232 / 72%);
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   font-size: clamp(0.58rem, 0.54rem + 0.14vw, 0.65rem);
   font-weight: 500;
   line-height: 1.2;
-  letter-spacing: 0.11em;
-  text-align: left;
+  letter-spacing: 0.15em;
+  text-align: center;
   text-transform: uppercase;
   cursor: pointer;
   opacity: 0;
@@ -467,7 +499,23 @@ body {
     color 260ms ease,
     opacity 520ms ease 180ms,
     text-shadow 260ms ease,
-    transform 520ms var(--universe-ease) 180ms;
+    transform 700ms var(--universe-ease) 180ms;
+}
+
+.course-system-label::before {
+  display: block;
+  width: 0.22rem;
+  height: 0.22rem;
+  margin: 0 auto 0.48rem;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  box-shadow: 0 0 0.75rem currentColor;
+  content: "";
+  opacity: 0.42;
+  transform: scale(0.72);
+  transition:
+    opacity 260ms ease,
+    transform 520ms var(--universe-ease);
 }
 
 .course-system-label__name {
@@ -536,6 +584,13 @@ body {
 .course-system-label[data-emphasized="true"] {
   color: rgb(230 240 249 / 92%);
   text-shadow: 0 0 0.95rem rgb(106 178 226 / 22%);
+}
+
+.course-system-label:hover::before,
+.course-system-label[data-emphasized="true"]::before,
+.course-system-label:focus-visible::before {
+  opacity: 0.9;
+  transform: scale(1);
 }
 
 .course-system-label:focus-visible {
@@ -908,29 +963,39 @@ body {
   top: var(--planet-label-desktop-y);
   left: var(--planet-label-desktop-x);
   display: grid;
-  min-width: 8rem;
+  min-width: 8.5rem;
   padding: 0.68rem 0.82rem;
-  border: 1px solid transparent;
-  border-radius: 0.65rem;
+  border: 0;
   outline: 1px solid transparent;
   outline-offset: 0.22rem;
-  background: rgb(6 5 12 / 2%);
-  color: rgb(222 211 234 / 62%);
+  background: transparent;
+  color: rgb(222 211 234 / 72%);
   font-size: 0.64rem;
   font-weight: 500;
   letter-spacing: 0.1em;
-  text-align: left;
+  text-align: center;
   text-transform: uppercase;
   transform: translate(-50%, -50%);
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
   transition:
-    border-color 240ms ease,
-    background 240ms ease,
     color 240ms ease,
     opacity 420ms var(--universe-ease),
-    text-shadow 240ms ease;
+    text-shadow 240ms ease,
+    transform 520ms var(--universe-ease);
+}
+
+.strength-planet-label::before {
+  display: block;
+  width: 1.75rem;
+  height: 1px;
+  margin: 0 auto 0.5rem;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  content: "";
+  opacity: 0.26;
+  transform: scaleX(0.55);
+  transition: transform 520ms var(--universe-ease);
 }
 
 .strength-planet-label[data-visible="true"] {
@@ -941,10 +1006,15 @@ body {
 .strength-planet-label[data-emphasized="true"],
 .strength-planet-label:hover,
 .strength-planet-label:focus-visible {
-  border-color: rgb(194 169 216 / 17%);
-  background: rgb(52 35 67 / 14%);
   color: rgb(245 237 250 / 88%);
   text-shadow: 0 0 1rem rgb(180 142 215 / 24%);
+  transform: translate(-50%, calc(-50% - 0.16rem));
+}
+
+.strength-planet-label[data-emphasized="true"]::before,
+.strength-planet-label:hover::before,
+.strength-planet-label:focus-visible::before {
+  transform: scaleX(1);
 }
 
 .strength-planet-label:focus-visible {

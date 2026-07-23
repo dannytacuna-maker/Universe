@@ -32,8 +32,8 @@ const fragmentShader = /* glsl */ `
     float facing = max(dot(vNormalDirection, vViewDirection), 0.0);
     float cell = sin(vLocalPosition.x * 91.0) * sin(vLocalPosition.y * 83.0);
     cell += sin((vLocalPosition.x + vLocalPosition.z) * 57.0) * 0.45;
-    float granulation = 0.82 + cell * 0.055;
-    float limb = 0.54 + pow(facing, 0.72) * 0.68;
+    float granulation = 0.88 + cell * 0.045;
+    float limb = 0.62 + pow(facing, 0.68) * 0.72;
     vec3 color = mix(uHalo, uCore, 0.42 + facing * 0.5) * granulation * limb;
     gl_FragColor = vec4(color, uOpacity);
   }
@@ -62,7 +62,7 @@ export function SystemStellarCore({
     }),
     [coreColor, emphasis, haloColor],
   );
-  const energy = emphasis * 0.02 + activity * 0.014;
+  const energy = emphasis * 0.025 + activity * 0.016;
 
   return (
     <group>
@@ -79,13 +79,18 @@ export function SystemStellarCore({
       </mesh>
       <StellarGlow
         color={haloColor}
-        opacity={0.11 + energy}
-        radius={radius * 3.7}
+        opacity={0.16 + energy}
+        radius={radius * 3.2}
       />
       <StellarGlow
         color={coreColor}
-        opacity={0.034 + energy * 0.55}
-        radius={radius * 7.1}
+        opacity={0.055 + energy * 0.55}
+        radius={radius * 6.4}
+      />
+      <StellarGlow
+        color={haloColor}
+        opacity={0.016 + energy * 0.18}
+        radius={radius * 11.5}
       />
     </group>
   );

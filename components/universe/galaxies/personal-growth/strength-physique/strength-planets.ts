@@ -10,9 +10,9 @@ export const trainingArchivePlanetDefinition = {
   id: "training-archive",
   kind: "program",
   labelPosition: {
-    compact: [34, 43],
-    desktop: [38, 42],
-    portrait: [32, 42],
+    compact: [33, 43],
+    desktop: [35, 42],
+    portrait: [32, 43],
   },
   landingOrigin: [18, -2, -25],
   name: "Training Archive",
@@ -21,7 +21,7 @@ export const trainingArchivePlanetDefinition = {
     atmosphere: "#8c7659",
     base: "#20262b",
   },
-  position: [4.64, -0.62, -10.02],
+  position: [5.05, -0.3, -10.05],
   seed: 438_217,
   systemId: "strength-physique",
 } as const satisfies PersonalGrowthPlanetDefinition;
@@ -35,9 +35,9 @@ export const gymPlaylistPlanetDefinition = {
   id: "gym-playlist",
   kind: "playlist",
   labelPosition: {
-    compact: [51, 66],
-    desktop: [51, 66],
-    portrait: [51, 68],
+    compact: [50, 70],
+    desktop: [49, 72],
+    portrait: [50, 71],
   },
   landingOrigin: [24, -2, -29],
   name: "Gym Playlist",
@@ -46,7 +46,7 @@ export const gymPlaylistPlanetDefinition = {
     atmosphere: "#4a9a83",
     base: "#10242a",
   },
-  position: [4.96, -1.08, -9.98],
+  position: [5.45, -1.5, -10.15],
   seed: 916_403,
   systemId: "strength-physique",
 } as const satisfies PersonalGrowthPlanetDefinition;

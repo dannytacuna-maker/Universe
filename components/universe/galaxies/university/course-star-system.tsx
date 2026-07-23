@@ -8,6 +8,7 @@ import type { Group } from "three";
 import { SystemStellarCore } from "../system-stellar-core";
 import type { CourseSystemDefinition } from "./course-system-definition";
 import { LogisticsOrbitalField } from "./logistics-orbital-field";
+import { MappedCourseSystemField } from "./mapped-course-system-field";
 
 type CourseStarSystemProps = Readonly<{
   definition: CourseSystemDefinition;
@@ -36,7 +37,6 @@ export function CourseStarSystem({
   const isExplorable = definition.status === "explorable";
   const presence = isVisible ? 1 : 0;
   const emphasis = isEmphasized ? 1 : 0;
-  const activeScale = isActive && isExplorable ? 1.55 : 1;
   const activeGlow = isActive ? 0.055 : 0;
 
   useCursor(isHovered && isInteractive, "pointer", "auto");
@@ -57,7 +57,7 @@ export function CourseStarSystem({
   return (
     <group
       position={definition.position}
-      scale={definition.scale * activeScale}
+      scale={definition.scale}
       visible={isVisible}
     >
       <SystemStellarCore
@@ -65,7 +65,7 @@ export function CourseStarSystem({
         coreColor={definition.palette.core}
         emphasis={emphasis * presence}
         haloColor={definition.palette.halo}
-        radius={isExplorable ? 0.027 : 0.022}
+        radius={isActive && isExplorable ? 0.12 : isExplorable ? 0.047 : 0.031}
       />
 
       {!isExplorable ? (
@@ -81,7 +81,11 @@ export function CourseStarSystem({
         </mesh>
       ) : null}
 
-      <group ref={orbitalGroup} rotation={[0.18, 0.05, -0.16]}>
+      <group
+        ref={orbitalGroup}
+        rotation={[0.18, 0.05, -0.16]}
+        scale={isActive ? 3.05 : 1}
+      >
         {isExplorable ? (
           <LogisticsOrbitalField
             opacity={presence * (0.46 + emphasis * 0.1)}
@@ -89,16 +93,12 @@ export function CourseStarSystem({
             seed={definition.seed}
           />
         ) : (
-          <mesh rotation={[Math.PI / 2, 0, 0]}>
-            <ringGeometry args={[0.16, 0.164, 64]} />
-            <meshBasicMaterial
-              color={definition.palette.orbit}
-              depthWrite={false}
-              opacity={presence * (0.12 + emphasis * 0.06)}
-              toneMapped={false}
-              transparent
-            />
-          </mesh>
+          <MappedCourseSystemField
+            emphasis={emphasis * presence}
+            haloColor={definition.palette.halo}
+            orbitColor={definition.palette.orbit}
+            seed={definition.seed}
+          />
         )}
       </group>
 

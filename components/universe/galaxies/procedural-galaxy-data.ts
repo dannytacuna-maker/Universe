@@ -7,6 +7,7 @@ export type GalaxyParticleLayer = Readonly<{
 
 export type ProceduralGalaxyData = Readonly<{
   arms: GalaxyParticleLayer;
+  beacons: GalaxyParticleLayer;
   core: GalaxyParticleLayer;
   dust: GalaxyParticleLayer;
   halo: GalaxyParticleLayer;
@@ -67,7 +68,10 @@ function createArmParticles(definition: GalaxyDefinition): GalaxyParticleLayer {
     index += 1
   ) {
     const offset = index * 3;
-    const radiusProgress = Math.pow(random(), 0.82);
+    const radiusProgress = Math.pow(
+      random(),
+      definition.morphology === "grand-design" ? 0.78 : 0.88,
+    );
     const armIndex = index % particleDistribution.armCount;
     const armOrigin = (armIndex / particleDistribution.armCount) * Math.PI * 2;
     const spiralAngle =
@@ -75,7 +79,9 @@ function createArmParticles(definition: GalaxyDefinition): GalaxyParticleLayer {
     const angularSpread =
       createGaussianRandom(random) *
       particleDistribution.armSpread *
-      (0.46 + radiusProgress * 0.72);
+      (definition.morphology === "grand-design"
+        ? 0.34 + radiusProgress * 0.64
+        : 0.68 + radiusProgress * 0.9);
     const radialJitter =
       createGaussianRandom(random) *
       particleDistribution.radius *
@@ -96,7 +102,13 @@ function createArmParticles(definition: GalaxyDefinition): GalaxyParticleLayer {
     const accentMix = random();
     const usesAccent = accentMix > 0.86;
     const colorMix = usesAccent ? (accentMix - 0.86) / 0.14 : random();
-    const brightness = 0.62 + random() * 0.24 + (1 - radiusProgress) * 0.12;
+    const clump =
+      definition.morphology === "flocculent"
+        ? 0.72 +
+          Math.pow(Math.sin(radiusProgress * 38 + armIndex * 1.7), 2) * 0.28
+        : 1;
+    const brightness =
+      (0.66 + random() * 0.24 + (1 - radiusProgress) * 0.1) * clump;
 
     writeColor(
       colors,
@@ -132,8 +144,9 @@ function createCoreParticles(
     const angle = random() * Math.PI * 2;
     const radius = radialFalloff * coreRadius;
 
+    const coreAspect = definition.morphology === "grand-design" ? 0.3 : 0.74;
     positions[offset] = Math.cos(angle) * radius;
-    positions[offset + 1] = Math.sin(angle) * radius;
+    positions[offset + 1] = Math.sin(angle) * radius * coreAspect;
     positions[offset + 2] =
       createGaussianRandom(random) *
       particleDistribution.thickness *
@@ -146,6 +159,44 @@ function createCoreParticles(
       palette.core,
       0.48 + random() * 0.48,
       0.76 + random() * 0.2,
+    );
+  }
+
+  return { colors, positions };
+}
+
+function createBeaconParticles(
+  definition: GalaxyDefinition,
+): GalaxyParticleLayer {
+  const { palette, particleDistribution } = definition;
+  const particleCount = definition.morphology === "grand-design" ? 190 : 155;
+  const random = createSeededRandom(particleDistribution.seed + 4);
+  const positions = new Float32Array(particleCount * 3);
+  const colors = new Float32Array(particleCount * 3);
+
+  for (let index = 0; index < particleCount; index += 1) {
+    const offset = index * 3;
+    const radiusProgress = 0.12 + Math.pow(random(), 0.72) * 0.88;
+    const armIndex = index % particleDistribution.armCount;
+    const armOrigin = (armIndex / particleDistribution.armCount) * Math.PI * 2;
+    const angle =
+      armOrigin +
+      radiusProgress * particleDistribution.twist * Math.PI * 2 +
+      createGaussianRandom(random) * particleDistribution.armSpread * 0.52;
+    const radius = particleDistribution.radius * radiusProgress;
+
+    positions[offset] = Math.cos(angle) * radius;
+    positions[offset + 1] = Math.sin(angle) * radius;
+    positions[offset + 2] =
+      createGaussianRandom(random) * particleDistribution.thickness * 0.72;
+
+    writeColor(
+      colors,
+      offset,
+      palette.secondary,
+      palette.core,
+      0.52 + random() * 0.46,
+      0.88 + random() * 0.12,
     );
   }
 
@@ -242,6 +293,7 @@ export function createProceduralGalaxyData(
 ): ProceduralGalaxyData {
   return {
     arms: createArmParticles(definition),
+    beacons: createBeaconParticles(definition),
     core: createCoreParticles(definition),
     dust: createDustParticles(definition),
     halo: createHaloParticles(definition),

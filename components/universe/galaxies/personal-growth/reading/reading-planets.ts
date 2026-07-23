@@ -9,9 +9,9 @@ export const celestialLibraryDefinition = {
   id: "celestial-library",
   kind: "library",
   labelPosition: {
-    compact: [55, 56],
-    desktop: [55, 54],
-    portrait: [54, 57],
+    compact: [68, 55],
+    desktop: [68, 53],
+    portrait: [67, 55],
   },
   landingOrigin: [36, -2, -37],
   name: "Celestial Library",
@@ -20,7 +20,7 @@ export const celestialLibraryDefinition = {
     atmosphere: "#9d86b5",
     base: "#171424",
   },
-  position: [4.76, -1.82, -9.7],
+  position: [5.3, -1.8, -9.65],
   seed: 672_145,
   systemId: "reading",
 } as const satisfies PersonalGrowthPlanetDefinition;

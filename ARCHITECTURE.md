@@ -59,11 +59,12 @@ Galaxy definitions use world-space `[x, y, z]` coordinates relative to the
 universe origin. The staging camera remains at `[0, 0, 8]`, looking toward the
 origin; navigable destinations live beyond the origin on negative `z`, leaving
 the origin clear for camera staging and future transitions. University is
-placed at `[-1.45, 0.9, -8.5]` with a visual radius of approximately 2.2 world
-units after scale. Personal Growth is placed at `[4.25, -1.15, -9.8]`, lower,
-deeper, and opposite University across the staging axis. This preserves a clear
-travel corridor and the sense of a wider universe. New galaxies should preserve
-deliberate separation in all three axes rather than forming a screen-space grid.
+placed at `[-1.45, 0.9, -8.5]` with a visual radius of approximately 2.75 world
+units after scale. Personal Growth is placed at `[4.25, -1.15, -9.8]` with a
+visual radius of approximately 2.5 world units, lower, deeper, and opposite
+University across the staging axis. This preserves a clear travel corridor and
+the sense of a wider universe. New galaxies should preserve deliberate
+separation in all three axes rather than forming a screen-space grid.
 
 The first galaxy introduces only a compact definition contract and procedural
 renderer. Identity data, placement, orientation, palette, and particle
@@ -71,14 +72,17 @@ distribution live in the definition; camera travel remains exclusively owned
 by `CameraRig`. DOM labels stay outside WebGL so destinations remain semantic,
 focusable, and represented when the canvas is unavailable.
 
-Procedural galaxies combine their deterministic point layers with one
-feature-owned spiral luminance veil and a sparse, thicker dust layer. The veil
-uses the same definition palette, arm count, radius, and twist as the particle
-distribution, so it reinforces the existing physical form rather than adding a
-separate decorative effect. It is a single transparent shader plane with no
-time uniform or post-processing. This keeps the galaxies chromatically coherent
-at the universe camera distance while their static typed arrays preserve close
-range depth.
+Procedural galaxies combine deterministic arm, core, halo, dust, and sparse
+beacon layers with one feature-owned spiral luminance veil. Each definition
+chooses one restrained morphology profile rather than sharing a universal
+particle formula: University uses a coherent grand-design spiral, while
+Personal Growth uses a looser flocculent distribution with broken arm segments
+and greater vertical depth. The veil uses the same definition palette, arm
+count, radius, twist, and morphology as the particle distribution, so it
+reinforces the existing physical form rather than adding a separate decorative
+effect. It is a single transparent shader plane with no time uniform or
+post-processing. This keeps the galaxies chromatically coherent at the universe
+camera distance while their static typed arrays preserve close-range depth.
 
 ### Atmospheric depth
 
@@ -151,10 +155,13 @@ through the small `universe-camera-poses` registry. Adding a future destination
 therefore extends definitions and poses without allowing scene objects or
 labels to mutate the camera directly.
 Motion-enabled travel uses a restrained smoothstep path, a small vertical arc,
-and temporary field-of-view compression before returning to ambient drift. The
-same poses snap immediately when reduced motion is requested. A monotonic reset
-token lets the semantic origin control deliberately replay the universe pose
-without moving camera ownership out of `CameraRig`.
+distance-aware depth displacement, and temporary field-of-view compression
+before returning to ambient drift. Portrait galaxy and system poses move farther
+from their target to preserve the same spatial composition instead of compressing
+or clipping the world-space layout. The same poses snap immediately when reduced
+motion is requested. A monotonic reset token lets the semantic origin control
+deliberately replay the universe pose without moving camera ownership out of
+`CameraRig`.
 
 `CameraRig` also owns bounded user zoom. Wheel input and the plus/minus keyboard
 keys adjust a distance multiplier along the active pose's camera-to-target vector;
@@ -240,14 +247,27 @@ and landing surface handle the lightweight destinations, while Beerus' Planet re
 specialized renderer. Camera travel remains exclusively owned by `CameraRig`.
 
 Navigable systems share one compact stellar-core renderer while retaining their
-feature-owned orbital fields. The core uses a static granulation shader and two
-bounded additive corona shells; progress affects only restrained clarity and
+feature-owned orbital fields. The core uses a static granulation shader and a
+bounded set of additive corona shells; progress affects only restrained clarity and
 never creates an independent scheduler. Generic destination planets use
 deterministic multi-octave terrain, a separate counter-rotating cloud shell, a
 Fresnel atmosphere, and one orbital satellite group. The specialized Beerus
 marker reuses the same atmosphere boundary. Only destinations in the current
 system are visible, so this additional depth does not multiply scene-wide GPU
 cost.
+
+Astronomical presentation scale is hierarchical rather than literal. In a galaxy
+overview, systems are compact stellar beacons with no readable planets. Entering
+a system expands only its feature-owned orbital architecture to roughly three
+times the overview scale; it does not enlarge the entire system group. Active
+stellar cores are approximately `0.11–0.12` world units, while destination
+planets remain approximately `0.046–0.078` world units before their local scale.
+Interaction meshes remain intentionally larger than the visible bodies so this
+visual hierarchy does not reduce pointer or keyboard usability. Systems use
+wide, non-uniform orbital lanes and feature-specific deterministic fields—course
+maps, training cadence, technique space, and reading paths—rather than identical
+decorative rings. These values establish a presentation convention for future
+systems; they are not a claim of real-world unit equivalence.
 
 Jiu-Jitsu contains the Hyperbolic Time Chamber as a review destination. The existing
 session logger is unchanged and remains available in the Jiu-Jitsu system. The landed

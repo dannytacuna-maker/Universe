@@ -94,15 +94,15 @@ export function UniverseScene({
         : 1
       : navigationLevel === "galaxy"
         ? isPortrait
-          ? 0.18
-          : 0.26
+          ? 0.26
+          : 0.38
         : navigationLevel === "planet"
           ? isPortrait
             ? 0.035
             : 0.05
           : isPortrait
-            ? 0.1
-            : 0.13;
+            ? 0.17
+            : 0.24;
   const universitySelected = selectedGalaxyId === universityGalaxyId;
   const personalGrowthSelected = selectedGalaxyId === personalGrowthGalaxyId;
   const universityNavigationLevel = universitySelected

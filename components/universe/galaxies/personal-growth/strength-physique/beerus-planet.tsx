@@ -100,7 +100,7 @@ const cloudFragmentShader = /* glsl */ `
 
 const orbitalDebris = Array.from({ length: 18 }, (_, index) => {
   const angle = (index / 18) * Math.PI * 2 + (index % 3) * 0.09;
-  const radius = 0.255 + (index % 4) * 0.012;
+  const radius = 0.112 + (index % 4) * 0.005;
 
   return {
     id: index,
@@ -109,7 +109,7 @@ const orbitalDebris = Array.from({ length: 18 }, (_, index) => {
       Math.sin(angle * 1.7) * 0.028,
       Math.sin(angle) * radius * 0.58,
     ] as const,
-    scale: 0.004 + (index % 3) * 0.0015,
+    scale: 0.0018 + (index % 3) * 0.0007,
   };
 });
 
@@ -168,7 +168,7 @@ export function BeerusPlanet({
       visible={isVisible}
     >
       <mesh ref={planet} rotation={[0.12, 0.25, -0.08]}>
-        <sphereGeometry args={[0.18, 56, 40]} />
+        <sphereGeometry args={[0.078, 48, 34]} />
         <shaderMaterial
           fragmentShader={planetFragmentShader}
           vertexShader={planetVertexShader}
@@ -176,7 +176,7 @@ export function BeerusPlanet({
       </mesh>
 
       <mesh ref={cloudShell} rotation={[0.15, -0.2, -0.06]} scale={1.018}>
-        <sphereGeometry args={[0.18, 48, 32]} />
+        <sphereGeometry args={[0.078, 42, 30]} />
         <shaderMaterial
           depthWrite={false}
           fragmentShader={cloudFragmentShader}
@@ -185,11 +185,11 @@ export function BeerusPlanet({
         />
       </mesh>
 
-      <PlanetAtmosphere color="#b77bdd" emphasis={emphasis} radius={0.18} />
+      <PlanetAtmosphere color="#b77bdd" emphasis={emphasis} radius={0.078} />
 
       <group ref={debris} rotation={[Math.PI / 2.65, 0.08, 0.14]}>
         <mesh>
-          <ringGeometry args={[0.255, 0.257, 120]} />
+          <ringGeometry args={[0.112, 0.113, 120]} />
           <meshBasicMaterial
             blending={AdditiveBlending}
             color="#c58ce0"
@@ -208,8 +208,8 @@ export function BeerusPlanet({
         ))}
       </group>
 
-      <mesh position={[0.265, 0.072, 0.03]}>
-        <sphereGeometry args={[0.016, 16, 10]} />
+      <mesh position={[0.116, 0.032, 0.014]}>
+        <sphereGeometry args={[0.007, 16, 10]} />
         <meshBasicMaterial color="#e6d2b0" toneMapped={false} />
       </mesh>
 
@@ -228,7 +228,7 @@ export function BeerusPlanet({
             onHoverChange(true);
           }}
         >
-          <sphereGeometry args={[0.31, 16, 12]} />
+          <sphereGeometry args={[0.19, 16, 12]} />
           <meshBasicMaterial
             colorWrite={false}
             depthWrite={false}

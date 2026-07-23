@@ -64,15 +64,15 @@ const starLayers: readonly StarLayerConfiguration[] = [
     size: 0.1,
   },
   {
-    colorFloor: 0.62,
-    count: 96,
+    colorFloor: 0.7,
+    count: 148,
     densityBias: 0.03,
     innerRadius: 19,
     opacity: 0.92,
     outerRadius: 104,
     rotation: [-0.06, -0.08, -0.03],
     seed: 196613,
-    size: 0.075,
+    size: 0.105,
   },
 ];
 

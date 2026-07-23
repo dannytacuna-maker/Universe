@@ -1,6 +1,5 @@
 import type { NavigationLevel } from "@/store/navigation-store";
 
-import { personalGrowthGalaxyDefinition } from "./galaxies/personal-growth/personal-growth-galaxy-definition";
 import { personalGrowthPlanets } from "./galaxies/personal-growth/personal-growth-planets";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
@@ -25,16 +24,16 @@ const universePose: CameraPose = {
 
 const galaxyPoses: Readonly<Record<string, CameraPose>> = {
   [personalGrowthGalaxyId]: {
-    ambientScale: 0.45,
-    fov: 47,
-    lookTarget: personalGrowthGalaxyDefinition.position,
-    position: [4.25, -1.02, -6.15],
+    ambientScale: 0.34,
+    fov: 46,
+    lookTarget: [4.2, -1, -9.75],
+    position: [4.2, -0.72, -4.9],
   },
   [universityGalaxyId]: {
-    ambientScale: 0.5,
-    fov: 47,
-    lookTarget: [-1.45, 0.9, -8.5],
-    position: [-1.45, 1.02, -5],
+    ambientScale: 0.36,
+    fov: 46,
+    lookTarget: [-1.45, 0, -8.9],
+    position: [-1.45, 0.3, -4.4],
   },
 };
 
@@ -75,8 +74,8 @@ export function getCameraPose(
 
     if (system !== undefined) {
       return {
-        ambientScale: 0.2,
-        fov: 38,
+        ambientScale: 0.16,
+        fov: 40,
         lookTarget: system.position,
         position: system.cameraPosition,
       };

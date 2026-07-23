@@ -2,13 +2,13 @@ import type { CourseSystemDefinition } from "./course-system-definition";
 
 export const universityCourseSystems = [
   {
-    cameraPosition: [-1.72, 1.34, -6.05],
+    cameraPosition: [-3, 1.2, -4.2],
     displayName: "Logistics & Distribution",
     id: "logistics",
     labelPosition: {
-      compact: [24, 48],
-      desktop: [36.5, 48],
-      portrait: [25, 48],
+      compact: [24, 49],
+      desktop: [32, 49],
+      portrait: [25, 49],
     },
     name: "Logistics and Distribution",
     palette: {
@@ -16,7 +16,7 @@ export const universityCourseSystems = [
       halo: "#78c8ff",
       orbit: "#79aeea",
     },
-    position: [-2.1, 1.15, -8.15],
+    position: [-3, 1, -8.4],
     schedule: [
       {
         day: "monday",
@@ -39,13 +39,13 @@ export const universityCourseSystems = [
     status: "explorable",
   },
   {
-    cameraPosition: [-0.5, 1.65, -6.5],
+    cameraPosition: [0, 1.15, -4.4],
     displayName: "Business Ethics",
     id: "business-ethics",
     labelPosition: {
-      compact: [75, 41],
-      desktop: [62, 40],
-      portrait: [74, 41],
+      compact: [77, 49],
+      desktop: [68, 49],
+      portrait: [76, 49],
     },
     name: "International Business Ethics",
     palette: {
@@ -53,7 +53,7 @@ export const universityCourseSystems = [
       halo: "#9895d8",
       orbit: "#7778aa",
     },
-    position: [-0.75, 1.45, -8.65],
+    position: [0, 1, -8.8],
     schedule: [
       {
         day: "monday",
@@ -70,19 +70,19 @@ export const universityCourseSystems = [
         startTime: "18:30",
       },
     ],
-    scale: 0.78,
+    scale: 0.86,
     seed: 26_104,
     sourceName: "Ética en los Negocios Internacionales",
     status: "future",
   },
   {
-    cameraPosition: [-0.9, 0.45, -6.3],
+    cameraPosition: [-0.3, -0.45, -4.6],
     displayName: "Language A III",
     id: "language-a-iii",
     labelPosition: {
-      compact: [68, 66],
-      desktop: [55, 76],
-      portrait: [61, 70],
+      compact: [71, 69],
+      desktop: [66, 72],
+      portrait: [68, 70],
     },
     name: "Language A III",
     palette: {
@@ -90,7 +90,7 @@ export const universityCourseSystems = [
       halo: "#64bac8",
       orbit: "#548a96",
     },
-    position: [-1.15, 0.25, -8.45],
+    position: [-0.3, -0.7, -9],
     schedule: [
       {
         day: "tuesday",
@@ -107,19 +107,19 @@ export const universityCourseSystems = [
         startTime: "14:30",
       },
     ],
-    scale: 0.7,
+    scale: 0.78,
     seed: 59_133,
     sourceName: "Idioma A III",
     status: "future",
   },
   {
-    cameraPosition: [-1.9, 0.6, -6.9],
+    cameraPosition: [-2.7, -0.35, -4.8],
     displayName: "Human Resources",
     id: "human-resources-management",
     labelPosition: {
-      compact: [24, 62],
-      desktop: [39, 66],
-      portrait: [27, 62],
+      compact: [27, 68],
+      desktop: [34, 71],
+      portrait: [29, 69],
     },
     name: "Human Resources Management",
     palette: {
@@ -127,7 +127,7 @@ export const universityCourseSystems = [
       halo: "#8d9ec3",
       orbit: "#6c7892",
     },
-    position: [-2.2, 0.45, -9.05],
+    position: [-2.7, -0.6, -9.2],
     schedule: [
       {
         day: "wednesday",
@@ -144,19 +144,19 @@ export const universityCourseSystems = [
         startTime: "14:30",
       },
     ],
-    scale: 0.66,
+    scale: 0.76,
     seed: 94_207,
     sourceName: "Gestión de Recursos Humanos",
     status: "future",
   },
   {
-    cameraPosition: [0.18, 0.82, -6.55],
+    cameraPosition: [-1.45, -1.05, -4.9],
     displayName: "Final Project",
     id: "final-project",
     labelPosition: {
-      compact: [50, 78],
-      desktop: [70, 58],
-      portrait: [74, 57],
+      compact: [50, 80],
+      desktop: [50, 82],
+      portrait: [51, 79],
     },
     name: "Final Project",
     palette: {
@@ -164,9 +164,9 @@ export const universityCourseSystems = [
       halo: "#d6b56f",
       orbit: "#9f8351",
     },
-    position: [0.05, 0.7, -9.1],
+    position: [-1.45, -1.3, -9.6],
     schedule: [],
-    scale: 0.82,
+    scale: 0.88,
     seed: 72_511,
     sourceName: "Final Project",
     status: "future",
