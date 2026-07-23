@@ -407,9 +407,9 @@ canvas fails during travel, preserving the existing non-WebGL experience.
 Visible scene objects also expose lightweight world-space label anchors. Those
 anchors project through the active camera and imperatively update CSS custom
 properties on their matching semantic labels during scheduled ambient frames.
-This keeps labels attached through travel, bounded zoom, responsive camera poses,
-and system-disc rotation without moving accessibility into WebGL or causing React
-state updates per frame. Definition-owned percentage positions remain fallback
+This keeps labels attached through travel, bounded zoom, and responsive camera poses
+without moving accessibility into WebGL or causing React state updates per frame.
+Definition-owned percentage positions remain fallback
 coordinates for loading and non-WebGL rendering.
 
 ### External course sources
@@ -430,20 +430,6 @@ indexes, and study-guide generation remain outside the render store. Generated
 materials must retain source provenance and require explicit user intent before
 document contents are sent to an AI provider. No adapter or planet model is added
 until the ingestion workflow is implemented.
-
-Selected solar systems support a transient presentation-only disc rotation. A
-single intentional interaction plane rotates the system group about its star,
-so every planet and its projected semantic label follows the same transform.
-The gesture measures pointer angle around the camera-projected star rather than
-mapping raw horizontal movement to rotation, so the system behaves like a physical
-celestial platter. Time-sampled release velocity supplies bounded inertia with
-exponential damping. Pointer capture, a drag threshold, a short click-suppression
-window, and a canvas-level touch-action boundary keep the gesture reliable without
-stealing planet activation. Reduced motion preserves direct manipulation but removes
-inertia. This transform is not persisted and does not change any planet's domain position.
-The three-destination Strength & Physique disc begins with a restrained portrait
-rotation so its widest orbital axis uses the available vertical space; desktop
-world placement remains unchanged.
 
 Dragging an individual planet should begin only after planets have a persisted domain model.
 The future interaction target will project pointer movement onto the system's

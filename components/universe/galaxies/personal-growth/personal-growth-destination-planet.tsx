@@ -11,7 +11,6 @@ import {
   type Mesh,
 } from "three";
 
-import { useSolarSystemActivationGuard } from "../../solar-system-disc";
 import { SpatialLabelAnchor } from "../../spatial-label-anchor";
 import type { PersonalGrowthPlanetDefinition } from "./personal-growth-planet-definition";
 import { PlanetAtmosphere } from "./planet-atmosphere";
@@ -153,7 +152,6 @@ export function PersonalGrowthDestinationPlanet({
   onActivate,
   onHoverChange,
 }: PersonalGrowthDestinationPlanetProps) {
-  const shouldSuppressActivation = useSolarSystemActivationGuard();
   const planet = useRef<Group>(null);
   const cloudShell = useRef<Mesh>(null);
   const satelliteOrbit = useRef<Group>(null);
@@ -262,11 +260,6 @@ export function PersonalGrowthDestinationPlanet({
         <mesh
           onClick={(event) => {
             event.stopPropagation();
-
-            if (shouldSuppressActivation()) {
-              return;
-            }
-
             onActivate();
           }}
           onPointerOut={(event) => {

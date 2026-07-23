@@ -61,10 +61,7 @@ export function UniverseSceneCanvas({
 }: UniverseSceneCanvasProps) {
   return (
     <div aria-hidden="true" style={{ inset: 0, position: "absolute" }}>
-      <UniverseCanvas
-        camera={camera}
-        className="h-full w-full touch-none select-none"
-      >
+      <UniverseCanvas camera={camera} className="h-full w-full">
         <UniverseScene
           activeSystemId={activeSystemId}
           cameraResetToken={cameraResetToken}

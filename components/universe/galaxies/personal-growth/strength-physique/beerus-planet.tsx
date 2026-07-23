@@ -5,7 +5,6 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import { AdditiveBlending, DoubleSide, type Group, type Mesh } from "three";
 
-import { useSolarSystemActivationGuard } from "../../../solar-system-disc";
 import { SpatialLabelAnchor } from "../../../spatial-label-anchor";
 import { PlanetAtmosphere } from "../planet-atmosphere";
 import { beerusPlanetDefinition } from "./beerus-planet-definition";
@@ -134,7 +133,6 @@ export function BeerusPlanet({
   onActivate,
   onHoverChange,
 }: BeerusPlanetProps) {
-  const shouldSuppressActivation = useSolarSystemActivationGuard();
   const planet = useRef<Mesh>(null);
   const cloudShell = useRef<Mesh>(null);
   const debris = useRef<Group>(null);
@@ -222,11 +220,6 @@ export function BeerusPlanet({
         <mesh
           onClick={(event) => {
             event.stopPropagation();
-
-            if (shouldSuppressActivation()) {
-              return;
-            }
-
             onActivate();
           }}
           onPointerOut={(event) => {

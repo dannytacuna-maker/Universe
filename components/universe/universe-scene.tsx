@@ -14,7 +14,6 @@ import { DeepSpaceBackdrop } from "./deep-space-backdrop";
 import { DistantCelestialStructures } from "./distant-celestial-structures";
 import { UniversityGalaxy } from "./galaxies/university-galaxy";
 import { UniversityCourseSystemGroup } from "./galaxies/university/university-course-system-group";
-import { universityCourseSystems } from "./galaxies/university/university-course-systems";
 import { UniversityInteriorField } from "./galaxies/university/university-interior-field";
 import type { JiuJitsuProgress } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-progress";
 import { hyperbolicTimeChamberDefinition } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-planets";
@@ -29,9 +28,7 @@ import { BeerusPlanetSurface } from "./galaxies/personal-growth/strength-physiqu
 import { PersonalGrowthGalaxy } from "./galaxies/personal-growth/personal-growth-galaxy";
 import { PersonalGrowthInteriorField } from "./galaxies/personal-growth/personal-growth-interior-field";
 import { PersonalGrowthSystemGroup } from "./galaxies/personal-growth/personal-growth-system-group";
-import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
 import { ProceduralStarfield } from "./procedural-starfield";
-import { SolarSystemDisc } from "./solar-system-disc";
 import {
   personalGrowthGalaxyId,
   universityGalaxyId,
@@ -63,7 +60,6 @@ type UniverseSceneProps = Readonly<{
 const genericPersonalGrowthSurfaces = standardPersonalGrowthPlanets.filter(
   (planet) => planet.kind !== "time-chamber",
 );
-const universeOrigin = [0, 0, 0] as const;
 
 export function UniverseScene({
   activeSystemId,
@@ -109,16 +105,6 @@ export function UniverseScene({
             : 0.24;
   const universitySelected = selectedGalaxyId === universityGalaxyId;
   const personalGrowthSelected = selectedGalaxyId === personalGrowthGalaxyId;
-  const activeUniversitySystem = universitySelected
-    ? universityCourseSystems.find(
-        (definition) => definition.id === activeSystemId,
-      )
-    : undefined;
-  const activePersonalGrowthSystem = personalGrowthSelected
-    ? personalGrowthSystems.find(
-        (definition) => definition.id === activeSystemId,
-      )
-    : undefined;
   const universityNavigationLevel = universitySelected
     ? navigationLevel
     : "universe";
@@ -173,26 +159,16 @@ export function UniverseScene({
         motionEnabled={motionEnabled}
         navigationLevel={universityNavigationLevel}
       />
-      <SolarSystemDisc
-        center={activeUniversitySystem?.position ?? universeOrigin}
-        enabled={
-          universitySelected &&
-          navigationLevel === "system" &&
-          activeUniversitySystem !== undefined
-        }
+      <UniversityCourseSystemGroup
+        activeCourseId={universitySelected ? activeSystemId : null}
+        emphasizedCourseId={universitySelected ? emphasizedSystemId : null}
+        hoveredCourseId={universitySelected ? hoveredSystemId : null}
+        isInteractive={universitySelected && navigationLevel === "galaxy"}
+        isVisible={universitySelected && navigationLevel !== "universe"}
         motionEnabled={motionEnabled}
-      >
-        <UniversityCourseSystemGroup
-          activeCourseId={universitySelected ? activeSystemId : null}
-          emphasizedCourseId={universitySelected ? emphasizedSystemId : null}
-          hoveredCourseId={universitySelected ? hoveredSystemId : null}
-          isInteractive={universitySelected && navigationLevel === "galaxy"}
-          isVisible={universitySelected && navigationLevel !== "universe"}
-          motionEnabled={motionEnabled}
-          onActivate={onSystemActivate}
-          onHoverChange={onSystemHoverChange}
-        />
-      </SolarSystemDisc>
+        onActivate={onSystemActivate}
+        onHoverChange={onSystemHoverChange}
+      />
       <PersonalGrowthGalaxy
         isEmphasized={emphasizedGalaxyId === personalGrowthGalaxyId}
         isHovered={hoveredGalaxyId === personalGrowthGalaxyId}
@@ -221,81 +197,64 @@ export function UniverseScene({
         motionEnabled={motionEnabled}
         presence={navigationLevel === "galaxy" ? 1 : 0.16}
       />
-      <SolarSystemDisc
-        center={activePersonalGrowthSystem?.position ?? universeOrigin}
-        enabled={
+      <PersonalGrowthSystemGroup
+        activeSystemId={personalGrowthSelected ? activeSystemId : null}
+        emphasizedSystemId={personalGrowthSelected ? emphasizedSystemId : null}
+        hoveredSystemId={personalGrowthSelected ? hoveredSystemId : null}
+        isInteractive={personalGrowthSelected && navigationLevel === "galaxy"}
+        isVisible={
+          personalGrowthSelected &&
+          navigationLevel !== "universe" &&
+          navigationLevel !== "planet"
+        }
+        jiuJitsuProgress={jiuJitsuProgress}
+        motionEnabled={motionEnabled}
+        onActivate={onSystemActivate}
+        onHoverChange={onSystemHoverChange}
+        strengthProgress={strengthProgress}
+      />
+      <BeerusPlanet
+        isEmphasized={emphasizedPlanetId === beerusPlanetDefinition.id}
+        isHovered={hoveredPlanetId === beerusPlanetDefinition.id}
+        isInteractive={
           personalGrowthSelected &&
           navigationLevel === "system" &&
-          activePersonalGrowthSystem !== undefined
+          activeSystemId === beerusPlanetDefinition.systemId
         }
-        initialRotation={
-          isPortrait && activePersonalGrowthSystem?.id === "strength-physique"
-            ? Math.PI / 3
-            : 0
+        isVisible={
+          personalGrowthSelected &&
+          navigationLevel === "system" &&
+          activeSystemId === beerusPlanetDefinition.systemId
         }
         motionEnabled={motionEnabled}
-      >
-        <PersonalGrowthSystemGroup
-          activeSystemId={personalGrowthSelected ? activeSystemId : null}
-          emphasizedSystemId={
-            personalGrowthSelected ? emphasizedSystemId : null
-          }
-          hoveredSystemId={personalGrowthSelected ? hoveredSystemId : null}
-          isInteractive={personalGrowthSelected && navigationLevel === "galaxy"}
-          isVisible={
-            personalGrowthSelected &&
-            navigationLevel !== "universe" &&
-            navigationLevel !== "planet"
-          }
-          jiuJitsuProgress={jiuJitsuProgress}
-          motionEnabled={motionEnabled}
-          onActivate={onSystemActivate}
-          onHoverChange={onSystemHoverChange}
-          strengthProgress={strengthProgress}
-        />
-        <BeerusPlanet
-          isEmphasized={emphasizedPlanetId === beerusPlanetDefinition.id}
-          isHovered={hoveredPlanetId === beerusPlanetDefinition.id}
+        onActivate={() => onPlanetActivate(beerusPlanetDefinition.id)}
+        onHoverChange={(isHovered) =>
+          onPlanetHoverChange(isHovered ? beerusPlanetDefinition.id : null)
+        }
+      />
+      {standardPersonalGrowthPlanets.map((planet) => (
+        <PersonalGrowthDestinationPlanet
+          definition={planet}
+          isEmphasized={emphasizedPlanetId === planet.id}
+          isHovered={hoveredPlanetId === planet.id}
           isInteractive={
             personalGrowthSelected &&
             navigationLevel === "system" &&
-            activeSystemId === beerusPlanetDefinition.systemId
+            activeSystemId === planet.systemId
           }
           isVisible={
             personalGrowthSelected &&
             navigationLevel === "system" &&
-            activeSystemId === beerusPlanetDefinition.systemId
+            activeSystemId === planet.systemId
           }
+          key={planet.id}
           motionEnabled={motionEnabled}
-          onActivate={() => onPlanetActivate(beerusPlanetDefinition.id)}
+          onActivate={() => onPlanetActivate(planet.id)}
           onHoverChange={(isHovered) =>
-            onPlanetHoverChange(isHovered ? beerusPlanetDefinition.id : null)
+            onPlanetHoverChange(isHovered ? planet.id : null)
           }
         />
-        {standardPersonalGrowthPlanets.map((planet) => (
-          <PersonalGrowthDestinationPlanet
-            definition={planet}
-            isEmphasized={emphasizedPlanetId === planet.id}
-            isHovered={hoveredPlanetId === planet.id}
-            isInteractive={
-              personalGrowthSelected &&
-              navigationLevel === "system" &&
-              activeSystemId === planet.systemId
-            }
-            isVisible={
-              personalGrowthSelected &&
-              navigationLevel === "system" &&
-              activeSystemId === planet.systemId
-            }
-            key={planet.id}
-            motionEnabled={motionEnabled}
-            onActivate={() => onPlanetActivate(planet.id)}
-            onHoverChange={(isHovered) =>
-              onPlanetHoverChange(isHovered ? planet.id : null)
-            }
-          />
-        ))}
-      </SolarSystemDisc>
+      ))}
       <Suspense fallback={null}>
         <BeerusPlanetSurface
           isVisible={
