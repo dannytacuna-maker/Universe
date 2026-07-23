@@ -3,14 +3,9 @@
 import { useCursor } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
-import {
-  AdditiveBlending,
-  BackSide,
-  DoubleSide,
-  type Group,
-  type Mesh,
-} from "three";
+import { AdditiveBlending, DoubleSide, type Group, type Mesh } from "three";
 
+import { PlanetAtmosphere } from "../planet-atmosphere";
 import { beerusPlanetDefinition } from "./beerus-planet-definition";
 
 const planetVertexShader = /* glsl */ `
@@ -190,18 +185,7 @@ export function BeerusPlanet({
         />
       </mesh>
 
-      <mesh scale={1.1}>
-        <sphereGeometry args={[0.18, 40, 28]} />
-        <meshBasicMaterial
-          blending={AdditiveBlending}
-          color="#a96ed2"
-          depthWrite={false}
-          opacity={0.12 + emphasis * 0.06}
-          side={BackSide}
-          toneMapped={false}
-          transparent
-        />
-      </mesh>
+      <PlanetAtmosphere color="#b77bdd" emphasis={emphasis} radius={0.18} />
 
       <group ref={debris} rotation={[Math.PI / 2.65, 0.08, 0.14]}>
         <mesh>

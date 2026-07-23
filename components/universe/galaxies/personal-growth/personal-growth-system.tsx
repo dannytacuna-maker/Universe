@@ -3,9 +3,9 @@
 import { useCursor } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
-import { AdditiveBlending, type Group } from "three";
+import type { Group } from "three";
 
-import { StellarGlow } from "../university/stellar-glow";
+import { SystemStellarCore } from "../system-stellar-core";
 import type { JiuJitsuProgress } from "./jiu-jitsu/jiu-jitsu-progress";
 import { JiuJitsuSystemField } from "./jiu-jitsu/jiu-jitsu-system-field";
 import type { PersonalGrowthSystemDefinition } from "./personal-growth-system-definition";
@@ -68,34 +68,12 @@ export function PersonalGrowthSystem({
       scale={definition.scale * activeScale}
       visible={isVisible}
     >
-      <mesh>
-        <sphereGeometry args={[isExplorable ? 0.023 : 0.018, 18, 14]} />
-        <meshBasicMaterial
-          blending={AdditiveBlending}
-          color={definition.palette.core}
-          opacity={0.82 + emphasis * 0.1}
-          toneMapped={false}
-          transparent
-        />
-      </mesh>
-
-      <StellarGlow
-        color={definition.palette.halo}
-        opacity={
-          isExplorable
-            ? 0.075 + recentAttention * 0.035 + emphasis * 0.022
-            : 0.032 + emphasis * 0.015
-        }
-        radius={isExplorable ? 0.078 : 0.052}
-      />
-      <StellarGlow
-        color={definition.palette.orbit}
-        opacity={
-          isExplorable
-            ? 0.025 + recentAttention * 0.016 + emphasis * 0.01
-            : 0.008 + emphasis * 0.005
-        }
-        radius={isExplorable ? 0.155 : 0.09}
+      <SystemStellarCore
+        activity={recentAttention}
+        coreColor={definition.palette.core}
+        emphasis={emphasis}
+        haloColor={definition.palette.halo}
+        radius={isExplorable ? 0.029 : 0.022}
       />
 
       <group ref={orbitalGroup}>

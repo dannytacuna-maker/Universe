@@ -1,13 +1,14 @@
 "use client";
 
-import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
-import { AdditiveBlending, type Group, SRGBColorSpace } from "three";
+import { AdditiveBlending, type Group } from "three";
 
+import { useCinematicEnvironmentTexture } from "../../../use-cinematic-environment-texture";
 import { TimeChamberAtmosphere } from "./time-chamber-atmosphere";
 
 const timeChamberTexturePath = "/assets/environments/time-chamber.webp";
+const timeChamberVideoPath = "/assets/environments/time-chamber-cinematic.mp4";
 
 type TimeChamberEnvironmentProps = Readonly<{
   motionEnabled: boolean;
@@ -18,9 +19,10 @@ export function TimeChamberEnvironment({
 }: TimeChamberEnvironmentProps) {
   const environmentPlate = useRef<Group>(null);
   const elapsedTime = useRef(0);
-  const texture = useTexture(timeChamberTexturePath, (loadedTexture) => {
-    loadedTexture.anisotropy = 8;
-    loadedTexture.colorSpace = SRGBColorSpace;
+  const texture = useCinematicEnvironmentTexture({
+    motionEnabled,
+    posterPath: timeChamberTexturePath,
+    videoPath: timeChamberVideoPath,
   });
 
   useFrame((_, delta) => {
@@ -74,5 +76,3 @@ export function TimeChamberEnvironment({
     </group>
   );
 }
-
-useTexture.preload(timeChamberTexturePath);

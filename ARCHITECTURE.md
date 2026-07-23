@@ -71,6 +71,15 @@ distribution live in the definition; camera travel remains exclusively owned
 by `CameraRig`. DOM labels stay outside WebGL so destinations remain semantic,
 focusable, and represented when the canvas is unavailable.
 
+Procedural galaxies combine their deterministic point layers with one
+feature-owned spiral luminance veil and a sparse, thicker dust layer. The veil
+uses the same definition palette, arm count, radius, and twist as the particle
+distribution, so it reinforces the existing physical form rather than adding a
+separate decorative effect. It is a single transparent shader plane with no
+time uniform or post-processing. This keeps the galaxies chromatically coherent
+at the universe camera distance while their static typed arrays preserve close
+range depth.
+
 ### Atmospheric depth
 
 The surrounding cosmos is composed from static, deterministic layers rather
@@ -230,6 +239,16 @@ domain dashboards and persistence remain feature-specific. A generic procedural 
 and landing surface handle the lightweight destinations, while Beerus' Planet retains its
 specialized renderer. Camera travel remains exclusively owned by `CameraRig`.
 
+Navigable systems share one compact stellar-core renderer while retaining their
+feature-owned orbital fields. The core uses a static granulation shader and two
+bounded additive corona shells; progress affects only restrained clarity and
+never creates an independent scheduler. Generic destination planets use
+deterministic multi-octave terrain, a separate counter-rotating cloud shell, a
+Fresnel atmosphere, and one orbital satellite group. The specialized Beerus
+marker reuses the same atmosphere boundary. Only destinations in the current
+system are visible, so this additional depth does not multiply scene-wide GPU
+cost.
+
 Jiu-Jitsu contains the Hyperbolic Time Chamber as a review destination. The existing
 session logger is unchanged and remains available in the Jiu-Jitsu system. The landed
 dashboard derives weekly and monthly sessions, total hours, sparring rounds, recent
@@ -281,6 +300,17 @@ This is a deliberate 2.5D cinematic staging boundary rather than a free-roaming 
 It adds no post-processing, shadows, physics, texture pack, or independent render loop.
 All atmosphere motion shares the existing 30 FPS invalidation scheduler and remains
 fully static for reduced-motion users.
+
+Landed cinematic environments may replace their static plate with one approved,
+project-owned video loop. The loop is treated as a presentation asset rather than
+a runtime AI dependency: generation credentials and provider calls never ship to
+the browser. A feature-shared texture hook creates the `VideoTexture` only while
+the landed destination is visible and motion is enabled, pauses it when the
+document is hidden, disables mipmaps, and disposes both media and GPU resources
+on departure. Loading or playback failure leaves the original static plate in
+place. Reduced-motion users never create or request the video. Video frames are
+presented through the existing 30 FPS on-demand invalidation scheduler, so the
+asset introduces no second render loop.
 
 Whis' semantic training assistant stays outside WebGL and composes the existing
 `WorkoutSplit` and `StrengthRecords` components. It therefore reads and mutates the

@@ -1,18 +1,15 @@
 "use client";
 
-import { useTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
-import {
-  AdditiveBlending,
-  DoubleSide,
-  type Group,
-  SRGBColorSpace,
-} from "three";
+import { AdditiveBlending, DoubleSide, type Group } from "three";
 
+import { useCinematicEnvironmentTexture } from "../../../use-cinematic-environment-texture";
 import { BeerusSanctuaryAtmosphere } from "./beerus-sanctuary-atmosphere";
 
 const sanctuaryTexturePath = "/assets/environments/beerus-sanctuary.webp";
+const sanctuaryVideoPath =
+  "/assets/environments/beerus-sanctuary-cinematic.mp4";
 
 type BeerusSanctuaryEnvironmentProps = Readonly<{
   motionEnabled: boolean;
@@ -23,9 +20,10 @@ export function BeerusSanctuaryEnvironment({
 }: BeerusSanctuaryEnvironmentProps) {
   const environmentPlate = useRef<Group>(null);
   const elapsedTime = useRef(0);
-  const texture = useTexture(sanctuaryTexturePath, (loadedTexture) => {
-    loadedTexture.anisotropy = 8;
-    loadedTexture.colorSpace = SRGBColorSpace;
+  const texture = useCinematicEnvironmentTexture({
+    motionEnabled,
+    posterPath: sanctuaryTexturePath,
+    videoPath: sanctuaryVideoPath,
   });
   useFrame((_, delta) => {
     if (!motionEnabled || environmentPlate.current === null) {
@@ -86,5 +84,3 @@ export function BeerusSanctuaryEnvironment({
     </group>
   );
 }
-
-useTexture.preload(sanctuaryTexturePath);

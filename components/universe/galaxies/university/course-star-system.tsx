@@ -3,11 +3,11 @@
 import { useCursor } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
-import { AdditiveBlending, type Group } from "three";
+import type { Group } from "three";
 
+import { SystemStellarCore } from "../system-stellar-core";
 import type { CourseSystemDefinition } from "./course-system-definition";
 import { LogisticsOrbitalField } from "./logistics-orbital-field";
-import { StellarGlow } from "./stellar-glow";
 
 type CourseStarSystemProps = Readonly<{
   definition: CourseSystemDefinition;
@@ -60,36 +60,12 @@ export function CourseStarSystem({
       scale={definition.scale * activeScale}
       visible={isVisible}
     >
-      <mesh>
-        <sphereGeometry args={[isExplorable ? 0.02 : 0.018, 18, 14]} />
-        <meshBasicMaterial
-          blending={AdditiveBlending}
-          color={definition.palette.core}
-          opacity={presence * (0.8 + emphasis * 0.12)}
-          toneMapped={false}
-          transparent
-        />
-      </mesh>
-
-      <StellarGlow
-        color={definition.palette.halo}
-        opacity={
-          presence *
-          (isExplorable
-            ? 0.075 + emphasis * 0.025 + activeGlow
-            : 0.035 + emphasis * 0.015)
-        }
-        radius={isExplorable ? 0.072 : 0.052}
-      />
-      <StellarGlow
-        color={definition.palette.orbit}
-        opacity={
-          presence *
-          (isExplorable
-            ? 0.022 + emphasis * 0.01 + activeGlow * 0.45
-            : 0.009 + emphasis * 0.006)
-        }
-        radius={isExplorable ? 0.14 : 0.09}
+      <SystemStellarCore
+        activity={activeGlow * 8}
+        coreColor={definition.palette.core}
+        emphasis={emphasis * presence}
+        haloColor={definition.palette.halo}
+        radius={isExplorable ? 0.027 : 0.022}
       />
 
       {!isExplorable ? (

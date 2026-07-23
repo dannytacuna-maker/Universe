@@ -6,6 +6,7 @@ import { useMemo, useRef } from "react";
 import { AdditiveBlending, type Group } from "three";
 
 import type { GalaxyDefinition } from "./galaxy-definition";
+import { GalaxyLuminousVeil } from "./galaxy-luminous-veil";
 import {
   createProceduralGalaxyData,
   type GalaxyParticleLayer,
@@ -82,29 +83,39 @@ export function ProceduralGalaxy({
       scale={definition.scale}
     >
       <group ref={rotatingGroup}>
+        <GalaxyLuminousVeil
+          definition={definition}
+          emphasis={clarity}
+          presence={presence}
+        />
         <ParticleLayer
           data={data.halo}
-          opacity={(0.2 + clarity * 0.04) * presence}
+          opacity={(0.16 + clarity * 0.04) * presence}
           size={0.014 * particleSizeScale}
         />
         <ParticleLayer
+          data={data.dust}
+          opacity={(0.12 + clarity * 0.025) * presence}
+          size={0.042 * particleSizeScale}
+        />
+        <ParticleLayer
           data={data.arms}
-          opacity={(0.64 + clarity * 0.08) * presence}
+          opacity={(0.48 + clarity * 0.08) * presence}
           size={0.023 * particleSizeScale}
         />
         <ParticleLayer
           data={data.core}
-          opacity={(0.78 + clarity * 0.08) * presence}
+          opacity={(0.62 + clarity * 0.08) * presence}
           size={0.032 * particleSizeScale}
         />
 
-        <mesh scale={[0.24, 0.24, 0.1]}>
+        <mesh scale={[0.3, 0.3, 0.13]}>
           <sphereGeometry args={[1, 18, 12]} />
           <meshBasicMaterial
             blending={AdditiveBlending}
             color="#d5eaff"
             depthWrite={false}
-            opacity={(0.045 + clarity * 0.012) * presence}
+            opacity={(0.068 + clarity * 0.018) * presence}
             toneMapped={false}
             transparent
           />
