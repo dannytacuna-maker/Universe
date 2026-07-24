@@ -3,6 +3,9 @@
 import { useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { createMissionDestinationState } from "@/components/mission-control/mission-destination-navigation";
+import type { MissionDestinationId } from "@/components/mission-control/mission-operating-record";
+import { MissionOperatingDeck } from "@/components/mission-control/mission-operating-deck";
 import type { NavigationState } from "@/store/navigation-store";
 import { useNavigationStore } from "@/store/navigation-store-provider";
 
@@ -414,6 +417,62 @@ export function UniverseViewport() {
     travelThroughPlanetClouds,
   ]);
 
+  const handleMissionDestinationNavigate = useCallback(
+    (destinationId: MissionDestinationId) => {
+      if (planetArrivalPhase !== "idle") {
+        return;
+      }
+
+      const nextState = createMissionDestinationState(destinationId);
+      const destination =
+        nextState.level === "galaxy"
+          ? findGalaxy(nextState.selectedGalaxyId)
+          : findSystem(nextState.selectedGalaxyId, nextState.selectedSystemId);
+
+      if (destination === null) {
+        return;
+      }
+
+      const travel = () => {
+        clearInteractionState();
+        beginCameraTravel();
+        pushNavigationUrl(nextState);
+        setAnnouncement(`Aligning with ${destination.name}.`);
+
+        if (
+          nextState.level === "galaxy" &&
+          nextState.selectedGalaxyId !== null
+        ) {
+          enterGalaxy(nextState.selectedGalaxyId);
+        } else if (
+          nextState.selectedGalaxyId !== null &&
+          nextState.selectedSystemId !== null
+        ) {
+          enterSystem(nextState.selectedGalaxyId, nextState.selectedSystemId);
+        }
+      };
+
+      if (navigationLevel === "planet") {
+        travelThroughPlanetClouds(
+          `A wave of cloud is rising for the journey to ${destination.name}.`,
+          travel,
+        );
+      } else {
+        travel();
+      }
+    },
+    [
+      beginCameraTravel,
+      clearInteractionState,
+      enterGalaxy,
+      enterSystem,
+      navigationLevel,
+      planetArrivalPhase,
+      pushNavigationUrl,
+      travelThroughPlanetClouds,
+    ],
+  );
+
   useEffect(() => {
     return () => {
       if (planetNavigationTimer.current !== null) {
@@ -477,7 +536,11 @@ export function UniverseViewport() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && navigationLevel !== "universe") {
+      if (
+        event.key === "Escape" &&
+        document.querySelector("dialog[open]") === null &&
+        navigationLevel !== "universe"
+      ) {
         event.preventDefault();
         handleBack();
       }
@@ -588,6 +651,8 @@ export function UniverseViewport() {
         selectedGalaxyName={selectedGalaxy?.name ?? null}
         selectedSystemId={activeSystemId}
       />
+
+      <MissionOperatingDeck onNavigate={handleMissionDestinationNavigate} />
 
       <JiuJitsuTrainingLog
         isLoading={isTrainingLogLoading}

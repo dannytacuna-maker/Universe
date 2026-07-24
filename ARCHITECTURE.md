@@ -216,6 +216,38 @@ and Zustand through `pushState` and `popstate`. Unknown or future destinations f
 back to the universe instead of fabricating unavailable navigation. This is client-side
 state reflection, not a replacement for future server-owned routes and domain data.
 
+### Mission operating layer
+
+The cross-domain operating layer lives under `components/mission-control/`
+rather than inside the WebGL feature tree. It is a semantic, keyboard-accessible
+DOM instrument that can be opened from every spatial level with one quiet
+launcher or `Command/Ctrl + K`. Its native dialog places the background outside
+the active interaction tree while open, restores focus on close, and becomes a
+full-viewport surface on compact screens. It does not own navigation state or
+camera motion: selecting a mapped destination delegates a typed navigation state
+to `UniverseViewport`, which preserves URL reflection, cloud departure from
+planets, and `CameraRig` as the only camera owner.
+
+The operating loop is deliberately small: Identity defines the north star and
+identity statements; Current Vector limits active growth cycles to three;
+one daily evidence record per cycle communicates consistency without punitive
+streaks; Capture provides a trusted cross-domain inbox; Weekly Review records
+pride, neglect, friction, one adjustment, and the next focus; Optimization
+Experiments bind one hypothesis to one change, one observable signal, and an
+explicit conclusion. Recovery mode changes the interpretation of Current Vector
+to the minimum viable action without deleting goals or manufacturing progress.
+The first-run identity and cycle definitions reflect the user-supplied profile,
+but no completion, review, capture, or experiment records are fabricated.
+
+Operating records use the same local-first `mission-control` IndexedDB database
+through the shared `lib/mission-control-database.ts` migration boundary. Schema
+version 4 preserves all Personal Growth stores and adds independent stores for
+identity, growth cycles, cycle evidence, captures, weekly reviews, and
+experiments. Repositories enforce the three-active-cycle limit and the one-piece-
+of-evidence-per-cycle-per-local-day invariant. Zustand remains navigation-only;
+operating records stay in their feature repository and hook until authenticated
+server ownership is introduced.
+
 ### Personal Growth and real-world visual state
 
 Personal Growth is a feature-owned galaxy with three first-class explorable system
@@ -229,9 +261,10 @@ current week's Push, Pull, Legs, Push, Pull, Legs rhythm; completed sessions cla
 those markers while recorded lifts modestly strengthen the surrounding structure. The
 visualization never reads storage and never owns authoritative records.
 
-Personal Growth records are stored in a feature-owned IndexedDB database named
-`mission-control`. Schema version 3 preserves the original Jiu-Jitsu and Strength stores
-and adds separate Reading book and session stores. The Strength plan describes muscle
+Personal Growth records are stored in the shared local IndexedDB database named
+`mission-control`. Schema version 4 preserves the original Jiu-Jitsu, Strength, and
+Reading stores while adding the independent Mission operating stores described above.
+The Strength plan describes muscle
 groups and bounded exercise counts rather than prescribing exercises: Push covers chest,
 shoulders, and triceps; Pull covers back, rear delts, and biceps; Legs covers legs and
 calves, repeated over six sessions. Personal records are limited to bench press, squat,
