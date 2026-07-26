@@ -16,7 +16,7 @@ import { UniversityGalaxy } from "./galaxies/university-galaxy";
 import { UniversityCourseSystemGroup } from "./galaxies/university/university-course-system-group";
 import { UniversityInteriorField } from "./galaxies/university/university-interior-field";
 import { FrenchLearningStation } from "./galaxies/personal-growth/french/french-learning-station";
-import { frenchStationDefinition } from "./galaxies/personal-growth/french/french-planets";
+import { frenchStationDefinition } from "./galaxies/personal-growth/french/french-station-definition";
 import { FrenchStationSurface } from "./galaxies/personal-growth/french/french-station-surface";
 import type { JiuJitsuProgress } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-progress";
 import { hyperbolicTimeChamberDefinition } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-planets";
@@ -260,16 +260,8 @@ export function UniverseScene({
       <FrenchLearningStation
         isEmphasized={emphasizedPlanetId === frenchStationDefinition.id}
         isHovered={hoveredPlanetId === frenchStationDefinition.id}
-        isInteractive={
-          personalGrowthSelected &&
-          navigationLevel === "system" &&
-          activeSystemId === frenchStationDefinition.systemId
-        }
-        isVisible={
-          personalGrowthSelected &&
-          navigationLevel === "system" &&
-          activeSystemId === frenchStationDefinition.systemId
-        }
+        isInteractive={personalGrowthSelected && navigationLevel === "galaxy"}
+        isVisible={personalGrowthSelected && navigationLevel === "galaxy"}
         motionEnabled={motionEnabled}
         onActivate={() => onPlanetActivate(frenchStationDefinition.id)}
         onHoverChange={(isHovered) =>

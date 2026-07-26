@@ -1,5 +1,6 @@
 import type { NavigationState } from "@/store/navigation-store";
 
+import { frenchStationDefinition } from "./galaxies/personal-growth/french/french-station-definition";
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
 import { personalGrowthPlanets } from "./galaxies/personal-growth/personal-growth-planets";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
@@ -69,4 +70,14 @@ export function findPlanet(
       (planet) => planet.systemId === systemId && planet.id === planetId,
     ) ?? null
   );
+}
+
+export function findGalaxyStation(
+  galaxyId: string | null,
+  stationId: string | null,
+) {
+  return galaxyId === frenchStationDefinition.galaxyId &&
+    stationId === frenchStationDefinition.id
+    ? frenchStationDefinition
+    : null;
 }

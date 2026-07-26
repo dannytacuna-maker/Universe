@@ -3,6 +3,7 @@
 import type { NavigationLevel } from "@/store/navigation-store";
 
 import { PersonalGrowthGalaxyLabel } from "./galaxies/personal-growth/personal-growth-galaxy-label";
+import { FrenchStationLabel } from "./galaxies/personal-growth/french/french-station-label";
 import { PersonalGrowthPlanetLabels } from "./galaxies/personal-growth/personal-growth-planet-labels";
 import { PersonalGrowthSystemLabels } from "./galaxies/personal-growth/personal-growth-system-labels";
 import { UniversityCourseSystemLabels } from "./galaxies/university/university-course-system-labels";
@@ -66,6 +67,10 @@ export function UniverseNavigationOverlay({
     selectedGalaxyId === universityGalaxyId &&
     level === "galaxy" &&
     isViewSettled;
+  const isPersonalGrowthOverviewVisible =
+    selectedGalaxyId === personalGrowthGalaxyId &&
+    level === "galaxy" &&
+    isViewSettled;
 
   return (
     <div className="universe-navigation-overlay">
@@ -112,14 +117,22 @@ export function UniverseNavigationOverlay({
 
       <PersonalGrowthSystemLabels
         emphasizedSystemId={emphasizedSystemId}
-        isVisible={
-          selectedGalaxyId === personalGrowthGalaxyId &&
-          level === "galaxy" &&
-          isViewSettled
-        }
+        isVisible={isPersonalGrowthOverviewVisible}
         onActivate={onSystemActivate}
         onFocusChange={onSystemFocusChange}
         onHoverChange={onSystemHoverChange}
+      />
+
+      <FrenchStationLabel
+        isEmphasized={emphasizedPlanetId === "french-station"}
+        isVisible={isPersonalGrowthOverviewVisible}
+        onActivate={() => onPlanetActivate("french-station")}
+        onFocusChange={(isFocused) =>
+          onPlanetFocusChange(isFocused ? "french-station" : null)
+        }
+        onHoverChange={(isHovered) =>
+          onPlanetHoverChange(isHovered ? "french-station" : null)
+        }
       />
 
       <PersonalGrowthPlanetLabels
@@ -144,7 +157,9 @@ export function UniverseNavigationOverlay({
           <span aria-hidden="true">←</span>
           <span>
             {level === "planet"
-              ? `${activeSystemName ?? "Personal Growth"} system`
+              ? activeSystemName === null
+                ? (selectedGalaxyName ?? "Galaxy")
+                : `${activeSystemName} system`
               : level === "system"
                 ? selectedGalaxyName
                 : "Universe"}
@@ -169,7 +184,7 @@ export function UniverseNavigationOverlay({
 
       {level === "planet" && isViewSettled && activePlanetName !== null ? (
         <div className="planet-context-label">
-          <span>{activeSystemName}</span>
+          <span>{activeSystemName ?? "Personal Growth · Orbital station"}</span>
           <strong>{activePlanetName}</strong>
         </div>
       ) : null}

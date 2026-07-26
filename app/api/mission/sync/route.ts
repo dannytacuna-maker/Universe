@@ -77,11 +77,24 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid sync mutation." }, { status: 400 });
   }
 
-  await applyMissionRecordMutations(
-    missionOwnerId,
-    mutations as MissionRecordMutation[],
-  );
-  const collections = await listMissionRecords(missionOwnerId);
+  try {
+    await applyMissionRecordMutations(
+      missionOwnerId,
+      mutations as MissionRecordMutation[],
+    );
+    const collections = await listMissionRecords(missionOwnerId);
 
-  return Response.json({ collections, syncedAt: new Date().toISOString() });
+    return Response.json({ collections, syncedAt: new Date().toISOString() });
+  } catch (error: unknown) {
+    console.error("Mission record synchronization failed.", error);
+    const detail =
+      process.env.NODE_ENV === "development" && error instanceof Error
+        ? ` ${error.message}`
+        : "";
+
+    return Response.json(
+      { error: `Mission record synchronization failed.${detail}` },
+      { status: 500 },
+    );
+  }
 }

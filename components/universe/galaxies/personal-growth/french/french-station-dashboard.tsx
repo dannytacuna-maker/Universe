@@ -254,8 +254,8 @@ export function FrenchStationDashboard({
               Update telemetry
             </button>
             <p className={styles.note}>
-              Mission Control stores only the values you enter. It never
-              receives your Duolingo password.
+              Saved locally first and synchronized across unlocked devices.
+              Mission Control never receives your Duolingo password.
             </p>
           </form>
         </aside>

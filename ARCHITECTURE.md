@@ -210,8 +210,10 @@ examples are `destination=university/logistics` and
 `destination=personal-growth/strength-physique/training-archive`, and
 `destination=personal-growth/strength-physique/gym-playlist`. Jiu-Jitsu and Reading
 planet deep links are `destination=personal-growth/jiu-jitsu/hyperbolic-time-chamber`
-and `destination=personal-growth/reading/celestial-library`. French uses
-`destination=personal-growth/french/french-station`. URL parsing is pure and
+and `destination=personal-growth/reading/celestial-library`. The independent
+French station uses the direct galaxy-child route
+`destination=personal-growth/french-station`; the former three-segment French
+route remains readable only as a backwards-compatible alias. URL parsing is pure and
 colocated with the universe feature; `UniverseViewport` synchronizes browser history
 and Zustand through `pushState` and `popstate`. Unknown or future destinations fall
 back to the universe instead of fabricating unavailable navigation. This is client-side
@@ -272,9 +274,11 @@ remain repository data. Each course keeps its palette and deterministic orbital
 identity, while scheduled systems derive their visible orbital guides from real class
 meetings and Final Project uses the mapped independent-work field.
 
-Personal Growth is a feature-owned galaxy with four first-class explorable system
-definitions: French, Jiu-Jitsu, Strength and Physique, and Reading. Daily Discipline was removed
-because it no longer represents a required destination. Each renderer receives only the
+Personal Growth is a feature-owned galaxy with three first-class explorable system
+definitions: Jiu-Jitsu, Strength and Physique, and Reading. French is deliberately
+represented by one independent station floating in the galaxy overview rather than a
+fourth stellar system. Daily Discipline was removed because it no longer represents a
+required destination. Each renderer receives only the
 compact derived progress signal it can communicate spatially. For Jiu-Jitsu, recent
 attention affects halo clarity, active-week consistency affects orbital stability,
 accumulated sessions affect field depth, and each recorded session contributes one
@@ -351,10 +355,13 @@ the current book, weekly time and pages, recent reflections, and the next readin
 The library uses ordinary forms and semantic history outside WebGL, staged over a quiet
 procedural library environment.
 
-French contains one deliberate destination, Lumière Station. It is a procedural
-orbital station rather than another planet: a lightweight station marker, a quiet
-observation-deck landing environment, and a semantic DOM instrument remain separated
-across the existing WebGL boundary. The station stores a Duolingo username, manually
+French is represented by one deliberate galaxy-level destination, Lumière Station.
+It is neither a planet nor a solar system. The exterior combines a pressurized metallic
+spine, habitat ring, truss, docking ports, antenna, navigation lights, and four solar
+arrays so its silhouette remains legible at the Personal Growth overview distance. It
+is entered directly from that overview. A quiet observation-deck landing environment
+and a semantic DOM instrument remain separated across the existing WebGL boundary. The
+station stores a Duolingo username, manually
 entered Duolingo Score and streak snapshots, weekly practice targets, and editable
 French practice sessions with focus, duration, lessons, confidence, and reflection.
 It never stores Duolingo credentials and does not imply live synchronization because
@@ -437,6 +444,12 @@ provides `DATABASE_URL`, `MISSION_CONTROL_ACCESS_KEY`, and
 collection envelope, enforce idempotent client mutation IDs, retain deletion
 tombstones, and require a signed, HTTP-only, SameSite session belonging to the sole
 owner. Secrets never enter the browser bundle.
+
+The production Vercel project provisions Neon through the Vercel Marketplace and
+supplies those three values to Production and Preview. Development receives the same
+database connection plus local-only copies of the owner credentials through the
+gitignored `.env.local`. Each device unlocks once and receives a signed 30-day HTTP-only
+session; it does not receive the database URL or signing secret.
 
 IndexedDB remains the fast offline adapter. Every feature repository commits locally
 first, adds a typed mutation to the durable outbox, and requests synchronization.

@@ -7,7 +7,7 @@ import { AdditiveBlending, type Group } from "three";
 
 import { createSeededRandom } from "../../../procedural-random";
 
-import { frenchStationDefinition } from "./french-planets";
+import { frenchStationDefinition } from "./french-station-definition";
 
 function createWindowStars() {
   const count = 110;

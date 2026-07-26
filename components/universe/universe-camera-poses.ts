@@ -1,5 +1,6 @@
 import type { NavigationLevel } from "@/store/navigation-store";
 
+import { frenchStationDefinition } from "./galaxies/personal-growth/french/french-station-definition";
 import { personalGrowthPlanets } from "./galaxies/personal-growth/personal-growth-planets";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
@@ -44,6 +45,19 @@ export function getCameraPose(
   selectedPlanetId: string | null,
 ): CameraPose {
   if (navigationLevel === "planet") {
+    if (
+      selectedGalaxyId === frenchStationDefinition.galaxyId &&
+      selectedSystemId === null &&
+      selectedPlanetId === frenchStationDefinition.id
+    ) {
+      return {
+        ambientScale: 0.08,
+        fov: 42,
+        lookTarget: frenchStationDefinition.cameraLookTarget,
+        position: frenchStationDefinition.cameraPosition,
+      };
+    }
+
     const planet = personalGrowthPlanets.find(
       (definition) =>
         definition.galaxyId === selectedGalaxyId &&

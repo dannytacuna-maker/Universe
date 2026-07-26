@@ -5,7 +5,9 @@
   bottom: max(1rem, calc(env(safe-area-inset-bottom) + 0.7rem));
   left: max(4.8rem, calc(env(safe-area-inset-left) + 4.2rem));
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   width: min(72rem, calc(100vw - 6rem));
+  height: min(72svh, 49rem);
   max-height: min(72svh, 49rem);
   margin-inline: auto;
   overflow: hidden;
@@ -20,6 +22,7 @@
   color: rgb(229 239 245 / 91%);
   backdrop-filter: blur(24px) saturate(116%);
   transition:
+    height 520ms var(--universe-ease),
     max-height 520ms var(--universe-ease),
     width 520ms var(--universe-ease),
     border-color 280ms ease;
@@ -28,6 +31,7 @@
 .dashboard[data-expanded="false"] {
   left: auto;
   width: min(35rem, calc(100vw - 2rem));
+  height: 5.2rem;
   max-height: 5.2rem;
 }
 
@@ -770,10 +774,12 @@
   }
 
   .dashboard {
+    height: min(76svh, 45rem);
     max-height: min(76svh, 45rem);
   }
 
   .dashboard[data-expanded="false"] {
+    height: 4.75rem;
     max-height: 4.75rem;
   }
 

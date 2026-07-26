@@ -10,7 +10,7 @@ import { MissionOperatingDeck } from "@/components/mission-control/mission-opera
 import type { NavigationState } from "@/store/navigation-store";
 import { useNavigationStore } from "@/store/navigation-store-provider";
 
-import { frenchStationDefinition } from "./galaxies/personal-growth/french/french-planets";
+import { frenchStationDefinition } from "./galaxies/personal-growth/french/french-station-definition";
 import { FrenchStationDashboard } from "./galaxies/personal-growth/french/french-station-dashboard";
 import { useFrenchLearning } from "./galaxies/personal-growth/french/use-french-learning";
 import {
@@ -44,6 +44,7 @@ import {
 } from "./planet-arrival-transition";
 import {
   findGalaxy,
+  findGalaxyStation,
   findPlanet,
   findSystem,
   personalGrowthGalaxyId,
@@ -59,7 +60,6 @@ import { useWebGLSupport } from "./use-webgl-support";
 import { deriveUniverseActivitySignals } from "./universe-activity";
 import { WebGLBoundary } from "./webgl-boundary";
 
-const frenchSystemId = "french";
 const jiuJitsuSystemId = "jiu-jitsu";
 const planetCloudCoverDurationMs = 1180;
 const planetCloudRevealDurationMs = 1500;
@@ -235,6 +235,11 @@ export function UniverseViewport() {
     () => findPlanet(selectedGalaxyId, selectedSystemId, selectedPlanetId),
     [selectedGalaxyId, selectedPlanetId, selectedSystemId],
   );
+  const activeStation = useMemo(
+    () => findGalaxyStation(selectedGalaxyId, selectedPlanetId),
+    [selectedGalaxyId, selectedPlanetId],
+  );
+  const activeDestination = activePlanet ?? activeStation;
   const activeCourse = useMemo(
     () =>
       selectedGalaxyId === universityGalaxyId
@@ -375,6 +380,23 @@ export function UniverseViewport() {
       }
 
       const galaxy = findGalaxy(selectedGalaxyId);
+      const station = findGalaxyStation(selectedGalaxyId, planetId);
+
+      if (galaxy !== null && station !== null && selectedSystemId === null) {
+        clearInteractionState();
+        beginCameraTravel();
+        setAnnouncement(`Docking with ${station.name}.`);
+        const nextState: NavigationState = {
+          level: "planet",
+          selectedGalaxyId: galaxy.id,
+          selectedPlanetId: station.id,
+          selectedSystemId: null,
+        };
+        pushNavigationUrl(nextState);
+        enterPlanet(galaxy.id, null, station.id);
+        return;
+      }
+
       const system = findSystem(selectedGalaxyId, selectedSystemId);
       const planet = findPlanet(selectedGalaxyId, selectedSystemId, planetId);
 
@@ -402,6 +424,7 @@ export function UniverseViewport() {
     },
     [
       beginCameraTravel,
+      clearInteractionState,
       enterPlanet,
       planetArrivalPhase,
       pushNavigationUrl,
@@ -441,6 +464,25 @@ export function UniverseViewport() {
       return;
     }
 
+    if (
+      navigationLevel === "planet" &&
+      selectedGalaxy !== null &&
+      activeStation !== null
+    ) {
+      clearInteractionState();
+      beginCameraTravel();
+      setAnnouncement(`Returning to the ${selectedGalaxy.name} galaxy.`);
+      const nextState: NavigationState = {
+        level: "galaxy",
+        selectedGalaxyId: selectedGalaxy.id,
+        selectedPlanetId: null,
+        selectedSystemId: null,
+      };
+      pushNavigationUrl(nextState);
+      returnToGalaxy(selectedGalaxy.id);
+      return;
+    }
+
     if (navigationLevel === "system" && selectedGalaxy !== null) {
       clearInteractionState();
       beginCameraTravel();
@@ -463,6 +505,7 @@ export function UniverseViewport() {
     returnToUniverse();
   }, [
     beginCameraTravel,
+    activeStation,
     activeSystem,
     clearInteractionState,
     navigationLevel,
@@ -488,7 +531,7 @@ export function UniverseViewport() {
       setCameraResetToken((token) => token + 1);
     };
 
-    if (navigationLevel === "planet") {
+    if (navigationLevel === "planet" && activeStation === null) {
       travelThroughPlanetClouds(
         "A wave of cloud is rising for the return to origin.",
         returnToOrigin,
@@ -500,6 +543,7 @@ export function UniverseViewport() {
     returnToOrigin();
   }, [
     beginCameraTravel,
+    activeStation,
     clearInteractionState,
     navigationLevel,
     planetArrivalPhase,
@@ -519,11 +563,15 @@ export function UniverseViewport() {
         nextState.level === "galaxy"
           ? findGalaxy(nextState.selectedGalaxyId)
           : nextState.level === "planet"
-            ? findPlanet(
+            ? (findGalaxyStation(
+                nextState.selectedGalaxyId,
+                nextState.selectedPlanetId,
+              ) ??
+              findPlanet(
                 nextState.selectedGalaxyId,
                 nextState.selectedSystemId,
                 nextState.selectedPlanetId,
-              )
+              ))
             : findSystem(
                 nextState.selectedGalaxyId,
                 nextState.selectedSystemId,
@@ -547,7 +595,6 @@ export function UniverseViewport() {
         } else if (
           nextState.level === "planet" &&
           nextState.selectedGalaxyId !== null &&
-          nextState.selectedSystemId !== null &&
           nextState.selectedPlanetId !== null
         ) {
           enterPlanet(
@@ -563,7 +610,7 @@ export function UniverseViewport() {
         }
       };
 
-      if (navigationLevel === "planet") {
+      if (navigationLevel === "planet" && activeStation === null) {
         travelThroughPlanetClouds(
           `A wave of cloud is rising for the journey to ${destination.name}.`,
           travel,
@@ -574,6 +621,7 @@ export function UniverseViewport() {
     },
     [
       beginCameraTravel,
+      activeStation,
       clearInteractionState,
       enterGalaxy,
       enterPlanet,
@@ -708,7 +756,7 @@ export function UniverseViewport() {
   const isFrenchStationActive =
     navigationLevel === "planet" &&
     selectedGalaxyId === personalGrowthGalaxyId &&
-    activeSystemId === frenchSystemId &&
+    activeSystemId === null &&
     selectedPlanetId === frenchStationDefinition.id;
 
   return (
@@ -755,7 +803,7 @@ export function UniverseViewport() {
 
       <UniverseNavigationOverlay
         activeSystemName={activeSystem?.name ?? null}
-        activePlanetName={activePlanet?.name ?? null}
+        activePlanetName={activeDestination?.name ?? null}
         activeSystemSummary={
           activeCourse === null
             ? (activeGrowthSystem?.description ?? null)
@@ -873,20 +921,18 @@ export function UniverseViewport() {
           ? "University and Personal Growth galaxies are available to explore."
           : navigationLevel === "galaxy"
             ? selectedGalaxyId === personalGrowthGalaxyId
-              ? "Four Personal Growth systems are mapped: French, Jiu-Jitsu, Strength and Physique, and Reading."
+              ? "Three Personal Growth systems and one independent French station are mapped: Jiu-Jitsu, Strength and Physique, Reading, and Lumière Station."
               : "Five University systems are mapped: four scheduled courses and Final Project. Logistics and Distribution is available to explore."
             : navigationLevel === "planet"
-              ? activePlanet === null
-                ? "Personal Growth planet."
-                : `${activePlanet.name}. ${activePlanet.description}`
+              ? activeDestination === null
+                ? "Personal Growth destination."
+                : `${activeDestination.name}. ${activeDestination.description}`
               : selectedGalaxyId === personalGrowthGalaxyId
-                ? activeSystemId === frenchSystemId
-                  ? "French system. Lumière Station is available for Duolingo progress and French practice."
-                  : activeSystemId === strengthPhysiqueSystemId
-                    ? "Strength and Physique system. Beerus' Planet, the Training Archive, and the Gym Playlist are available to enter."
-                    : activeSystemId === jiuJitsuSystemId
-                      ? "Jiu-Jitsu system. Training sessions can be logged privately, and the Hyperbolic Time Chamber is available to enter."
-                      : "Reading system. The Celestial Library is available to enter."
+                ? activeSystemId === strengthPhysiqueSystemId
+                  ? "Strength and Physique system. Beerus' Planet, the Training Archive, and the Gym Playlist are available to enter."
+                  : activeSystemId === jiuJitsuSystemId
+                    ? "Jiu-Jitsu system. Training sessions can be logged privately, and the Hyperbolic Time Chamber is available to enter."
+                    : "Reading system. The Celestial Library is available to enter."
                 : activeCourse === null
                   ? "University course system."
                   : `${activeCourse.name} course system. ${formatCourseScheduleDetails(activeCourse.schedule)}. Workspaces have not been introduced yet.`}

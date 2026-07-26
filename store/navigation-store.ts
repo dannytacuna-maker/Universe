@@ -11,7 +11,11 @@ export type NavigationState = {
 
 export type NavigationActions = {
   enterGalaxy: (galaxyId: string) => void;
-  enterPlanet: (galaxyId: string, systemId: string, planetId: string) => void;
+  enterPlanet: (
+    galaxyId: string,
+    systemId: string | null,
+    planetId: string,
+  ) => void;
   enterSystem: (galaxyId: string, systemId: string) => void;
   returnToGalaxy: (galaxyId: string) => void;
   returnToSystem: (galaxyId: string, systemId: string) => void;

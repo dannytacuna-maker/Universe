@@ -2,6 +2,7 @@ import type { NavigationState } from "@/store/navigation-store";
 
 import {
   findGalaxy,
+  findGalaxyStation,
   findPlanet,
   findSystem,
   universeOriginState,
@@ -29,6 +30,31 @@ export function readUniverseNavigation(search: string): NavigationState {
       }
 
       const system = findSystem(galaxy.id, systemId);
+
+      if (
+        galaxy.id === "personal-growth" &&
+        systemId === "french" &&
+        planetId === "french-station"
+      ) {
+        return {
+          level: "planet",
+          selectedGalaxyId: galaxy.id,
+          selectedPlanetId: "french-station",
+          selectedSystemId: null,
+        };
+      }
+
+      if (
+        planetId === undefined &&
+        findGalaxyStation(galaxy.id, systemId) !== null
+      ) {
+        return {
+          level: "planet",
+          selectedGalaxyId: galaxy.id,
+          selectedPlanetId: systemId,
+          selectedSystemId: null,
+        };
+      }
 
       if (system?.status === "explorable" && planetId === undefined) {
         return {
@@ -69,6 +95,16 @@ export function createUniverseNavigationUrl(
     if (state.selectedGalaxyId !== null) {
       url.searchParams.set(destinationParameter, state.selectedGalaxyId);
     }
+  } else if (
+    state.level === "planet" &&
+    state.selectedGalaxyId !== null &&
+    state.selectedSystemId === null &&
+    state.selectedPlanetId !== null
+  ) {
+    url.searchParams.set(
+      destinationParameter,
+      `${state.selectedGalaxyId}/${state.selectedPlanetId}`,
+    );
   } else if (
     (state.level === "system" || state.level === "planet") &&
     state.selectedGalaxyId !== null &&

@@ -1,10 +1,10 @@
 import type { Vector3Tuple } from "../galaxy-definition";
 
 export type PersonalGrowthPlanetKind =
-  "library" | "playlist" | "program" | "sanctuary" | "station" | "time-chamber";
+  "library" | "playlist" | "program" | "sanctuary" | "time-chamber";
 
 export type PersonalGrowthPlanetSystemId =
-  "french" | "jiu-jitsu" | "reading" | "strength-physique";
+  "jiu-jitsu" | "reading" | "strength-physique";
 
 export type PersonalGrowthPlanetDefinition = Readonly<{
   cameraLookTarget: Vector3Tuple;
