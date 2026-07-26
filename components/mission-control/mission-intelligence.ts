@@ -1,3 +1,4 @@
+import type { FrenchPracticeSession } from "@/components/universe/galaxies/personal-growth/french/french-learning-record";
 import type { JiuJitsuSession } from "@/components/universe/galaxies/personal-growth/jiu-jitsu/jiu-jitsu-session";
 import type {
   ReadingBook,
@@ -8,7 +9,7 @@ import type { UniversityNote } from "@/components/universe/galaxies/university/u
 import { universityCourseSystems } from "@/components/universe/galaxies/university/university-course-systems";
 
 export type MissionReflectionSystem =
-  "jiu-jitsu" | "reading" | "strength-physique" | "university";
+  "french" | "jiu-jitsu" | "reading" | "strength-physique" | "university";
 
 export type MissionReflectionEntry = Readonly<{
   date: string;
@@ -34,7 +35,7 @@ export type MissionIntelligence = Readonly<{
   activityDates: Readonly<
     Partial<
       Record<
-        "jiu-jitsu" | "reading" | "strength-physique" | "university",
+        "french" | "jiu-jitsu" | "reading" | "strength-physique" | "university",
         readonly string[]
       >
     >
@@ -45,6 +46,7 @@ export type MissionIntelligence = Readonly<{
 }>;
 
 type MissionIntelligenceInput = Readonly<{
+  frenchSessions: readonly FrenchPracticeSession[];
   jiuJitsuSessions: readonly JiuJitsuSession[];
   readingBooks: readonly ReadingBook[];
   readingSessions: readonly ReadingSession[];
@@ -53,6 +55,7 @@ type MissionIntelligenceInput = Readonly<{
 }>;
 
 type WeeklyActivity = {
+  frenchMinutes: number;
   jiuJitsu: number;
   readingMinutes: number;
   strength: number;
@@ -96,6 +99,7 @@ function correlation(first: readonly number[], second: readonly number[]) {
 
 function buildPatterns(input: MissionIntelligenceInput) {
   const datedActivity = [
+    ...input.frenchSessions.map((session) => session.occurredOn),
     ...input.jiuJitsuSessions.map((session) => session.occurredOn),
     ...input.readingSessions.map((session) => session.occurredOn),
     ...input.strengthSessions.map((session) => session.occurredOn),
@@ -127,9 +131,14 @@ function buildPatterns(input: MissionIntelligenceInput) {
   const activity = new Map<string, WeeklyActivity>(
     weeks.map((week) => [
       week,
-      { jiuJitsu: 0, readingMinutes: 0, strength: 0 },
+      { frenchMinutes: 0, jiuJitsu: 0, readingMinutes: 0, strength: 0 },
     ]),
   );
+
+  for (const session of input.frenchSessions) {
+    const entry = activity.get(getMondayKey(session.occurredOn));
+    if (entry !== undefined) entry.frenchMinutes += session.durationMinutes;
+  }
 
   for (const session of input.jiuJitsuSessions) {
     const entry = activity.get(getMondayKey(session.occurredOn));
@@ -148,9 +157,21 @@ function buildPatterns(input: MissionIntelligenceInput) {
 
   const values = weeks.map(
     (week) =>
-      activity.get(week) ?? { jiuJitsu: 0, readingMinutes: 0, strength: 0 },
+      activity.get(week) ?? {
+        frenchMinutes: 0,
+        jiuJitsu: 0,
+        readingMinutes: 0,
+        strength: 0,
+      },
   );
   const candidates = [
+    {
+      first: values.map((entry) => entry.frenchMinutes),
+      firstLabel: "French practice",
+      id: "french-reading",
+      second: values.map((entry) => entry.readingMinutes),
+      secondLabel: "reading time",
+    },
     {
       first: values.map((entry) => entry.readingMinutes),
       firstLabel: "reading time",
@@ -205,6 +226,19 @@ function buildReflections(input: MissionIntelligenceInput) {
     universityCourseSystems.map((course) => [course.id, course.displayName]),
   );
   const reflections: MissionReflectionEntry[] = [];
+
+  for (const session of input.frenchSessions) {
+    if (session.reflection.length > 0) {
+      reflections.push({
+        date: session.occurredOn,
+        id: `french:${session.id}`,
+        label: "French",
+        system: "french",
+        text: session.reflection,
+        topic: `${session.focus} practice`,
+      });
+    }
+  }
 
   for (const session of input.jiuJitsuSessions) {
     const text = [session.reflection, session.notes].filter(Boolean).join("\n");
@@ -273,6 +307,9 @@ function buildIdentityEvidence(input: MissionIntelligenceInput) {
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - 30);
   const cutoffKey = cutoff.toISOString().slice(0, 10);
+  const frenchMinutes = input.frenchSessions
+    .filter((session) => session.occurredOn >= cutoffKey)
+    .reduce((total, session) => total + session.durationMinutes, 0);
   const jiuJitsuCount = input.jiuJitsuSessions.filter(
     (session) => session.occurredOn >= cutoffKey,
   ).length;
@@ -286,6 +323,7 @@ function buildIdentityEvidence(input: MissionIntelligenceInput) {
     (note) => note.createdAt.slice(0, 10) >= cutoffKey,
   ).length;
   const statements = [
+    frenchMinutes > 0 ? `${frenchMinutes} minutes of French practiced` : null,
     jiuJitsuCount > 0
       ? `${jiuJitsuCount} Jiu-Jitsu ${jiuJitsuCount === 1 ? "session" : "sessions"} practiced`
       : null,
@@ -306,6 +344,9 @@ export function buildMissionIntelligence(
 ): MissionIntelligence {
   return {
     activityDates: {
+      french: [
+        ...new Set(input.frenchSessions.map((session) => session.occurredOn)),
+      ],
       "jiu-jitsu": [
         ...new Set(input.jiuJitsuSessions.map((session) => session.occurredOn)),
       ],

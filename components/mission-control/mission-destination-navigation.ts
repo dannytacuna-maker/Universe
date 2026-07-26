@@ -20,6 +20,13 @@ export function createMissionDestinationState(
         selectedPlanetId: null,
         selectedSystemId: "logistics",
       };
+    case "french-station":
+      return {
+        level: "planet",
+        selectedGalaxyId: "personal-growth",
+        selectedPlanetId: "french-station",
+        selectedSystemId: "french",
+      };
     case "hyperbolic-time-chamber":
       return {
         level: "planet",
@@ -41,6 +48,7 @@ export function createMissionDestinationState(
         selectedPlanetId: "celestial-library",
         selectedSystemId: "reading",
       };
+    case "french":
     case "jiu-jitsu":
     case "reading":
     case "strength-physique":

@@ -15,6 +15,9 @@ import { DistantCelestialStructures } from "./distant-celestial-structures";
 import { UniversityGalaxy } from "./galaxies/university-galaxy";
 import { UniversityCourseSystemGroup } from "./galaxies/university/university-course-system-group";
 import { UniversityInteriorField } from "./galaxies/university/university-interior-field";
+import { FrenchLearningStation } from "./galaxies/personal-growth/french/french-learning-station";
+import { frenchStationDefinition } from "./galaxies/personal-growth/french/french-planets";
+import { FrenchStationSurface } from "./galaxies/personal-growth/french/french-station-surface";
 import type { JiuJitsuProgress } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-progress";
 import { hyperbolicTimeChamberDefinition } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-planets";
 import { TimeChamberSurface } from "./galaxies/personal-growth/jiu-jitsu/time-chamber-surface";
@@ -117,6 +120,9 @@ export function UniverseScene({
   const isTimeChamberSurfaceSelected =
     navigationLevel === "planet" &&
     selectedPlanetId === hyperbolicTimeChamberDefinition.id;
+  const isFrenchStationSurfaceSelected =
+    navigationLevel === "planet" &&
+    selectedPlanetId === frenchStationDefinition.id;
   const selectedGenericPersonalGrowthSurface =
     navigationLevel === "planet"
       ? (genericPersonalGrowthSurfaces.find(
@@ -251,6 +257,25 @@ export function UniverseScene({
           onPlanetHoverChange(isHovered ? beerusPlanetDefinition.id : null)
         }
       />
+      <FrenchLearningStation
+        isEmphasized={emphasizedPlanetId === frenchStationDefinition.id}
+        isHovered={hoveredPlanetId === frenchStationDefinition.id}
+        isInteractive={
+          personalGrowthSelected &&
+          navigationLevel === "system" &&
+          activeSystemId === frenchStationDefinition.systemId
+        }
+        isVisible={
+          personalGrowthSelected &&
+          navigationLevel === "system" &&
+          activeSystemId === frenchStationDefinition.systemId
+        }
+        motionEnabled={motionEnabled}
+        onActivate={() => onPlanetActivate(frenchStationDefinition.id)}
+        onHoverChange={(isHovered) =>
+          onPlanetHoverChange(isHovered ? frenchStationDefinition.id : null)
+        }
+      />
       {standardPersonalGrowthPlanets.map((planet) => (
         <PersonalGrowthDestinationPlanet
           definition={planet}
@@ -280,6 +305,9 @@ export function UniverseScene({
         ) : null}
         {isTimeChamberSurfaceSelected ? (
           <TimeChamberSurface isVisible motionEnabled={motionEnabled} />
+        ) : null}
+        {isFrenchStationSurfaceSelected ? (
+          <FrenchStationSurface isVisible motionEnabled={motionEnabled} />
         ) : null}
         {selectedGenericPersonalGrowthSurface ? (
           <PersonalGrowthDestinationSurface

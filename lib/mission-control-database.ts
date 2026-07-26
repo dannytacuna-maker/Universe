@@ -1,8 +1,11 @@
 const databaseName = "mission-control";
-const databaseVersion = 5;
+const databaseVersion = 6;
 
 export const personalGrowthStoreNames = {
   bodyWeight: "strength-body-weight",
+  frenchProfile: "french-learning-profile",
+  frenchSessions: "french-practice-sessions",
+  frenchSnapshots: "french-progress-snapshots",
   jiuJitsuSessions: "jiu-jitsu-sessions",
   liftHistory: "strength-lift-history",
   personalRecords: "strength-personal-records",
@@ -97,6 +100,19 @@ export async function openMissionControlDatabase() {
     createIndexedStore(
       database,
       personalGrowthStoreNames.jiuJitsuSessions,
+      "id",
+      ["occurredOn"],
+    );
+    createIndexedStore(database, personalGrowthStoreNames.frenchProfile, "id");
+    createIndexedStore(
+      database,
+      personalGrowthStoreNames.frenchSessions,
+      "id",
+      ["occurredOn", "focus"],
+    );
+    createIndexedStore(
+      database,
+      personalGrowthStoreNames.frenchSnapshots,
       "id",
       ["occurredOn"],
     );

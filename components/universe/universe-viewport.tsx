@@ -10,6 +10,9 @@ import { MissionOperatingDeck } from "@/components/mission-control/mission-opera
 import type { NavigationState } from "@/store/navigation-store";
 import { useNavigationStore } from "@/store/navigation-store-provider";
 
+import { frenchStationDefinition } from "./galaxies/personal-growth/french/french-planets";
+import { FrenchStationDashboard } from "./galaxies/personal-growth/french/french-station-dashboard";
+import { useFrenchLearning } from "./galaxies/personal-growth/french/use-french-learning";
 import {
   formatCourseScheduleDetails,
   formatCourseScheduleSummary,
@@ -56,6 +59,7 @@ import { useWebGLSupport } from "./use-webgl-support";
 import { deriveUniverseActivitySignals } from "./universe-activity";
 import { WebGLBoundary } from "./webgl-boundary";
 
+const frenchSystemId = "french";
 const jiuJitsuSystemId = "jiu-jitsu";
 const planetCloudCoverDurationMs = 1180;
 const planetCloudRevealDurationMs = 1500;
@@ -100,6 +104,7 @@ export function UniverseViewport() {
   const hasSyncedLocation = useRef(false);
   const planetNavigationTimer = useRef<number | null>(null);
   const planetRevealTimer = useRef<number | null>(null);
+  const frenchLearning = useFrenchLearning();
   const {
     addSession,
     editSession,
@@ -142,6 +147,7 @@ export function UniverseViewport() {
   const missionIntelligence = useMemo(
     () =>
       buildMissionIntelligence({
+        frenchSessions: frenchLearning.sessions,
         jiuJitsuSessions,
         readingBooks,
         readingSessions,
@@ -149,6 +155,7 @@ export function UniverseViewport() {
         universityNotes: universityRecords.notes,
       }),
     [
+      frenchLearning.sessions,
       jiuJitsuSessions,
       readingBooks,
       readingSessions,
@@ -159,6 +166,11 @@ export function UniverseViewport() {
   const activitySignals = useMemo(
     () =>
       deriveUniverseActivitySignals({
+        french: {
+          error: frenchLearning.storageError,
+          loading: frenchLearning.isLoading,
+          summary: frenchLearning.summary,
+        },
         jiuJitsu: {
           error: trainingStorageError,
           loading: isTrainingLogLoading,
@@ -184,6 +196,9 @@ export function UniverseViewport() {
         },
       }),
     [
+      frenchLearning.isLoading,
+      frenchLearning.storageError,
+      frenchLearning.summary,
       isReadingLoading,
       isStrengthLoading,
       isTrainingLogLoading,
@@ -690,6 +705,11 @@ export function UniverseViewport() {
     selectedGalaxyId === personalGrowthGalaxyId &&
     activeSystemId === readingSystemId &&
     selectedPlanetId === celestialLibraryDefinition.id;
+  const isFrenchStationActive =
+    navigationLevel === "planet" &&
+    selectedGalaxyId === personalGrowthGalaxyId &&
+    activeSystemId === frenchSystemId &&
+    selectedPlanetId === frenchStationDefinition.id;
 
   return (
     <section
@@ -832,6 +852,19 @@ export function UniverseViewport() {
         summary={readingSummary}
       />
 
+      <FrenchStationDashboard
+        isLoading={frenchLearning.isLoading}
+        isVisible={isFrenchStationActive && isViewSettled}
+        onAddSession={frenchLearning.addSession}
+        onEditSession={frenchLearning.editSession}
+        onRemoveSession={frenchLearning.removeSession}
+        onUpdateProfile={frenchLearning.updateProfile}
+        profile={frenchLearning.profile}
+        sessions={frenchLearning.sessions}
+        storageError={frenchLearning.storageError}
+        summary={frenchLearning.summary}
+      />
+
       <span aria-live="polite" className="sr-only">
         {announcement}
       </span>
@@ -840,18 +873,20 @@ export function UniverseViewport() {
           ? "University and Personal Growth galaxies are available to explore."
           : navigationLevel === "galaxy"
             ? selectedGalaxyId === personalGrowthGalaxyId
-              ? "Three Personal Growth systems are mapped: Jiu-Jitsu, Strength and Physique, and Reading."
+              ? "Four Personal Growth systems are mapped: French, Jiu-Jitsu, Strength and Physique, and Reading."
               : "Five University systems are mapped: four scheduled courses and Final Project. Logistics and Distribution is available to explore."
             : navigationLevel === "planet"
               ? activePlanet === null
                 ? "Personal Growth planet."
                 : `${activePlanet.name}. ${activePlanet.description}`
               : selectedGalaxyId === personalGrowthGalaxyId
-                ? activeSystemId === strengthPhysiqueSystemId
-                  ? "Strength and Physique system. Beerus' Planet, the Training Archive, and the Gym Playlist are available to enter."
-                  : activeSystemId === jiuJitsuSystemId
-                    ? "Jiu-Jitsu system. Training sessions can be logged privately, and the Hyperbolic Time Chamber is available to enter."
-                    : "Reading system. The Celestial Library is available to enter."
+                ? activeSystemId === frenchSystemId
+                  ? "French system. Lumière Station is available for Duolingo progress and French practice."
+                  : activeSystemId === strengthPhysiqueSystemId
+                    ? "Strength and Physique system. Beerus' Planet, the Training Archive, and the Gym Playlist are available to enter."
+                    : activeSystemId === jiuJitsuSystemId
+                      ? "Jiu-Jitsu system. Training sessions can be logged privately, and the Hyperbolic Time Chamber is available to enter."
+                      : "Reading system. The Celestial Library is available to enter."
                 : activeCourse === null
                   ? "University course system."
                   : `${activeCourse.name} course system. ${formatCourseScheduleDetails(activeCourse.schedule)}. Workspaces have not been introduced yet.`}

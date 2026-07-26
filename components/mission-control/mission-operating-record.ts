@@ -1,6 +1,7 @@
 export const missionAreas = [
   { id: "general", label: "General" },
   { id: "university", label: "University" },
+  { id: "french", label: "French" },
   { id: "jiu-jitsu", label: "Jiu-Jitsu" },
   { id: "strength-physique", label: "Strength & Physique" },
   { id: "reading", label: "Reading" },
@@ -13,6 +14,12 @@ export type MissionAreaId = (typeof missionAreas)[number]["id"];
 export const missionDestinations = [
   { areaId: "university", id: "university", label: "University galaxy" },
   { areaId: "university", id: "logistics", label: "Logistics system" },
+  { areaId: "french", id: "french", label: "French system" },
+  {
+    areaId: "french",
+    id: "french-station",
+    label: "Lumière Station",
+  },
   { areaId: "jiu-jitsu", id: "jiu-jitsu", label: "Jiu-Jitsu system" },
   {
     areaId: "jiu-jitsu",

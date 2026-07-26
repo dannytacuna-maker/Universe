@@ -210,7 +210,8 @@ examples are `destination=university/logistics` and
 `destination=personal-growth/strength-physique/training-archive`, and
 `destination=personal-growth/strength-physique/gym-playlist`. Jiu-Jitsu and Reading
 planet deep links are `destination=personal-growth/jiu-jitsu/hyperbolic-time-chamber`
-and `destination=personal-growth/reading/celestial-library`. URL parsing is pure and
+and `destination=personal-growth/reading/celestial-library`. French uses
+`destination=personal-growth/french/french-station`. URL parsing is pure and
 colocated with the universe feature; `UniverseViewport` synchronizes browser history
 and Zustand through `pushState` and `popstate`. Unknown or future destinations fall
 back to the universe instead of fabricating unavailable navigation. This is client-side
@@ -250,7 +251,8 @@ clarity without letting the scene read persistence directly.
 
 Operating records use the same local-first `mission-control` IndexedDB database
 through the shared `lib/mission-control-database.ts` migration boundary. Schema
-version 5 preserves all Personal Growth stores and adds independent stores for
+version 6 preserves all existing records, adds the French learning profile,
+practice-session, and progress-snapshot stores, and retains independent stores for
 identity, growth cycles, cycle evidence, captures, weekly reviews, and
 experiments, University operations, Strength sessions and lift history, the sync
 outbox, sync state, and recoverable form drafts. Repositories enforce the
@@ -270,8 +272,8 @@ remain repository data. Each course keeps its palette and deterministic orbital
 identity, while scheduled systems derive their visible orbital guides from real class
 meetings and Final Project uses the mapped independent-work field.
 
-Personal Growth is a feature-owned galaxy with three first-class explorable system
-definitions: Jiu-Jitsu, Strength and Physique, and Reading. Daily Discipline was removed
+Personal Growth is a feature-owned galaxy with four first-class explorable system
+definitions: French, Jiu-Jitsu, Strength and Physique, and Reading. Daily Discipline was removed
 because it no longer represents a required destination. Each renderer receives only the
 compact derived progress signal it can communicate spatially. For Jiu-Jitsu, recent
 attention affects halo clarity, active-week consistency affects orbital stability,
@@ -282,8 +284,8 @@ those markers while recorded lifts modestly strengthen the surrounding structure
 visualization never reads storage and never owns authoritative records.
 
 Personal Growth records are stored in the shared local IndexedDB database named
-`mission-control`. Schema version 5 preserves the original Jiu-Jitsu, Strength, and
-Reading stores while adding the independent Mission, University, and sync stores
+`mission-control`. Schema version 6 preserves the original Jiu-Jitsu, Strength, and
+Reading stores while adding the French learning stores and the independent Mission, University, and sync stores
 described above.
 The Strength plan describes muscle
 groups and bounded exercise counts rather than prescribing exercises: Push covers chest,
@@ -348,6 +350,18 @@ page. A pure summary derives
 the current book, weekly time and pages, recent reflections, and the next reading queue.
 The library uses ordinary forms and semantic history outside WebGL, staged over a quiet
 procedural library environment.
+
+French contains one deliberate destination, Lumière Station. It is a procedural
+orbital station rather than another planet: a lightweight station marker, a quiet
+observation-deck landing environment, and a semantic DOM instrument remain separated
+across the existing WebGL boundary. The station stores a Duolingo username, manually
+entered Duolingo Score and streak snapshots, weekly practice targets, and editable
+French practice sessions with focus, duration, lessons, confidence, and reflection.
+It never stores Duolingo credentials and does not imply live synchronization because
+Duolingo currently exposes no supported personal-progress API. Session activity feeds
+the same derived identity, reflection, Current Vector, and living-universe boundaries
+as the other Personal Growth systems. The station adds no external asset, post-processing,
+shadow, physics, or independent render scheduler.
 
 Strength and Physique contains three landed destinations: Beerus' Planet, Training
 Archive, and Gym Playlist. Shared definitions own system-space placement, label

@@ -1,4 +1,5 @@
 import type { JiuJitsuProgress } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-progress";
+import type { FrenchLearningSummary } from "./galaxies/personal-growth/french/french-learning-summary";
 import type { ReadingSession } from "./galaxies/personal-growth/reading/reading-record";
 import type { ReadingSummary } from "./galaxies/personal-growth/reading/reading-summary";
 import type { StrengthProgress } from "./galaxies/personal-growth/strength-physique/strength-physique-progress";
@@ -22,6 +23,7 @@ export type UniverseActivitySignals = Readonly<{
     university: number;
   }>;
   personalGrowth: Readonly<{
+    french: UniverseActivitySignal;
     "jiu-jitsu": UniverseActivitySignal;
     reading: UniverseActivitySignal;
     "strength-physique": UniverseActivitySignal;
@@ -35,6 +37,7 @@ type ActivityLoadState = Readonly<{
 }>;
 
 type UniverseActivityInput = Readonly<{
+  french: ActivityLoadState & Readonly<{ summary: FrenchLearningSummary }>;
   jiuJitsu: ActivityLoadState & Readonly<{ progress: JiuJitsuProgress }>;
   reading: ActivityLoadState &
     Readonly<{
@@ -85,6 +88,7 @@ function average(values: readonly number[]) {
 export function deriveUniverseActivitySignals(
   input: UniverseActivityInput,
 ): UniverseActivitySignals {
+  const french = signal(input.french, input.french.summary.activity);
   const jiuJitsu = signal(
     input.jiuJitsu,
     input.jiuJitsu.progress.recentAttention,
@@ -150,6 +154,7 @@ export function deriveUniverseActivitySignals(
   return {
     galaxy: {
       personalGrowth: average([
+        french.activity,
         jiuJitsu.activity,
         reading.activity,
         strength.activity,
@@ -159,6 +164,7 @@ export function deriveUniverseActivitySignals(
       ),
     },
     personalGrowth: {
+      french,
       "jiu-jitsu": jiuJitsu,
       reading,
       "strength-physique": strength,

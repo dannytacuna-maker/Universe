@@ -2,6 +2,28 @@ import type { PersonalGrowthSystemDefinition } from "./personal-growth-system-de
 
 export const personalGrowthSystems = [
   {
+    cameraPosition: [4.15, 0.42, -5.72],
+    description:
+      "French practice, Duolingo progress, confidence, and lasting fluency.",
+    displayName: "French",
+    id: "french",
+    labelPosition: {
+      compact: [52, 25],
+      desktop: [51, 24],
+      portrait: [52, 25],
+    },
+    name: "French",
+    palette: {
+      core: "#eef8ff",
+      halo: "#79b9ed",
+      orbit: "#6e83d5",
+    },
+    position: [4.15, 0.25, -10.18],
+    scale: 0.88,
+    seed: 731_947,
+    status: "explorable",
+  },
+  {
     cameraPosition: [2.85, -0.28, -5.35],
     description: "Training consistency, techniques, sparring, and reflection.",
     displayName: "Jiu-Jitsu",
@@ -66,6 +88,7 @@ export const personalGrowthSystems = [
   },
 ] as const satisfies readonly PersonalGrowthSystemDefinition[];
 
-export const jiuJitsuSystem = personalGrowthSystems[0];
-export const strengthPhysiqueSystem = personalGrowthSystems[1];
-export const readingSystem = personalGrowthSystems[2];
+export const frenchSystem = personalGrowthSystems[0];
+export const jiuJitsuSystem = personalGrowthSystems[1];
+export const strengthPhysiqueSystem = personalGrowthSystems[2];
+export const readingSystem = personalGrowthSystems[3];

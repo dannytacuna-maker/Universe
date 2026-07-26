@@ -16,6 +16,7 @@ type ReflectionIntelligenceProps = Readonly<{
 
 const systemLabels = {
   all: "All systems",
+  french: "French",
   "jiu-jitsu": "Jiu-Jitsu",
   reading: "Reading",
   "strength-physique": "Strength & Physique",

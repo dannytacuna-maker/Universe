@@ -28,6 +28,7 @@ const planetActionLabels = {
   playlist: "Listen",
   program: "Open archive",
   sanctuary: "Land",
+  station: "Enter station",
   "time-chamber": "Review training",
 } as const;
 
@@ -74,7 +75,7 @@ export function PersonalGrowthPlanetLabels({
           <span>{planet.name}</span>
           <small aria-hidden="true">{planetActionLabels[planet.kind]}</small>
           <span className="sr-only" id={descriptionId}>
-            {planet.description} Activate to enter this planet.
+            {planet.description} Activate to enter this destination.
           </span>
         </button>
       );

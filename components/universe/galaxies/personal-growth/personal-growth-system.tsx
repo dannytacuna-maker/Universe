@@ -7,6 +7,7 @@ import type { Group } from "three";
 
 import { SpatialLabelAnchor } from "../../spatial-label-anchor";
 import { SystemStellarCore } from "../system-stellar-core";
+import { FrenchSystemField } from "./french/french-system-field";
 import type { JiuJitsuProgress } from "./jiu-jitsu/jiu-jitsu-progress";
 import { JiuJitsuSystemField } from "./jiu-jitsu/jiu-jitsu-system-field";
 import type { PersonalGrowthSystemDefinition } from "./personal-growth-system-definition";
@@ -46,6 +47,7 @@ export function PersonalGrowthSystem({
 }: PersonalGrowthSystemProps) {
   const orbitalGroup = useRef<Group>(null);
   const isExplorable = definition.status === "explorable";
+  const isFrench = definition.id === "french";
   const isJiuJitsu = definition.id === "jiu-jitsu";
   const isStrengthPhysique = definition.id === "strength-physique";
   const isReading = definition.id === "reading";
@@ -87,7 +89,9 @@ export function PersonalGrowthSystem({
       />
 
       <group ref={orbitalGroup} scale={isActive ? 3 : 1}>
-        {isJiuJitsu ? (
+        {isFrench ? (
+          <FrenchSystemField activity={signal.activity} emphasis={emphasis} />
+        ) : isJiuJitsu ? (
           <JiuJitsuSystemField
             emphasis={emphasis}
             progress={jiuJitsuProgress}

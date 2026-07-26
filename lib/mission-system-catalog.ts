@@ -9,6 +9,13 @@ export const missionSystemCatalog = [
   {
     cadence: "weekly",
     galaxyId: "personal-growth",
+    id: "french",
+    label: "French",
+    records: ["profile", "progress", "session", "reflection"],
+  },
+  {
+    cadence: "weekly",
+    galaxyId: "personal-growth",
     id: "jiu-jitsu",
     label: "Jiu-Jitsu",
     records: ["session", "technique", "mobility", "reflection"],

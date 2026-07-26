@@ -4,7 +4,7 @@ export type PersonalGrowthSystemDefinition = Readonly<{
   cameraPosition: Vector3Tuple;
   description: string;
   displayName: string;
-  id: string;
+  id: "french" | "jiu-jitsu" | "reading" | "strength-physique";
   labelPosition: Readonly<{
     compact: readonly [number, number];
     desktop: readonly [number, number];

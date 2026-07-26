@@ -138,6 +138,9 @@ export function CurrentVectorPanel({
         >
           Log Jiu-Jitsu
         </button>
+        <button onClick={() => onNavigate("french-station")} type="button">
+          Practice French
+        </button>
         <button onClick={() => onNavigate("beerus-planet")} type="button">
           Log training
         </button>
