@@ -22,5 +22,3 @@ export function GokuPresence() {
     </group>
   );
 }
-
-useTexture.preload(gokuTexturePath);

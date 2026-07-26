@@ -85,7 +85,7 @@ export function ProceduralGalaxy({
       rotation={definition.orientation}
       scale={definition.scale}
     >
-      <SpatialLabelAnchor anchorId={labelAnchorId} />
+      <SpatialLabelAnchor anchorId={labelAnchorId} enabled={isInteractive} />
 
       <group ref={rotatingGroup}>
         <GalaxyLuminousVeil

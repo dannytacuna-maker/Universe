@@ -130,6 +130,25 @@ export function CurrentVectorPanel({
         <span className={styles.capacity}>{activeCycleCount} / 3 active</span>
       </header>
 
+      <nav aria-label="Quick actions" className={styles.commandActions}>
+        <span>Act now</span>
+        <button
+          onClick={() => onNavigate("hyperbolic-time-chamber")}
+          type="button"
+        >
+          Log Jiu-Jitsu
+        </button>
+        <button onClick={() => onNavigate("beerus-planet")} type="button">
+          Log training
+        </button>
+        <button onClick={() => onNavigate("celestial-library")} type="button">
+          Continue reading
+        </button>
+        <button onClick={() => onNavigate("university")} type="button">
+          University pressure
+        </button>
+      </nav>
+
       {recoveryMode ? (
         <div className={styles.recoveryNotice}>
           <span aria-hidden="true" className={styles.recoveryMark} />
@@ -185,13 +204,29 @@ export function CurrentVectorPanel({
                   aria-pressed={item.isCompleteToday}
                   className={styles.primaryAction}
                   disabled={isPending}
-                  onClick={() => void handleEvidence(item)}
+                  onClick={() => {
+                    if (item.isSystemLinked && destination !== null) {
+                      onNavigate(destination.id);
+                    } else {
+                      void handleEvidence(item);
+                    }
+                  }}
                   type="button"
                 >
                   <span aria-hidden="true">
-                    {item.isCompleteToday ? "✓" : "+"}
+                    {item.isCompleteToday
+                      ? "✓"
+                      : item.isSystemLinked
+                        ? "→"
+                        : "+"}
                   </span>
-                  {item.isCompleteToday ? "Evidence logged" : "Log today"}
+                  {item.isCompleteToday
+                    ? item.isSystemLinked
+                      ? "Recorded in system"
+                      : "Evidence logged"
+                    : item.isSystemLinked
+                      ? "Record in system"
+                      : "Log today"}
                 </button>
                 {destination !== null ? (
                   <button

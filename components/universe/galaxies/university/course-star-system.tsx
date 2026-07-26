@@ -5,6 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import type { Group } from "three";
 
+import type { UniverseActivitySignal } from "../../universe-activity";
 import { SpatialLabelAnchor } from "../../spatial-label-anchor";
 import { SystemStellarCore } from "../system-stellar-core";
 import type { CourseSystemDefinition } from "./course-system-definition";
@@ -21,6 +22,7 @@ type CourseStarSystemProps = Readonly<{
   motionEnabled: boolean;
   onActivate: (courseId: string) => void;
   onHoverChange: (courseId: string | null) => void;
+  signal: UniverseActivitySignal;
 }>;
 
 export function CourseStarSystem({
@@ -33,12 +35,15 @@ export function CourseStarSystem({
   motionEnabled,
   onActivate,
   onHoverChange,
+  signal,
 }: CourseStarSystemProps) {
   const orbitalGroup = useRef<Group>(null);
   const isExplorable = definition.status === "explorable";
+  const hasSchedule = definition.schedule.length > 0;
   const presence = isVisible ? 1 : 0;
   const emphasis = isEmphasized ? 1 : 0;
-  const activeGlow = isActive ? 0.055 : 0;
+  const activeGlow =
+    (isActive ? 0.055 : 0) + signal.activity * 0.7 + signal.attention * 0.16;
 
   useCursor(isHovered && isInteractive, "pointer", "auto");
 
@@ -61,10 +66,13 @@ export function CourseStarSystem({
       scale={definition.scale}
       visible={isVisible}
     >
-      <SpatialLabelAnchor anchorId={`system:${definition.id}`} />
+      <SpatialLabelAnchor
+        anchorId={`system:${definition.id}`}
+        enabled={isInteractive && isVisible}
+      />
 
       <SystemStellarCore
-        activity={activeGlow * 8}
+        activity={activeGlow}
         coreColor={definition.palette.core}
         emphasis={emphasis * presence}
         haloColor={definition.palette.halo}
@@ -89,9 +97,11 @@ export function CourseStarSystem({
         rotation={[0.18, 0.05, -0.16]}
         scale={isActive ? 3.05 : 1}
       >
-        {isExplorable ? (
+        {isExplorable && hasSchedule ? (
           <LogisticsOrbitalField
+            haloColor={definition.palette.halo}
             opacity={presence * (0.46 + emphasis * 0.1)}
+            orbitColor={definition.palette.orbit}
             schedule={definition.schedule}
             seed={definition.seed}
           />

@@ -73,7 +73,7 @@ export const universityCourseSystems = [
     scale: 0.86,
     seed: 26_104,
     sourceName: "Ética en los Negocios Internacionales",
-    status: "future",
+    status: "explorable",
   },
   {
     cameraPosition: [-0.3, -0.45, -4.6],
@@ -110,7 +110,7 @@ export const universityCourseSystems = [
     scale: 0.78,
     seed: 59_133,
     sourceName: "Idioma A III",
-    status: "future",
+    status: "explorable",
   },
   {
     cameraPosition: [-2.7, -0.35, -4.8],
@@ -147,7 +147,7 @@ export const universityCourseSystems = [
     scale: 0.76,
     seed: 94_207,
     sourceName: "Gestión de Recursos Humanos",
-    status: "future",
+    status: "explorable",
   },
   {
     cameraPosition: [-1.45, -1.05, -4.9],
@@ -169,7 +169,7 @@ export const universityCourseSystems = [
     scale: 0.88,
     seed: 72_511,
     sourceName: "Final Project",
-    status: "future",
+    status: "explorable",
   },
 ] as const satisfies readonly CourseSystemDefinition[];
 

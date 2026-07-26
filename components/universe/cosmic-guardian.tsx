@@ -208,5 +208,3 @@ export function CosmicGuardian({
     </group>
   );
 }
-
-useTexture.preload(guardianTexturePath);

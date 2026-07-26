@@ -239,16 +239,36 @@ to the minimum viable action without deleting goals or manufacturing progress.
 The first-run identity and cycle definitions reflect the user-supplied profile,
 but no completion, review, capture, or experiment records are fabricated.
 
+The Review surface indexes real reflections from Jiu-Jitsu, Reading, Strength,
+University, and weekly reviews. Search and filters are deterministic. Cross-system
+associations require at least six complete weeks, sufficient variance, and a bounded
+correlation threshold; the interface explicitly avoids causal claims and stays silent
+when evidence is weak. The Identity surface summarizes only activity actually recorded
+in the previous 30 days. The same derived data boundary produces normalized loading,
+error, activity, and attention signals for WebGL, allowing restrained living-universe
+clarity without letting the scene read persistence directly.
+
 Operating records use the same local-first `mission-control` IndexedDB database
 through the shared `lib/mission-control-database.ts` migration boundary. Schema
-version 4 preserves all Personal Growth stores and adds independent stores for
+version 5 preserves all Personal Growth stores and adds independent stores for
 identity, growth cycles, cycle evidence, captures, weekly reviews, and
-experiments. Repositories enforce the three-active-cycle limit and the one-piece-
-of-evidence-per-cycle-per-local-day invariant. Zustand remains navigation-only;
-operating records stay in their feature repository and hook until authenticated
-server ownership is introduced.
+experiments, University operations, Strength sessions and lift history, the sync
+outbox, sync state, and recoverable form drafts. Repositories enforce the
+three-active-cycle limit and the one-piece-of-evidence-per-cycle-per-local-day
+invariant. Instrumented domain activity is folded into Current Vector by date, so
+Daniel does not have to log the same evidence twice. Zustand remains
+navigation-only.
 
 ### Personal Growth and real-world visual state
+
+University now treats all five course systems as real explorable destinations.
+The operations instrument remains semantic DOM outside WebGL and owns assignments,
+deadlines, status, grades, trajectory, course notes, and reflections. Its overview
+derives cross-course deadline pressure without creating analytics records or fake
+coursework. Course schedules remain immutable definition context; academic records
+remain repository data. Each course keeps its palette and deterministic orbital
+identity, while scheduled systems derive their visible orbital guides from real class
+meetings and Final Project uses the mapped independent-work field.
 
 Personal Growth is a feature-owned galaxy with three first-class explorable system
 definitions: Jiu-Jitsu, Strength and Physique, and Reading. Daily Discipline was removed
@@ -262,8 +282,9 @@ those markers while recorded lifts modestly strengthen the surrounding structure
 visualization never reads storage and never owns authoritative records.
 
 Personal Growth records are stored in the shared local IndexedDB database named
-`mission-control`. Schema version 4 preserves the original Jiu-Jitsu, Strength, and
-Reading stores while adding the independent Mission operating stores described above.
+`mission-control`. Schema version 5 preserves the original Jiu-Jitsu, Strength, and
+Reading stores while adding the independent Mission, University, and sync stores
+described above.
 The Strength plan describes muscle
 groups and bounded exercise counts rather than prescribing exercises: Push covers chest,
 shoulders, and triceps; Pull covers back, rear delts, and biceps; Legs covers legs and
@@ -319,12 +340,14 @@ keyboard-accessible open/close control. The translucent review instrument theref
 within the chamber rather than replacing it, while all metrics and history remain usable
 when WebGL is unavailable.
 
-Reading contains the Celestial Library. Its landed dashboard supports adding books,
-explicit reading statuses, session logging, page ranges, time, reflections, current
-progress, history, planned books, ratings, and final reflections. A pure summary derives
+Reading contains the Celestial Library. Its landed dashboard supports adding, editing,
+and intentionally deleting books and sessions; explicit reading statuses; page ranges;
+time; reflections; current progress; history; planned books; ratings; and final
+reflections. A prominent continue-reading path preselects the current book and starting
+page. A pure summary derives
 the current book, weekly time and pages, recent reflections, and the next reading queue.
 The library uses ordinary forms and semantic history outside WebGL, staged over a quiet
-procedural library environment. Records remain local to the current browser and origin.
+procedural library environment.
 
 Strength and Physique contains three landed destinations: Beerus' Planet, Training
 Archive, and Gym Playlist. Shared definitions own system-space placement, label
@@ -368,8 +391,11 @@ presented through the existing 30 FPS on-demand invalidation scheduler, so the
 asset introduces no second render loop.
 
 Whis' semantic training assistant stays outside WebGL and composes the existing
-`WorkoutSplit` and `StrengthRecords` components. It therefore reads and mutates the
-same IndexedDB-backed Strength records without creating parallel progress state. The
+`WorkoutSplit`, `StrengthSessionLog`, and `StrengthRecords` components. Full sessions
+record focus, exercises, sets, reps, load, effort, recovery, mobility, notes, and
+reflection. Key-lift observations retain history rather than overwriting the only
+trajectory record. These components read and mutate the same repository without
+creating parallel progress state. The
 system overview intentionally exposes only planet destinations; the current training
 plan, personal records, and weight controls appear only after landing with Whis. The planet
 view remains useful when WebGL is unavailable: the destination, back path, Whis welcome,
@@ -389,12 +415,28 @@ redundant panel toggle, is the only way to leave them. Both supporting planets u
 procedural markers and static horizon surfaces rather than new texture packs or
 rendering loops.
 
-This local-first persistence is intentionally private and useful before an
-account backend exists, but it is device-and-browser specific: it is not synced,
-backed up, or available across origins. Before multi-device use, a server-owned
-repository should implement the same feature boundary with authenticated
-ownership, schema migrations, export, and conflict handling. IndexedDB should
-then become an explicit offline adapter rather than the sole source of truth.
+### Private cloud and offline ownership
+
+Postgres on Neon is the synchronized source of truth when the Vercel environment
+provides `DATABASE_URL`, `MISSION_CONTROL_ACCESS_KEY`, and
+`MISSION_CONTROL_SESSION_SECRET`. Server-only API routes validate an allowlisted
+collection envelope, enforce idempotent client mutation IDs, retain deletion
+tombstones, and require a signed, HTTP-only, SameSite session belonging to the sole
+owner. Secrets never enter the browser bundle.
+
+IndexedDB remains the fast offline adapter. Every feature repository commits locally
+first, adds a typed mutation to the durable outbox, and requests synchronization.
+Offline, locked, and failed requests leave the outbox intact and expose an honest
+status through the compact Mission footer. The first authenticated device bootstrap
+uploads preserved version-4 records with deterministic mutation IDs before accepting
+the canonical server snapshot. Successful synchronization then atomically replaces
+the cache and clears only acknowledged outbox records. Remote changes emit one shared
+data event so feature hooks reload without copying records into Zustand.
+
+The current conflict rule is last source timestamp wins, which is appropriate for a
+single owner but should be replaced by revision-aware merge UX before concurrent
+multi-user editing is ever considered. Export and point-in-time recovery remain a
+future reliability boundary.
 
 ### Request-safe global state
 

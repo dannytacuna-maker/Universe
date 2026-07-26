@@ -20,6 +20,27 @@ export function createMissionDestinationState(
         selectedPlanetId: null,
         selectedSystemId: "logistics",
       };
+    case "hyperbolic-time-chamber":
+      return {
+        level: "planet",
+        selectedGalaxyId: "personal-growth",
+        selectedPlanetId: "hyperbolic-time-chamber",
+        selectedSystemId: "jiu-jitsu",
+      };
+    case "beerus-planet":
+      return {
+        level: "planet",
+        selectedGalaxyId: "personal-growth",
+        selectedPlanetId: "beerus-planet",
+        selectedSystemId: "strength-physique",
+      };
+    case "celestial-library":
+      return {
+        level: "planet",
+        selectedGalaxyId: "personal-growth",
+        selectedPlanetId: "celestial-library",
+        selectedSystemId: "reading",
+      };
     case "jiu-jitsu":
     case "reading":
     case "strength-physique":

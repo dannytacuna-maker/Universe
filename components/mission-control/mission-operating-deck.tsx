@@ -3,19 +3,24 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { MissionDestinationId } from "./mission-operating-record";
+import type { MissionIntelligence } from "./mission-intelligence";
 import { CapturePanel } from "./capture-panel";
+import { CloudSyncPanel } from "./cloud-sync-panel";
 import { CurrentVectorPanel } from "./current-vector-panel";
 import { ExperimentsPanel } from "./experiments-panel";
 import { IdentityPanel } from "./identity-panel";
 import styles from "./mission-operating-deck.module.css";
 import { useMissionOperatingSystem } from "./use-mission-operating-system";
+import { useMissionCloudSync } from "./use-mission-cloud-sync";
 import { WeeklyReviewPanel } from "./weekly-review-panel";
 
 type MissionOperatingDeckProps = Readonly<{
+  intelligence: MissionIntelligence;
   onNavigate: (destinationId: MissionDestinationId) => void;
 }>;
 
-type DeckPanelId = "capture" | "experiments" | "identity" | "review" | "vector";
+type DeckPanelId =
+  "capture" | "experiments" | "identity" | "review" | "sync" | "vector";
 
 const deckPanels = [
   { id: "vector", label: "Current Vector", marker: "01" },
@@ -30,13 +35,15 @@ const deckPanels = [
 }[];
 
 export function MissionOperatingDeck({
+  intelligence,
   onNavigate,
 }: MissionOperatingDeckProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
   const [activePanel, setActivePanel] = useState<DeckPanelId>("vector");
   const [isOpen, setIsOpen] = useState(false);
-  const operatingSystem = useMissionOperatingSystem();
+  const operatingSystem = useMissionOperatingSystem(intelligence.activityDates);
+  const cloudSync = useMissionCloudSync();
   const activeEvidenceCount = operatingSystem.currentVector.filter(
     (item) => item.isCompleteToday,
   ).length;
@@ -89,6 +96,7 @@ export function MissionOperatingDeck({
   return (
     <>
       <button
+        aria-label="Open Mission deck"
         aria-controls="mission-operating-deck"
         aria-expanded={isOpen}
         aria-haspopup="dialog"
@@ -104,8 +112,10 @@ export function MissionOperatingDeck({
           <strong>Mission</strong>
           <small>
             {operatingSystem.isLoading
-              ? "Synchronizing"
-              : `${activeEvidenceCount}/${operatingSystem.currentVector.length} aligned today`}
+              ? "Aligning"
+              : cloudSync.status.state === "syncing"
+                ? "Synchronizing"
+                : `${activeEvidenceCount}/${operatingSystem.currentVector.length} aligned today`}
           </small>
         </span>
         <kbd>⌘K</kbd>
@@ -173,16 +183,21 @@ export function MissionOperatingDeck({
                   </button>
                 ))}
               </div>
-              <div className={styles.deckStatus}>
+              <button
+                aria-label="Open private cloud status"
+                className={styles.deckStatus}
+                onClick={() => setActivePanel("sync")}
+                type="button"
+              >
                 <span
                   aria-hidden="true"
-                  data-error={operatingSystem.storageError !== null}
+                  data-error={
+                    operatingSystem.storageError !== null ||
+                    cloudSync.status.state === "error"
+                  }
                 />
-                <p>
-                  {operatingSystem.storageError ??
-                    "Private to this browser. Changes save automatically."}
-                </p>
-              </div>
+                <p>{operatingSystem.storageError ?? cloudSync.status.detail}</p>
+              </button>
             </nav>
 
             <div className={styles.deckContent}>
@@ -211,6 +226,8 @@ export function MissionOperatingDeck({
               ) : activePanel === "review" ? (
                 <WeeklyReviewPanel
                   onSubmit={operatingSystem.submitWeeklyReview}
+                  patterns={intelligence.patterns}
+                  reflections={intelligence.reflections}
                   reviews={operatingSystem.reviews}
                 />
               ) : activePanel === "experiments" ? (
@@ -219,10 +236,19 @@ export function MissionOperatingDeck({
                   onAdd={operatingSystem.addExperiment}
                   onConclude={operatingSystem.concludeExperiment}
                 />
-              ) : (
+              ) : activePanel === "identity" ? (
                 <IdentityPanel
+                  evidence={intelligence.identityEvidence}
                   identity={operatingSystem.identity}
                   onUpdate={operatingSystem.updateIdentity}
+                />
+              ) : (
+                <CloudSyncPanel
+                  isConfigured={cloudSync.isConfigured}
+                  onLock={cloudSync.lock}
+                  onRefresh={cloudSync.refresh}
+                  onUnlock={cloudSync.unlock}
+                  status={cloudSync.status}
                 />
               )}
             </div>

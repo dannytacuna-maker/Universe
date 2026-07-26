@@ -4,6 +4,7 @@ import type { JiuJitsuProgress } from "./jiu-jitsu/jiu-jitsu-progress";
 import { PersonalGrowthSystem } from "./personal-growth-system";
 import { personalGrowthSystems } from "./personal-growth-systems";
 import type { StrengthProgress } from "./strength-physique/strength-physique-progress";
+import type { UniverseActivitySignals } from "../../universe-activity";
 
 type PersonalGrowthSystemGroupProps = Readonly<{
   activeSystemId: string | null;
@@ -16,6 +17,7 @@ type PersonalGrowthSystemGroupProps = Readonly<{
   onActivate: (systemId: string) => void;
   onHoverChange: (systemId: string | null) => void;
   strengthProgress: StrengthProgress;
+  signals: UniverseActivitySignals["personalGrowth"];
 }>;
 
 export function PersonalGrowthSystemGroup({
@@ -28,6 +30,7 @@ export function PersonalGrowthSystemGroup({
   motionEnabled,
   onActivate,
   onHoverChange,
+  signals,
   strengthProgress,
 }: PersonalGrowthSystemGroupProps) {
   return personalGrowthSystems.map((definition) => (
@@ -46,6 +49,7 @@ export function PersonalGrowthSystemGroup({
       motionEnabled={motionEnabled}
       onActivate={onActivate}
       onHoverChange={onHoverChange}
+      signal={signals[definition.id]}
       strengthProgress={strengthProgress}
     />
   ));

@@ -6,14 +6,20 @@ import type {
   MissionIdentity,
   MissionIdentityUpdate,
 } from "./mission-operating-record";
+import type { MissionIdentityEvidence } from "./mission-intelligence";
 import styles from "./mission-operating-deck.module.css";
 
 type IdentityPanelProps = Readonly<{
+  evidence: MissionIdentityEvidence;
   identity: MissionIdentity;
   onUpdate: (input: MissionIdentityUpdate) => Promise<void>;
 }>;
 
-export function IdentityPanel({ identity, onUpdate }: IdentityPanelProps) {
+export function IdentityPanel({
+  evidence,
+  identity,
+  onUpdate,
+}: IdentityPanelProps) {
   const [feedback, setFeedback] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
@@ -60,6 +66,25 @@ export function IdentityPanel({ identity, onUpdate }: IdentityPanelProps) {
         Mission Control measures evidence of identity, not busyness. Change this
         slowly; it is the compass for every cycle and review.
       </p>
+
+      <section className={styles.identityEvidence}>
+        <header>
+          <span>Living evidence · last 30 days</span>
+          <strong>{evidence.activeSystemCount} active systems</strong>
+        </header>
+        {evidence.statements.length === 0 ? (
+          <p>
+            Your identity narrative will update from real sessions, reading,
+            training, and university reflection—not from claims alone.
+          </p>
+        ) : (
+          <ul>
+            {evidence.statements.map((statement) => (
+              <li key={statement}>{statement}</li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <form className={styles.identityForm} onSubmit={handleSubmit}>
         <label>

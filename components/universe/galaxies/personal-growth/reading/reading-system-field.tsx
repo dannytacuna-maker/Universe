@@ -10,6 +10,7 @@ import {
 } from "../../../procedural-random";
 
 type ReadingSystemFieldProps = Readonly<{
+  activity: number;
   emphasis: number;
 }>;
 
@@ -53,7 +54,10 @@ function createReadingField() {
   return { colors, positions };
 }
 
-export function ReadingSystemField({ emphasis }: ReadingSystemFieldProps) {
+export function ReadingSystemField({
+  activity,
+  emphasis,
+}: ReadingSystemFieldProps) {
   const field = useMemo(() => createReadingField(), []);
 
   return (
@@ -65,7 +69,9 @@ export function ReadingSystemField({ emphasis }: ReadingSystemFieldProps) {
             blending={AdditiveBlending}
             color={orbit.color}
             depthWrite={false}
-            opacity={(0.08 + emphasis * 0.045) * (1 - index * 0.11)}
+            opacity={
+              (0.068 + activity * 0.018 + emphasis * 0.045) * (1 - index * 0.11)
+            }
             side={DoubleSide}
             toneMapped={false}
             transparent
@@ -77,8 +83,8 @@ export function ReadingSystemField({ emphasis }: ReadingSystemFieldProps) {
         <PointMaterial
           blending={AdditiveBlending}
           depthWrite={false}
-          opacity={0.36 + emphasis * 0.1}
-          size={0.011}
+          opacity={0.31 + activity * 0.075 + emphasis * 0.1}
+          size={0.0104 + activity * 0.0012}
           sizeAttenuation
           toneMapped={false}
           transparent

@@ -4,6 +4,7 @@ import { useReducedMotion } from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { createMissionDestinationState } from "@/components/mission-control/mission-destination-navigation";
+import { buildMissionIntelligence } from "@/components/mission-control/mission-intelligence";
 import type { MissionDestinationId } from "@/components/mission-control/mission-operating-record";
 import { MissionOperatingDeck } from "@/components/mission-control/mission-operating-deck";
 import type { NavigationState } from "@/store/navigation-store";
@@ -14,6 +15,8 @@ import {
   formatCourseScheduleSummary,
 } from "./galaxies/university/course-schedule";
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
+import { UniversityOperationsDashboard } from "./galaxies/university/university-operations-dashboard";
+import { useUniversityRecords } from "./galaxies/university/use-university-records";
 import { hyperbolicTimeChamberDefinition } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-planets";
 import { JiuJitsuReviewDashboard } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-review-dashboard";
 import { JiuJitsuTrainingLog } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-training-log";
@@ -50,6 +53,7 @@ import {
   readUniverseNavigation,
 } from "./universe-navigation-url";
 import { useWebGLSupport } from "./use-webgl-support";
+import { deriveUniverseActivitySignals } from "./universe-activity";
 import { WebGLBoundary } from "./webgl-boundary";
 
 const jiuJitsuSystemId = "jiu-jitsu";
@@ -98,6 +102,7 @@ export function UniverseViewport() {
   const planetRevealTimer = useRef<number | null>(null);
   const {
     addSession,
+    editSession,
     isLoading: isTrainingLogLoading,
     progress: jiuJitsuProgress,
     removeSession,
@@ -106,11 +111,16 @@ export function UniverseViewport() {
   } = useJiuJitsuSessions();
   const {
     addBodyWeight,
+    addTrainingSession,
     bodyWeightEntries,
     isLoading: isStrengthLoading,
+    liftHistory,
     personalRecords,
     progress: strengthProgress,
     removeBodyWeight,
+    removeTrainingSession,
+    editTrainingSession,
+    sessions: strengthTrainingSessions,
     storageError: strengthStorageError,
     toggleWorkout,
     updatePersonalRecord,
@@ -120,11 +130,77 @@ export function UniverseViewport() {
     addSession: addReadingSession,
     books: readingBooks,
     editBook,
+    editSession: editReadingSession,
     isLoading: isReadingLoading,
+    removeBook: removeReadingBook,
+    removeSession: removeReadingSession,
     sessions: readingSessions,
     storageError: readingStorageError,
     summary: readingSummary,
   } = useReadingLibrary();
+  const universityRecords = useUniversityRecords();
+  const missionIntelligence = useMemo(
+    () =>
+      buildMissionIntelligence({
+        jiuJitsuSessions,
+        readingBooks,
+        readingSessions,
+        strengthSessions: strengthTrainingSessions,
+        universityNotes: universityRecords.notes,
+      }),
+    [
+      jiuJitsuSessions,
+      readingBooks,
+      readingSessions,
+      strengthTrainingSessions,
+      universityRecords.notes,
+    ],
+  );
+  const activitySignals = useMemo(
+    () =>
+      deriveUniverseActivitySignals({
+        jiuJitsu: {
+          error: trainingStorageError,
+          loading: isTrainingLogLoading,
+          progress: jiuJitsuProgress,
+        },
+        reading: {
+          error: readingStorageError,
+          loading: isReadingLoading,
+          sessions: readingSessions,
+          summary: readingSummary,
+        },
+        strength: {
+          error: strengthStorageError,
+          loading: isStrengthLoading,
+          progress: strengthProgress,
+        },
+        university: {
+          assignments: universityRecords.assignments,
+          error: universityRecords.storageError,
+          grades: universityRecords.grades,
+          loading: universityRecords.isLoading,
+          notes: universityRecords.notes,
+        },
+      }),
+    [
+      isReadingLoading,
+      isStrengthLoading,
+      isTrainingLogLoading,
+      jiuJitsuProgress,
+      readingSessions,
+      readingStorageError,
+      readingSummary,
+      strengthProgress,
+      strengthStorageError,
+      trainingStorageError,
+      universityRecords.assignments,
+      universityRecords.grades,
+      universityRecords.isLoading,
+      universityRecords.notes,
+      universityRecords.storageError,
+    ],
+  );
   const emphasizedGalaxyId = hoveredGalaxyId ?? focusedGalaxyId;
   const emphasizedSystemId = hoveredSystemId ?? focusedSystemId;
   const emphasizedPlanetId = hoveredPlanetId ?? focusedPlanetId;
@@ -427,7 +503,16 @@ export function UniverseViewport() {
       const destination =
         nextState.level === "galaxy"
           ? findGalaxy(nextState.selectedGalaxyId)
-          : findSystem(nextState.selectedGalaxyId, nextState.selectedSystemId);
+          : nextState.level === "planet"
+            ? findPlanet(
+                nextState.selectedGalaxyId,
+                nextState.selectedSystemId,
+                nextState.selectedPlanetId,
+              )
+            : findSystem(
+                nextState.selectedGalaxyId,
+                nextState.selectedSystemId,
+              );
 
       if (destination === null) {
         return;
@@ -444,6 +529,17 @@ export function UniverseViewport() {
           nextState.selectedGalaxyId !== null
         ) {
           enterGalaxy(nextState.selectedGalaxyId);
+        } else if (
+          nextState.level === "planet" &&
+          nextState.selectedGalaxyId !== null &&
+          nextState.selectedSystemId !== null &&
+          nextState.selectedPlanetId !== null
+        ) {
+          enterPlanet(
+            nextState.selectedGalaxyId,
+            nextState.selectedSystemId,
+            nextState.selectedPlanetId,
+          );
         } else if (
           nextState.selectedGalaxyId !== null &&
           nextState.selectedSystemId !== null
@@ -465,6 +561,7 @@ export function UniverseViewport() {
       beginCameraTravel,
       clearInteractionState,
       enterGalaxy,
+      enterPlanet,
       enterSystem,
       navigationLevel,
       planetArrivalPhase,
@@ -536,9 +633,18 @@ export function UniverseViewport() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      const eventTarget =
+        event.target instanceof Element ? event.target : document.activeElement;
+      const isEditingOrInsideWorkspace =
+        eventTarget instanceof Element &&
+        eventTarget.closest(
+          "aside, form, details, input, select, textarea, [contenteditable='true']",
+        ) !== null;
+
       if (
         event.key === "Escape" &&
         document.querySelector("dialog[open]") === null &&
+        !isEditingOrInsideWorkspace &&
         navigationLevel !== "universe"
       ) {
         event.preventDefault();
@@ -552,6 +658,9 @@ export function UniverseViewport() {
   }, [handleBack, navigationLevel]);
 
   const isViewSettled = webglSupport !== "available" || isCameraSettled;
+  const isUniversityOperationsVisible =
+    selectedGalaxyId === universityGalaxyId &&
+    (navigationLevel === "galaxy" || navigationLevel === "system");
   const isJiuJitsuActive =
     navigationLevel === "system" &&
     selectedGalaxyId === personalGrowthGalaxyId &&
@@ -598,6 +707,7 @@ export function UniverseViewport() {
         <WebGLBoundary>
           <LazyUniverseCanvas
             activeSystemId={activeSystemId}
+            activitySignals={activitySignals}
             cameraResetToken={cameraResetToken}
             emphasizedGalaxyId={emphasizedGalaxyId}
             emphasizedPlanetId={emphasizedPlanetId}
@@ -652,12 +762,24 @@ export function UniverseViewport() {
         selectedSystemId={activeSystemId}
       />
 
-      <MissionOperatingDeck onNavigate={handleMissionDestinationNavigate} />
+      <MissionOperatingDeck
+        intelligence={missionIntelligence}
+        onNavigate={handleMissionDestinationNavigate}
+      />
+
+      <UniversityOperationsDashboard
+        courseId={activeCourse?.id ?? null}
+        defaultExpanded={navigationLevel === "system"}
+        isVisible={isUniversityOperationsVisible && isViewSettled}
+        key={activeCourse?.id ?? "university-overview"}
+        records={universityRecords}
+      />
 
       <JiuJitsuTrainingLog
         isLoading={isTrainingLogLoading}
         isVisible={isJiuJitsuActive && isViewSettled}
         onAddSession={addSession}
+        onEditSession={editSession}
         onRemoveSession={removeSession}
         progress={jiuJitsuProgress}
         sessions={jiuJitsuSessions}
@@ -675,13 +797,18 @@ export function UniverseViewport() {
         bodyWeightEntries={bodyWeightEntries}
         isLoading={isStrengthLoading}
         isVisible={isBeerusPlanetActive && isViewSettled}
+        liftHistory={liftHistory}
         onAddBodyWeight={addBodyWeight}
+        onAddTrainingSession={addTrainingSession}
+        onEditTrainingSession={editTrainingSession}
         onRemoveBodyWeight={removeBodyWeight}
+        onRemoveTrainingSession={removeTrainingSession}
         onToggleWorkout={toggleWorkout}
         onUpdatePersonalRecord={updatePersonalRecord}
         personalRecords={personalRecords}
         progress={strengthProgress}
         storageError={strengthStorageError}
+        trainingSessions={strengthTrainingSessions}
       />
 
       <TrainingProgramArchive
@@ -697,6 +824,9 @@ export function UniverseViewport() {
         onAddBook={addBook}
         onAddSession={addReadingSession}
         onEditBook={editBook}
+        onEditSession={editReadingSession}
+        onRemoveBook={removeReadingBook}
+        onRemoveSession={removeReadingSession}
         sessions={readingSessions}
         storageError={readingStorageError}
         summary={readingSummary}

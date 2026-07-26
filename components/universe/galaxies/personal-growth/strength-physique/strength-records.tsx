@@ -8,11 +8,13 @@ import type {
   BodyWeightEntry,
   NewBodyWeightEntry,
   NewStrengthPersonalRecord,
+  StrengthLiftObservation,
   StrengthPersonalRecord,
 } from "./strength-physique-record";
 
 type StrengthRecordsProps = Readonly<{
   bodyWeightEntries: readonly BodyWeightEntry[];
+  liftHistory: readonly StrengthLiftObservation[];
   onAddBodyWeight: (input: NewBodyWeightEntry) => Promise<void>;
   onRemoveBodyWeight: (entryId: string) => Promise<void>;
   onUpdatePersonalRecord: (input: NewStrengthPersonalRecord) => Promise<void>;
@@ -28,6 +30,7 @@ function formatEntryDate(value: string) {
 
 export function StrengthRecords({
   bodyWeightEntries,
+  liftHistory,
   onAddBodyWeight,
   onRemoveBodyWeight,
   onUpdatePersonalRecord,
@@ -40,6 +43,11 @@ export function StrengthRecords({
 
   const handleRecordSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (isSavingRecords) {
+      return;
+    }
+
     const data = new FormData(event.currentTarget);
     const updates = strengthLiftIds.flatMap((liftId) => {
       const weightKg = Number(data.get(`${liftId}-weight`));
@@ -74,6 +82,11 @@ export function StrengthRecords({
 
   const handleWeightSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (isSavingWeight) {
+      return;
+    }
+
     const form = event.currentTarget;
     const data = new FormData(form);
     const input: NewBodyWeightEntry = {
@@ -100,6 +113,10 @@ export function StrengthRecords({
   };
 
   const handleRemoveWeight = async (entryId: string) => {
+    if (!window.confirm("Remove this body weight entry?")) {
+      return;
+    }
+
     setFeedback("");
 
     try {
@@ -162,6 +179,46 @@ export function StrengthRecords({
           {isSavingRecords ? "Saving" : "Save records"}
         </button>
       </form>
+
+      {liftHistory.length > 0 ? (
+        <div className="strength-records__lift-history">
+          <strong>Strength trajectory</strong>
+          <ul>
+            {strengthLiftIds.map((liftId) => {
+              const history = liftHistory
+                .filter((entry) => entry.liftId === liftId)
+                .slice(0, 3);
+
+              if (history.length === 0) {
+                return null;
+              }
+
+              const [latest, previous] = history;
+
+              if (latest === undefined) {
+                return null;
+              }
+
+              const change =
+                previous === undefined
+                  ? null
+                  : latest.weightKg - previous.weightKg;
+
+              return (
+                <li key={liftId}>
+                  <span>{strengthLiftLabels[liftId]}</span>
+                  <strong>{latest.weightKg.toFixed(1)} kg</strong>
+                  <small>
+                    {change === null
+                      ? "First observation"
+                      : `${change >= 0 ? "+" : ""}${change.toFixed(1)} kg from prior`}
+                  </small>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : null}
 
       <form className="strength-records__weight" onSubmit={handleWeightSubmit}>
         <strong>Body weight</strong>

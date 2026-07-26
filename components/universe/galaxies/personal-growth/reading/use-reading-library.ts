@@ -2,18 +2,24 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { subscribeToMissionDataChanges } from "@/lib/mission-record-sync";
+
 import type {
   NewReadingBook,
   NewReadingSession,
   ReadingBook,
   ReadingBookUpdate,
   ReadingSession,
+  ReadingSessionUpdate,
 } from "./reading-record";
 import {
+  deleteReadingBook,
+  deleteReadingSession,
   listReadingLibraryData,
   saveReadingBook,
   saveReadingSession,
   updateReadingBook,
+  updateReadingSession,
 } from "./reading-repository";
 import { deriveReadingSummary } from "./reading-summary";
 
@@ -26,14 +32,16 @@ export function useReadingLibrary() {
   useEffect(() => {
     let isCurrent = true;
 
-    void listReadingLibraryData()
-      .then((data) => {
+    const load = () =>
+      listReadingLibraryData().then((data) => {
         if (isCurrent) {
           setBooks(data.books);
           setSessions(data.sessions);
           setStorageError(null);
         }
-      })
+      });
+
+    void load()
       .catch((error: unknown) => {
         if (isCurrent) {
           setStorageError(
@@ -49,8 +57,13 @@ export function useReadingLibrary() {
         }
       });
 
+    const unsubscribe = subscribeToMissionDataChanges(() => {
+      void load();
+    });
+
     return () => {
       isCurrent = false;
+      unsubscribe();
     };
   }, []);
 
@@ -77,6 +90,31 @@ export function useReadingLibrary() {
     setStorageError(null);
   }, []);
 
+  const editSession = useCallback(async (input: ReadingSessionUpdate) => {
+    const updated = await updateReadingSession(input);
+    setSessions((current) =>
+      current.map((session) => (session.id === updated.id ? updated : session)),
+    );
+    setStorageError(null);
+  }, []);
+
+  const removeSession = useCallback(async (sessionId: string) => {
+    await deleteReadingSession(sessionId);
+    setSessions((current) =>
+      current.filter((session) => session.id !== sessionId),
+    );
+    setStorageError(null);
+  }, []);
+
+  const removeBook = useCallback(async (bookId: string) => {
+    await deleteReadingBook(bookId);
+    setBooks((current) => current.filter((book) => book.id !== bookId));
+    setSessions((current) =>
+      current.filter((session) => session.bookId !== bookId),
+    );
+    setStorageError(null);
+  }, []);
+
   const summary = useMemo(
     () => deriveReadingSummary(books, sessions),
     [books, sessions],
@@ -87,8 +125,11 @@ export function useReadingLibrary() {
     addSession,
     books,
     editBook,
+    editSession,
     isLoading,
     sessions,
+    removeBook,
+    removeSession,
     storageError,
     summary,
   };

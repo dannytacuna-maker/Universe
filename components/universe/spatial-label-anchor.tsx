@@ -1,17 +1,21 @@
 "use client";
 
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { type Group, Vector3 } from "three";
 
 type SpatialLabelAnchorProps = Readonly<{
   anchorId: string;
+  enabled: boolean;
 }>;
 
 const projectionBounds = 1.18;
 const minimumCoordinateChange = 0.025;
 
-export function SpatialLabelAnchor({ anchorId }: SpatialLabelAnchorProps) {
+export function SpatialLabelAnchor({
+  anchorId,
+  enabled,
+}: SpatialLabelAnchorProps) {
   const anchor = useRef<Group>(null);
   const element = useRef<HTMLElement | null>(null);
   const worldPosition = useRef(new Vector3());
@@ -20,8 +24,19 @@ export function SpatialLabelAnchor({ anchorId }: SpatialLabelAnchorProps) {
   const lastY = useRef(Number.POSITIVE_INFINITY);
   const lastVisibility = useRef<boolean | null>(null);
 
+  useEffect(() => {
+    element.current = enabled
+      ? document.querySelector<HTMLElement>(
+          `[data-spatial-anchor="${anchorId}"]`,
+        )
+      : null;
+    lastX.current = Number.POSITIVE_INFINITY;
+    lastY.current = Number.POSITIVE_INFINITY;
+    lastVisibility.current = null;
+  }, [anchorId, enabled]);
+
   useFrame(({ camera }) => {
-    if (anchor.current === null) {
+    if (!enabled || anchor.current === null) {
       return;
     }
 

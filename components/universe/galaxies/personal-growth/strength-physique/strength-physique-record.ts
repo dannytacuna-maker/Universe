@@ -17,6 +17,14 @@ export type StrengthPersonalRecord = Readonly<{
   weightKg: number;
 }>;
 
+export type StrengthLiftObservation = Readonly<{
+  achievedOn: string;
+  createdAt: string;
+  id: string;
+  liftId: StrengthLiftId;
+  weightKg: number;
+}>;
+
 export type BodyWeightEntry = Readonly<{
   createdAt: string;
   id: string;
@@ -31,3 +39,36 @@ export type NewStrengthPersonalRecord = Readonly<
 export type NewBodyWeightEntry = Readonly<
   Pick<BodyWeightEntry, "measuredOn" | "weightKg">
 >;
+
+export type StrengthTrainingFocus = "custom" | "legs" | "pull" | "push";
+
+export type StrengthExerciseEntry = Readonly<{
+  id: string;
+  name: string;
+  reps: number;
+  sets: number;
+  weightKg: number | null;
+}>;
+
+export type StrengthTrainingSession = Readonly<{
+  createdAt: string;
+  exercises: readonly StrengthExerciseEntry[];
+  focus: StrengthTrainingFocus;
+  id: string;
+  mobilityWork: boolean;
+  notes: string;
+  occurredOn: string;
+  perceivedExertion: number | null;
+  physiqueNotes: string;
+  recoveryWork: boolean;
+  reflection: string;
+  updatedAt: string;
+}>;
+
+export type NewStrengthTrainingSession = Omit<
+  StrengthTrainingSession,
+  "createdAt" | "id" | "updatedAt"
+>;
+
+export type StrengthTrainingSessionUpdate = NewStrengthTrainingSession &
+  Readonly<{ id: string }>;

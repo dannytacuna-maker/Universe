@@ -22,5 +22,3 @@ export function WhisPresence() {
     </group>
   );
 }
-
-useTexture.preload(whisTexturePath);

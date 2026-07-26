@@ -2,13 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import { subscribeToMissionDataChanges } from "@/lib/mission-record-sync";
+
 import { deriveJiuJitsuProgress } from "./jiu-jitsu-progress";
 import {
   deleteJiuJitsuSession,
   listJiuJitsuSessions,
   saveJiuJitsuSession,
+  updateJiuJitsuSession,
 } from "./jiu-jitsu-session-repository";
-import type { JiuJitsuSession, NewJiuJitsuSession } from "./jiu-jitsu-session";
+import type {
+  JiuJitsuSession,
+  JiuJitsuSessionUpdate,
+  NewJiuJitsuSession,
+} from "./jiu-jitsu-session";
 
 export function useJiuJitsuSessions() {
   const [sessions, setSessions] = useState<readonly JiuJitsuSession[]>([]);
@@ -18,13 +25,15 @@ export function useJiuJitsuSessions() {
   useEffect(() => {
     let isCurrent = true;
 
-    void listJiuJitsuSessions()
-      .then((storedSessions) => {
+    const load = () =>
+      listJiuJitsuSessions().then((storedSessions) => {
         if (isCurrent) {
           setSessions(storedSessions);
           setStorageError(null);
         }
-      })
+      });
+
+    void load()
       .catch((error: unknown) => {
         if (isCurrent) {
           setStorageError(
@@ -40,8 +49,13 @@ export function useJiuJitsuSessions() {
         }
       });
 
+    const unsubscribe = subscribeToMissionDataChanges(() => {
+      void load();
+    });
+
     return () => {
       isCurrent = false;
+      unsubscribe();
     };
   }, []);
 
@@ -63,10 +77,23 @@ export function useJiuJitsuSessions() {
     setStorageError(null);
   }, []);
 
+  const editSession = useCallback(async (input: JiuJitsuSessionUpdate) => {
+    const updated = await updateJiuJitsuSession(input);
+    setSessions((current) =>
+      current
+        .map((session) => (session.id === updated.id ? updated : session))
+        .toSorted((first, second) =>
+          second.occurredOn.localeCompare(first.occurredOn),
+        ),
+    );
+    setStorageError(null);
+  }, []);
+
   const progress = useMemo(() => deriveJiuJitsuProgress(sessions), [sessions]);
 
   return {
     addSession,
+    editSession,
     isLoading,
     progress,
     removeSession,

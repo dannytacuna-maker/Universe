@@ -1608,6 +1608,51 @@ body {
   padding-inline: 0.85rem;
 }
 
+.strength-records__lift-history {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid rgb(158 177 142 / 8%);
+}
+
+.strength-records__lift-history > strong {
+  color: rgb(224 231 218 / 78%);
+  font-size: 0.58rem;
+  font-weight: 500;
+}
+
+.strength-records__lift-history ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.strength-records__lift-history li {
+  display: grid;
+  gap: 0.18rem;
+  padding: 0.58rem;
+  border: 1px solid rgb(158 177 142 / 9%);
+  border-radius: 0.55rem;
+  background: rgb(151 170 137 / 3%);
+}
+
+.strength-records__lift-history li span,
+.strength-records__lift-history li small {
+  color: rgb(159 174 148 / 50%);
+  font-size: 0.46rem;
+}
+
+.strength-records__lift-history li strong {
+  color: rgb(221 230 215 / 80%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.63rem;
+  font-weight: 500;
+}
+
 .strength-records__weight {
   display: grid;
   grid-template-columns: 1fr 6.5rem 8.5rem auto;
@@ -1657,6 +1702,216 @@ body {
   background: transparent;
   color: rgb(159 173 150 / 44%);
   font-size: 0.45rem;
+}
+
+.strength-session-log {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1rem 0;
+  border-top: 1px solid rgb(158 177 142 / 9%);
+}
+
+.strength-session-log > header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.strength-session-log > header > div {
+  display: grid;
+  gap: 0.22rem;
+}
+
+.strength-session-log > header span,
+.strength-session-log legend,
+.strength-session-log label > span {
+  color: rgb(164 181 153 / 52%);
+  font-size: 0.48rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.strength-session-log > header strong,
+.strength-session-log__history > strong {
+  color: rgb(226 233 221 / 84%);
+  font-size: 0.68rem;
+  font-weight: 500;
+}
+
+.strength-session-log > header dl {
+  display: grid;
+  grid-auto-flow: column;
+  gap: 0.9rem;
+  margin: 0;
+}
+
+.strength-session-log > header dl div {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.strength-session-log > header dt {
+  color: rgb(159 174 148 / 46%);
+  font-size: 0.43rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.strength-session-log > header dd {
+  margin: 0;
+  color: rgb(217 226 210 / 79%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.58rem;
+}
+
+.strength-session-log__attention,
+.strength-session-log__feedback {
+  margin: 0;
+  padding: 0.62rem 0.72rem;
+  border: 1px solid rgb(190 169 132 / 12%);
+  border-radius: 0.58rem;
+  background: rgb(168 137 88 / 4%);
+  color: rgb(205 190 161 / 62%);
+  font-size: 0.53rem;
+  line-height: 1.5;
+}
+
+.strength-session-log > form {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.strength-session-log label {
+  display: grid;
+  gap: 0.26rem;
+  min-width: 0;
+  color: rgb(183 195 174 / 64%);
+  font-size: 0.52rem;
+}
+
+.strength-session-log input,
+.strength-session-log select,
+.strength-session-log textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.15rem;
+  padding: 0.5rem 0.58rem;
+  border: 1px solid rgb(158 177 142 / 13%);
+  border-radius: 0.5rem;
+  outline: 1px solid transparent;
+  outline-offset: 0.12rem;
+  background: rgb(151 170 137 / 4%);
+  color: rgb(230 236 225 / 86%);
+  font: inherit;
+  font-size: 0.61rem;
+  color-scheme: dark;
+}
+
+.strength-session-log textarea {
+  resize: vertical;
+}
+
+.strength-session-log input:focus-visible,
+.strength-session-log select:focus-visible,
+.strength-session-log textarea:focus-visible {
+  border-color: rgb(196 181 220 / 35%);
+  outline-color: rgb(196 181 220 / 48%);
+}
+
+.strength-session-log__basics,
+.strength-session-log__notes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.strength-session-log__exercises {
+  display: grid;
+  gap: 0.52rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0.7rem;
+  border: 1px solid rgb(158 177 142 / 10%);
+  border-radius: 0.7rem;
+}
+
+.strength-session-log__exercises > div {
+  display: grid;
+  grid-template-columns: minmax(8rem, 1fr) repeat(3, 4rem) auto;
+  align-items: end;
+  gap: 0.45rem;
+}
+
+.strength-session-log__exercises > div > button {
+  min-height: 2.15rem;
+  border-color: rgb(213 151 142 / 13%);
+  background: transparent;
+  color: rgb(211 160 153 / 58%);
+}
+
+.strength-session-log__exercises > button {
+  justify-self: start;
+}
+
+.strength-session-log__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.62rem;
+}
+
+.strength-session-log__footer label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.strength-session-log__footer input {
+  width: 0.95rem;
+  min-height: 0.95rem;
+}
+
+.strength-session-log__footer button:first-of-type {
+  margin-left: auto;
+}
+
+.strength-session-log__history {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.strength-session-log__history ul {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.strength-session-log__history li {
+  display: flex;
+  min-height: 2.45rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  border-top: 1px solid rgb(158 177 142 / 7%);
+  color: rgb(164 177 154 / 56%);
+  font-size: 0.52rem;
+}
+
+.strength-session-log__history li > span {
+  display: flex;
+  align-items: center;
+  gap: 0.46rem;
+}
+
+.strength-session-log__history li button {
+  min-height: 1.8rem;
+  padding: 0.28rem 0.48rem;
+  border: 0;
+  background: transparent;
+  font-size: 0.47rem;
 }
 
 .strength-tracker__feedback,
@@ -2687,6 +2942,10 @@ select {
   .universe-viewport::after {
     transition: none;
   }
+
+  .universe-viewport::before {
+    transition: none;
+  }
 }
 
 @media (max-width: 64rem) {
@@ -2817,6 +3076,17 @@ select {
 
   .jiu-jitsu-log__panel {
     max-height: min(65svh, 35rem);
+  }
+
+  .jiu-jitsu-log__form input,
+  .jiu-jitsu-log__form select,
+  .jiu-jitsu-log__form textarea {
+    min-height: 2.75rem;
+    font-size: 1rem;
+  }
+
+  .jiu-jitsu-log button {
+    min-height: 2.75rem;
   }
 
   .strength-tracker,
@@ -2966,7 +3236,8 @@ select {
   }
 
   .strength-split,
-  .strength-records__lifts {
+  .strength-records__lifts,
+  .strength-records__lift-history ul {
     grid-template-columns: 1fr;
   }
 
@@ -2976,6 +3247,44 @@ select {
 
   .strength-records__weight > strong {
     grid-column: 1 / -1;
+  }
+
+  .strength-session-log > header {
+    align-items: start;
+  }
+
+  .strength-session-log > header dl {
+    grid-auto-flow: row;
+    gap: 0.28rem;
+  }
+
+  .strength-session-log__basics,
+  .strength-session-log__notes {
+    grid-template-columns: 1fr;
+  }
+
+  .strength-session-log__exercises > div {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .strength-session-log__exercises > div > label:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .strength-session-log__exercises > div > button {
+    grid-column: 1 / -1;
+  }
+
+  .strength-session-log input,
+  .strength-session-log select,
+  .strength-session-log textarea,
+  .strength-session-log button {
+    min-height: 2.75rem;
+    font-size: 1rem;
+  }
+
+  .strength-session-log__footer button:first-of-type {
+    margin-left: 0;
   }
 
   .active-course-label {

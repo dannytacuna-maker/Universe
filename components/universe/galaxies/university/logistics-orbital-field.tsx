@@ -16,7 +16,9 @@ type OrbitalFieldData = Readonly<{
 }>;
 
 type LogisticsOrbitalFieldProps = Readonly<{
+  haloColor: string;
   opacity: number;
+  orbitColor: string;
   schedule: readonly CourseMeeting[];
   seed: number;
 }>;
@@ -38,10 +40,10 @@ const weekdayAngles: Record<CourseWeekday, number> = {
   wednesday: Math.PI * 0.62,
 };
 
-const sessionColors = ["#7db8e8", "#8c8fd0"] as const;
-
 function createOrbitalGuides(
   schedule: readonly CourseMeeting[],
+  orbitColor: string,
+  haloColor: string,
 ): readonly OrbitalGuide[] {
   return schedule.map((meeting, index) => {
     const radius = 0.29 + index * 0.17;
@@ -49,7 +51,7 @@ function createOrbitalGuides(
     const angle = weekdayAngles[meeting.day];
 
     return {
-      color: sessionColors[index] ?? sessionColors[0],
+      color: index % 2 === 0 ? orbitColor : haloColor,
       id: `${meeting.day}-${meeting.room}`,
       markerPosition: [
         Math.cos(angle) * radius,
@@ -63,13 +65,17 @@ function createOrbitalGuides(
   });
 }
 
-function createOrbitalField(seed: number): OrbitalFieldData {
+function createOrbitalField(
+  seed: number,
+  orbitColor: string,
+  haloColor: string,
+): OrbitalFieldData {
   const particleCount = 1_080;
   const positions = new Float32Array(particleCount * 3);
   const colors = new Float32Array(particleCount * 3);
   const random = createSeededRandom(seed);
-  const coolWhite = new Color("#d8edff");
-  const coolBlue = new Color("#689ed2");
+  const coolWhite = new Color(haloColor).lerp(new Color("#f4fbff"), 0.58);
+  const coolBlue = new Color(orbitColor);
   const color = new Color();
 
   for (let index = 0; index < particleCount; index += 1) {
@@ -94,14 +100,19 @@ function createOrbitalField(seed: number): OrbitalFieldData {
 }
 
 export function LogisticsOrbitalField({
+  haloColor,
   opacity,
+  orbitColor,
   schedule,
   seed,
 }: LogisticsOrbitalFieldProps) {
-  const field = useMemo(() => createOrbitalField(seed), [seed]);
+  const field = useMemo(
+    () => createOrbitalField(seed, orbitColor, haloColor),
+    [haloColor, orbitColor, seed],
+  );
   const orbitalGuides = useMemo(
-    () => createOrbitalGuides(schedule),
-    [schedule],
+    () => createOrbitalGuides(schedule, orbitColor, haloColor),
+    [haloColor, orbitColor, schedule],
   );
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { subscribeToMissionDataChanges } from "@/lib/mission-record-sync";
 
 import type {
   CycleEvidence,
@@ -36,6 +37,7 @@ export type CurrentVectorItem = Readonly<{
   cycle: GrowthCycle;
   evidenceThisWeek: number;
   isCompleteToday: boolean;
+  isSystemLinked: boolean;
 }>;
 
 function describeStorageError(error: unknown) {
@@ -44,7 +46,13 @@ function describeStorageError(error: unknown) {
     : "The local mission records could not be updated.";
 }
 
-export function useMissionOperatingSystem() {
+type DomainEvidenceDates = Readonly<
+  Partial<Record<GrowthCycle["areaId"], readonly string[]>>
+>;
+
+export function useMissionOperatingSystem(
+  domainEvidenceDates: DomainEvidenceDates = {},
+) {
   const [data, setData] = useState<MissionOperatingData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [storageError, setStorageError] = useState<string | null>(null);
@@ -52,26 +60,32 @@ export function useMissionOperatingSystem() {
   useEffect(() => {
     let isCurrent = true;
 
-    void listMissionOperatingData()
-      .then((loaded) => {
-        if (isCurrent) {
-          setData(loaded);
-          setStorageError(null);
-        }
-      })
-      .catch((error: unknown) => {
-        if (isCurrent) {
-          setStorageError(describeStorageError(error));
-        }
-      })
-      .finally(() => {
-        if (isCurrent) {
-          setIsLoading(false);
-        }
-      });
+    const load = () => {
+      void listMissionOperatingData()
+        .then((loaded) => {
+          if (isCurrent) {
+            setData(loaded);
+            setStorageError(null);
+          }
+        })
+        .catch((error: unknown) => {
+          if (isCurrent) {
+            setStorageError(describeStorageError(error));
+          }
+        })
+        .finally(() => {
+          if (isCurrent) {
+            setIsLoading(false);
+          }
+        });
+    };
+
+    load();
+    const unsubscribe = subscribeToMissionDataChanges(load);
 
     return () => {
       isCurrent = false;
+      unsubscribe();
     };
   }, []);
 
@@ -271,15 +285,19 @@ export function useMissionOperatingSystem() {
           (entry) =>
             entry.cycleId === cycle.id && entry.occurredOn >= weekStart,
         );
+        const domainDates = domainEvidenceDates[cycle.areaId];
+        const evidenceDates = new Set([
+          ...cycleEvidence.map((entry) => entry.occurredOn),
+          ...(domainDates ?? []).filter((date) => date >= weekStart),
+        ]);
         return {
           cycle,
-          evidenceThisWeek: cycleEvidence.length,
-          isCompleteToday: cycleEvidence.some(
-            (entry) => entry.occurredOn === today,
-          ),
+          evidenceThisWeek: evidenceDates.size,
+          isCompleteToday: evidenceDates.has(today),
+          isSystemLinked: domainDates !== undefined,
         };
       });
-  }, [data]);
+  }, [data, domainEvidenceDates]);
 
   return {
     addCapture,

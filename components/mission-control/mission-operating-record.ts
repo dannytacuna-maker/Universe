@@ -15,11 +15,26 @@ export const missionDestinations = [
   { areaId: "university", id: "logistics", label: "Logistics system" },
   { areaId: "jiu-jitsu", id: "jiu-jitsu", label: "Jiu-Jitsu system" },
   {
+    areaId: "jiu-jitsu",
+    id: "hyperbolic-time-chamber",
+    label: "Hyperbolic Time Chamber",
+  },
+  {
     areaId: "strength-physique",
     id: "strength-physique",
     label: "Strength & Physique system",
   },
+  {
+    areaId: "strength-physique",
+    id: "beerus-planet",
+    label: "Strength training",
+  },
   { areaId: "reading", id: "reading", label: "Reading system" },
+  {
+    areaId: "reading",
+    id: "celestial-library",
+    label: "Celestial Library",
+  },
 ] as const satisfies readonly {
   areaId: MissionAreaId;
   id: string;

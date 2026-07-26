@@ -291,12 +291,33 @@
 }
 
 .deckStatus {
+  width: 100%;
   display: flex;
   align-items: flex-start;
   gap: 0.55rem;
   margin-top: auto;
   padding: 1rem 0.45rem 0;
   border-top: 1px solid rgb(168 201 216 / 7%);
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease;
+}
+
+.deckStatus:hover,
+.deckStatus:focus-visible {
+  border-top-color: rgb(168 201 216 / 16%);
+}
+
+.deckStatus:focus-visible {
+  outline: 1px solid rgb(135 201 215 / 35%);
+  outline-offset: 0.35rem;
 }
 
 .deckStatus > span {
@@ -374,6 +395,53 @@
   color: rgb(178 199 208 / 58%);
   font-size: 0.72rem;
   line-height: 1.65;
+}
+
+.commandActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.58rem;
+  border: 1px solid rgb(135 188 201 / 8%);
+  border-radius: 0.72rem;
+  background: rgb(83 132 145 / 3%);
+}
+
+.commandActions > span {
+  padding-inline: 0.2rem 0.45rem;
+  color: rgb(139 179 191 / 43%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.48rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.commandActions button {
+  min-height: 2rem;
+  padding: 0.42rem 0.68rem;
+  border: 1px solid rgb(136 190 203 / 11%);
+  border-radius: 99px;
+  background: transparent;
+  color: rgb(180 205 211 / 60%);
+  font-size: 0.54rem;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.commandActions button:hover,
+.commandActions button:focus-visible {
+  border-color: rgb(139 202 215 / 27%);
+  background: rgb(105 166 180 / 7%);
+  color: rgb(215 232 235 / 82%);
+}
+
+.commandActions button:focus-visible {
+  outline: 1px solid rgb(139 202 215 / 42%);
+  outline-offset: 0.16rem;
 }
 
 .recoveryNotice {
@@ -1003,6 +1071,10 @@
     padding: 0.4rem;
   }
 
+  :global(.universe-viewport[data-navigation-level="planet"]) .launcher {
+    right: max(4.25rem, calc(env(safe-area-inset-right) + 3.9rem));
+  }
+
   .launcher > span:nth-child(2),
   .launcher kbd {
     display: none;
@@ -1050,7 +1122,7 @@
 
   .navItems button {
     grid-template-columns: auto auto auto;
-    min-height: 2.3rem;
+    min-height: 2.75rem;
     padding: 0.35rem 0.58rem;
   }
 
@@ -1097,6 +1169,20 @@
   .conclusionForm form {
     grid-template-columns: minmax(0, 1fr);
   }
+
+  .deck input,
+  .deck textarea,
+  .deck select {
+    font-size: 1rem;
+  }
+
+  .primaryAction,
+  .textAction,
+  .commandActions button,
+  .composer summary,
+  .secondaryActions button {
+    min-height: 2.75rem;
+  }
 }
 
 @media (max-width: 24rem) {
@@ -1130,5 +1216,360 @@
 
   .loadingState span {
     animation-duration: 3s;
+  }
+}
+
+.syncPanel {
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  min-height: 100%;
+  padding: clamp(1.2rem, 3vw, 2.4rem);
+  color: rgb(229 240 244 / 90%);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgb(166 205 219 / 10%);
+}
+
+.panelHeader span,
+.syncUnlock label > span {
+  color: rgb(170 196 207 / 58%);
+  font-size: 0.61rem;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+}
+
+.panelHeader h2 {
+  margin-top: 0.3rem;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  font-weight: 420;
+  letter-spacing: -0.035em;
+}
+
+.syncState {
+  padding: 0.38rem 0.56rem;
+  border: 1px solid rgb(150 197 211 / 16%);
+  border-radius: 999px;
+  background: rgb(100 163 181 / 6%);
+}
+
+.syncState[data-state="synced"] {
+  border-color: rgb(124 213 188 / 22%);
+  color: rgb(151 225 204 / 76%);
+}
+
+.syncState[data-state="error"],
+.syncState[data-state="offline"] {
+  border-color: rgb(225 173 130 / 22%);
+  color: rgb(235 196 162 / 78%);
+}
+
+.syncSummary {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid rgb(157 198 213 / 10%);
+  border-radius: 0.85rem;
+  background: rgb(5 14 20 / 46%);
+}
+
+.syncSummary > p {
+  max-width: 42rem;
+  color: rgb(208 226 233 / 78%);
+  line-height: 1.6;
+}
+
+.syncSummary dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.syncSummary dl > div {
+  display: grid;
+  gap: 0.22rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgb(161 199 214 / 8%);
+}
+
+.syncSummary dt {
+  color: rgb(159 187 198 / 52%);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.syncSummary dd {
+  color: rgb(226 239 243 / 88%);
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.77rem;
+}
+
+.syncUnlock {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.7rem;
+}
+
+.syncUnlock label {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.syncUnlock input {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid rgb(155 198 213 / 14%);
+  border-radius: 0.62rem;
+  background: rgb(3 11 17 / 62%);
+  padding: 0 0.8rem;
+  color: rgb(231 241 245 / 91%);
+}
+
+.syncUnlock button,
+.syncActions button {
+  min-height: 2.75rem;
+  border: 1px solid rgb(147 200 215 / 16%);
+  border-radius: 0.62rem;
+  background: rgb(97 169 189 / 11%);
+  padding: 0 0.9rem;
+  color: rgb(218 237 242 / 86%);
+}
+
+.syncActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.syncActions button:last-child {
+  background: transparent;
+  color: rgb(171 197 207 / 68%);
+}
+
+.formFeedback {
+  color: rgb(199 220 228 / 78%);
+  font-size: 0.75rem;
+}
+
+.syncPrivacy {
+  max-width: 42rem;
+  color: rgb(151 179 190 / 52%);
+  font-size: 0.69rem;
+  line-height: 1.55;
+}
+
+.identityEvidence,
+.intelligenceSection {
+  display: grid;
+  gap: 0.8rem;
+  padding: 0.9rem;
+  border: 1px solid rgb(146 192 205 / 9%);
+  border-radius: 0.82rem;
+  background: rgb(70 123 139 / 3%);
+}
+
+.identityEvidence header,
+.intelligenceSection > header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.identityEvidence header span,
+.identityEvidence p,
+.intelligenceSection > header > span,
+.intelligenceEmpty,
+.patternSection > p {
+  margin: 0;
+  color: rgb(161 190 200 / 54%);
+  font-size: 0.62rem;
+  line-height: 1.55;
+}
+
+.identityEvidence header strong {
+  color: rgb(193 216 222 / 68%);
+  font-size: 0.62rem;
+  font-weight: 500;
+}
+
+.identityEvidence ul {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.identityEvidence li {
+  padding: 0.58rem 0.65rem;
+  border: 1px solid rgb(139 190 203 / 7%);
+  border-radius: 0.55rem;
+  color: rgb(205 224 229 / 70%);
+  font-size: 0.62rem;
+}
+
+.intelligenceSection {
+  margin-top: 0.4rem;
+}
+
+.intelligenceSection > header h3 {
+  margin: 0.24rem 0 0;
+  color: rgb(225 237 241 / 86%);
+  font-size: 0.96rem;
+  font-weight: 450;
+}
+
+.resurfacedReflection {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0.85rem;
+  border-left: 1px solid rgb(149 209 221 / 24%);
+  background: linear-gradient(90deg, rgb(86 151 166 / 6%), transparent 72%);
+}
+
+.resurfacedReflection span,
+.resurfacedReflection cite {
+  color: rgb(153 190 200 / 52%);
+  font-size: 0.54rem;
+  font-style: normal;
+  letter-spacing: 0.07em;
+}
+
+.resurfacedReflection p {
+  margin: 0;
+  color: rgb(209 228 233 / 75%);
+  font-size: 0.69rem;
+  line-height: 1.62;
+  white-space: pre-line;
+}
+
+.reflectionFilters {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) auto auto;
+  gap: 0.5rem;
+}
+
+.reflectionFilters input,
+.reflectionFilters select {
+  width: 100%;
+  min-height: 2.35rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid rgb(145 191 203 / 10%);
+  border-radius: 0.55rem;
+  outline: 1px solid transparent;
+  background: rgb(4 13 18 / 44%);
+  color: rgb(211 228 233 / 74%);
+  font-size: 0.62rem;
+  color-scheme: dark;
+}
+
+.reflectionFilters input:focus-visible,
+.reflectionFilters select:focus-visible {
+  border-color: rgb(148 207 219 / 30%);
+  outline-color: rgb(148 207 219 / 35%);
+}
+
+.reflectionArchive {
+  display: grid;
+  gap: 0;
+  max-height: 19rem;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.reflectionArchive li {
+  display: grid;
+  gap: 0.34rem;
+  padding: 0.75rem 0.2rem;
+  border-top: 1px solid rgb(146 191 203 / 7%);
+}
+
+.reflectionArchive li > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: rgb(151 188 198 / 48%);
+  font-size: 0.52rem;
+}
+
+.reflectionArchive strong {
+  color: rgb(209 227 232 / 74%);
+  font-size: 0.63rem;
+  font-weight: 500;
+}
+
+.reflectionArchive p {
+  margin: 0;
+  color: rgb(178 202 209 / 58%);
+  font-size: 0.62rem;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+.patternSection {
+  display: grid;
+  gap: 0.55rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgb(146 191 203 / 8%);
+}
+
+.patternSection ul {
+  display: grid;
+  gap: 0.48rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.patternSection li {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.65rem;
+  border: 1px solid rgb(145 192 204 / 8%);
+  border-radius: 0.58rem;
+}
+
+.patternSection strong {
+  color: rgb(205 225 230 / 72%);
+  font-size: 0.63rem;
+  font-weight: 500;
+}
+
+.patternSection small {
+  color: rgb(151 185 195 / 48%);
+  font-size: 0.52rem;
+}
+
+@media (max-width: 42rem) {
+  .syncPanel {
+    padding: 1.15rem 0.9rem calc(1.5rem + env(safe-area-inset-bottom));
+  }
+
+  .syncUnlock {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .identityEvidence ul,
+  .reflectionFilters {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .reflectionFilters input,
+  .reflectionFilters select {
+    min-height: 2.75rem;
+    font-size: 1rem;
   }
 }

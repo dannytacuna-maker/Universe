@@ -13,6 +13,7 @@ import type { PersonalGrowthSystemDefinition } from "./personal-growth-system-de
 import { ReadingSystemField } from "./reading/reading-system-field";
 import type { StrengthProgress } from "./strength-physique/strength-physique-progress";
 import { StrengthPhysiqueSystemField } from "./strength-physique/strength-physique-system-field";
+import type { UniverseActivitySignal } from "../../universe-activity";
 
 type PersonalGrowthSystemProps = Readonly<{
   definition: PersonalGrowthSystemDefinition;
@@ -23,6 +24,7 @@ type PersonalGrowthSystemProps = Readonly<{
   isVisible: boolean;
   jiuJitsuProgress: JiuJitsuProgress;
   motionEnabled: boolean;
+  signal: UniverseActivitySignal;
   onActivate: (systemId: string) => void;
   onHoverChange: (systemId: string | null) => void;
   strengthProgress: StrengthProgress;
@@ -39,6 +41,7 @@ export function PersonalGrowthSystem({
   motionEnabled,
   onActivate,
   onHoverChange,
+  signal,
   strengthProgress,
 }: PersonalGrowthSystemProps) {
   const orbitalGroup = useRef<Group>(null);
@@ -51,7 +54,7 @@ export function PersonalGrowthSystem({
     ? jiuJitsuProgress.recentAttention
     : isStrengthPhysique
       ? strengthProgress.weeklyCompletionRatio
-      : 0;
+      : signal.activity;
 
   useCursor(isHovered && isInteractive, "pointer", "auto");
 
@@ -70,7 +73,10 @@ export function PersonalGrowthSystem({
       scale={definition.scale}
       visible={isVisible}
     >
-      <SpatialLabelAnchor anchorId={`system:${definition.id}`} />
+      <SpatialLabelAnchor
+        anchorId={`system:${definition.id}`}
+        enabled={isInteractive && isVisible}
+      />
 
       <SystemStellarCore
         activity={recentAttention}
@@ -92,7 +98,7 @@ export function PersonalGrowthSystem({
             progress={strengthProgress}
           />
         ) : isReading ? (
-          <ReadingSystemField emphasis={emphasis} />
+          <ReadingSystemField activity={signal.activity} emphasis={emphasis} />
         ) : (
           <mesh rotation={[Math.PI / 2, 0, 0]}>
             <ringGeometry

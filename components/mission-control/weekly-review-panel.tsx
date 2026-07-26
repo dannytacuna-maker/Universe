@@ -1,16 +1,23 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 
 import type {
   WeeklyReview,
   WeeklyReviewInput,
 } from "./mission-operating-record";
 import { getWeekStartKey } from "./mission-operating-record";
+import type {
+  MissionPattern,
+  MissionReflectionEntry,
+} from "./mission-intelligence";
 import styles from "./mission-operating-deck.module.css";
+import { ReflectionIntelligence } from "./reflection-intelligence";
 
 type WeeklyReviewPanelProps = Readonly<{
   onSubmit: (input: WeeklyReviewInput) => Promise<void>;
+  patterns: readonly MissionPattern[];
+  reflections: readonly MissionReflectionEntry[];
   reviews: readonly WeeklyReview[];
 }>;
 
@@ -26,6 +33,8 @@ const emptyDraft: ReviewDraft = {
 
 export function WeeklyReviewPanel({
   onSubmit,
+  patterns,
+  reflections,
   reviews,
 }: WeeklyReviewPanelProps) {
   const weekStart = getWeekStartKey();
@@ -36,6 +45,21 @@ export function WeeklyReviewPanel({
   const [draft, setDraft] = useState<ReviewDraft>(currentReview ?? emptyDraft);
   const [feedback, setFeedback] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const isDraftDirtyRef = useRef(false);
+
+  useEffect(() => {
+    if (isDraftDirtyRef.current || currentReview === null) {
+      return;
+    }
+
+    setDraft({
+      adjustment: currentReview.adjustment,
+      friction: currentReview.friction,
+      neglected: currentReview.neglected,
+      nextFocus: currentReview.nextFocus,
+      proudOf: currentReview.proudOf,
+    });
+  }, [currentReview]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -44,6 +68,7 @@ export function WeeklyReviewPanel({
 
     try {
       await onSubmit({ ...draft, weekStart });
+      isDraftDirtyRef.current = false;
       setFeedback("Weekly review saved. The next adjustment is now explicit.");
     } catch (error: unknown) {
       setFeedback(
@@ -57,6 +82,7 @@ export function WeeklyReviewPanel({
   };
 
   const updateDraft = (field: keyof ReviewDraft, value: string) => {
+    isDraftDirtyRef.current = true;
     setDraft((current) => ({ ...current, [field]: value }));
   };
 
@@ -161,6 +187,8 @@ export function WeeklyReviewPanel({
           </div>
         </details>
       ) : null}
+
+      <ReflectionIntelligence patterns={patterns} reflections={reflections} />
     </div>
   );
 }

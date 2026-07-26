@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useId, useRef, useState, type FormEvent } from "react";
 
 import {
   readingBookStatusLabels,
@@ -10,6 +10,7 @@ import {
   type ReadingBookStatus,
   type ReadingBookUpdate,
   type ReadingSession,
+  type ReadingSessionUpdate,
 } from "./reading-record";
 import type { ReadingSummary } from "./reading-summary";
 
@@ -20,9 +21,18 @@ type CelestialLibraryDashboardProps = Readonly<{
   onAddBook: (input: NewReadingBook) => Promise<void>;
   onAddSession: (input: NewReadingSession) => Promise<void>;
   onEditBook: (input: ReadingBookUpdate) => Promise<void>;
+  onEditSession: (input: ReadingSessionUpdate) => Promise<void>;
+  onRemoveBook: (bookId: string) => Promise<void>;
+  onRemoveSession: (sessionId: string) => Promise<void>;
   sessions: readonly ReadingSession[];
   storageError: string | null;
   summary: ReadingSummary;
+}>;
+
+type SessionEditor = Readonly<{
+  bookId: string;
+  revision: number;
+  session: ReadingSession | null;
 }>;
 
 function todayAsInputValue() {
@@ -51,70 +61,150 @@ export function CelestialLibraryDashboard({
   onAddBook,
   onAddSession,
   onEditBook,
+  onEditSession,
+  onRemoveBook,
+  onRemoveSession,
   sessions,
   storageError,
   summary,
 }: CelestialLibraryDashboardProps) {
+  const sessionComposerId = useId();
   const [isSaving, setIsSaving] = useState(false);
+  const [isSessionComposerOpen, setIsSessionComposerOpen] = useState(false);
+  const [pendingRemovalKey, setPendingRemovalKey] = useState<string | null>(
+    null,
+  );
   const [feedback, setFeedback] = useState("");
+  const [sessionEditor, setSessionEditor] = useState<SessionEditor>({
+    bookId: "",
+    revision: 0,
+    session: null,
+  });
+  const operationLockRef = useRef(false);
 
   if (!isVisible) {
     return null;
   }
+
+  const currentBook = summary.currentBook;
+  const currentProgress =
+    currentBook === null
+      ? 0
+      : Math.min(currentBook.currentPage / currentBook.totalPages, 1);
+  const sessionTargetBookId =
+    sessionEditor.bookId || currentBook?.id || books[0]?.id || "";
+  const sessionTargetBook =
+    books.find((book) => book.id === sessionTargetBookId) ?? null;
+
+  const runOperation = async (
+    operation: () => Promise<void>,
+    successMessage: string,
+    failureMessage: string,
+  ) => {
+    if (operationLockRef.current) {
+      return false;
+    }
+
+    operationLockRef.current = true;
+    setIsSaving(true);
+    setFeedback("");
+
+    try {
+      await operation();
+      setFeedback(successMessage);
+      return true;
+    } catch (error: unknown) {
+      setFeedback(error instanceof Error ? error.message : failureMessage);
+      return false;
+    } finally {
+      operationLockRef.current = false;
+      setIsSaving(false);
+    }
+  };
+
+  const resetSessionEditor = (excludedBookId?: string) => {
+    const fallbackBookId =
+      currentBook?.id !== excludedBookId
+        ? currentBook?.id
+        : books.find((book) => book.id !== excludedBookId)?.id;
+
+    setSessionEditor((current) => ({
+      bookId: fallbackBookId ?? "",
+      revision: current.revision + 1,
+      session: null,
+    }));
+  };
+
+  const openSessionEditor = (
+    bookId: string,
+    session: ReadingSession | null,
+  ) => {
+    setSessionEditor((current) => ({
+      bookId,
+      revision: current.revision + 1,
+      session,
+    }));
+    setIsSessionComposerOpen(true);
+    setFeedback(
+      session === null
+        ? "Ready for your next reading session."
+        : "Editing reading session.",
+    );
+  };
 
   const handleBookSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
     const input: NewReadingBook = {
-      author: String(data.get("author") ?? ""),
+      author: String(data.get("author") ?? "").trim(),
       status: String(data.get("status")) as ReadingBookStatus,
-      title: String(data.get("title") ?? ""),
+      title: String(data.get("title") ?? "").trim(),
       totalPages: Number(data.get("totalPages")),
     };
+    const didSave = await runOperation(
+      () => onAddBook(input),
+      "Book added to the Celestial Library.",
+      "The book could not be saved.",
+    );
 
-    setIsSaving(true);
-    setFeedback("");
-    try {
-      await onAddBook(input);
+    if (didSave) {
       form.reset();
-      setFeedback("Book added to the Celestial Library.");
-    } catch (error: unknown) {
-      setFeedback(
-        error instanceof Error ? error.message : "The book could not be saved.",
-      );
-    } finally {
-      setIsSaving(false);
     }
   };
 
   const handleSessionSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const form = event.currentTarget;
-    const data = new FormData(form);
+    const data = new FormData(event.currentTarget);
+    const sessionBeingEdited = sessionEditor.session;
     const input: NewReadingSession = {
       bookId: String(data.get("bookId")),
       durationMinutes: Number(data.get("durationMinutes")),
       endPage: Number(data.get("endPage")),
       occurredOn: String(data.get("occurredOn")),
-      reflection: String(data.get("reflection") ?? ""),
+      reflection: String(data.get("reflection") ?? "").trim(),
       startPage: Number(data.get("startPage")),
     };
+    const didSave =
+      sessionBeingEdited === null
+        ? await runOperation(
+            () => onAddSession(input),
+            "Reading session logged.",
+            "The reading session could not be saved.",
+          )
+        : await runOperation(
+            () =>
+              onEditSession({
+                ...input,
+                id: sessionBeingEdited.id,
+              }),
+            "Reading session updated.",
+            "The reading session could not be updated.",
+          );
 
-    setIsSaving(true);
-    setFeedback("");
-    try {
-      await onAddSession(input);
-      form.reset();
-      setFeedback("Reading session logged.");
-    } catch (error: unknown) {
-      setFeedback(
-        error instanceof Error
-          ? error.message
-          : "The reading session could not be saved.",
-      );
-    } finally {
-      setIsSaving(false);
+    if (didSave) {
+      resetSessionEditor();
+      setIsSessionComposerOpen(false);
     }
   };
 
@@ -123,34 +213,83 @@ export function CelestialLibraryDashboard({
     const data = new FormData(event.currentTarget);
     const ratingValue = String(data.get("rating") ?? "");
     const input: ReadingBookUpdate = {
+      author: String(data.get("author") ?? "").trim(),
       currentPage: Number(data.get("currentPage")),
-      finalReflection: String(data.get("finalReflection") ?? ""),
+      finalReflection: String(data.get("finalReflection") ?? "").trim(),
       id: String(data.get("id")),
       rating: ratingValue.length === 0 ? null : Number(ratingValue),
       status: String(data.get("status")) as ReadingBookStatus,
+      title: String(data.get("title") ?? "").trim(),
+      totalPages: Number(data.get("totalPages")),
     };
 
-    setIsSaving(true);
-    setFeedback("");
-    try {
-      await onEditBook(input);
-      setFeedback("Book progress updated.");
-    } catch (error: unknown) {
-      setFeedback(
-        error instanceof Error
-          ? error.message
-          : "The book could not be updated.",
-      );
-    } finally {
-      setIsSaving(false);
+    await runOperation(
+      () => onEditBook(input),
+      "Book details and progress updated.",
+      "The book could not be updated.",
+    );
+  };
+
+  const handleRemoveSession = async (session: ReadingSession) => {
+    if (
+      operationLockRef.current ||
+      !window.confirm("Delete this reading session? This cannot be undone.")
+    ) {
+      return;
+    }
+
+    const removalKey = `session:${session.id}`;
+    setPendingRemovalKey(removalKey);
+    const didRemove = await runOperation(
+      () => onRemoveSession(session.id),
+      "Reading session deleted.",
+      "The reading session could not be deleted.",
+    );
+    setPendingRemovalKey(null);
+
+    if (didRemove && sessionEditor.session?.id === session.id) {
+      resetSessionEditor();
+      setIsSessionComposerOpen(false);
     }
   };
 
-  const currentBook = summary.currentBook;
-  const currentProgress =
-    currentBook === null
-      ? 0
-      : Math.min(currentBook.currentPage / currentBook.totalPages, 1);
+  const handleRemoveBook = async (book: ReadingBook) => {
+    if (operationLockRef.current) {
+      return;
+    }
+
+    const relatedSessionCount = sessions.filter(
+      (session) => session.bookId === book.id,
+    ).length;
+    const sessionWarning =
+      relatedSessionCount === 0
+        ? ""
+        : ` and ${relatedSessionCount} reading ${
+            relatedSessionCount === 1 ? "session" : "sessions"
+          }`;
+
+    if (
+      !window.confirm(
+        `Delete "${book.title}"${sessionWarning}? This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+
+    const removalKey = `book:${book.id}`;
+    setPendingRemovalKey(removalKey);
+    const didRemove = await runOperation(
+      () => onRemoveBook(book.id),
+      "Book deleted from the library.",
+      "The book could not be deleted.",
+    );
+    setPendingRemovalKey(null);
+
+    if (didRemove && sessionTargetBookId === book.id) {
+      resetSessionEditor(book.id);
+      setIsSessionComposerOpen(false);
+    }
+  };
 
   return (
     <aside
@@ -166,6 +305,19 @@ export function CelestialLibraryDashboard({
               ? "Build a quiet record of books, sessions, and ideas."
               : `${currentBook.author || "Unknown author"} · page ${currentBook.currentPage} of ${currentBook.totalPages}`}
           </p>
+          {currentBook !== null ? (
+            <div className="library-action">
+              <button
+                aria-controls={sessionComposerId}
+                aria-expanded={isSessionComposerOpen}
+                disabled={isSaving}
+                onClick={() => openSessionEditor(currentBook.id, null)}
+                type="button"
+              >
+                Continue reading
+              </button>
+            </div>
+          ) : null}
         </div>
         <div aria-label="Weekly reading summary" className="immersive-metrics">
           <span>
@@ -266,16 +418,31 @@ export function CelestialLibraryDashboard({
 
         <details
           className="immersive-panel library-action"
-          open={books.length > 0 && sessions.length === 0}
+          id={sessionComposerId}
+          onToggle={(event) =>
+            setIsSessionComposerOpen(event.currentTarget.open)
+          }
+          open={isSessionComposerOpen}
         >
-          <summary>Log reading</summary>
+          <summary>
+            {sessionEditor.session === null
+              ? "Log reading"
+              : "Edit reading session"}
+          </summary>
           {books.length === 0 ? (
             <p>Add a book before logging a reading session.</p>
           ) : (
-            <form onSubmit={handleSessionSubmit}>
+            <form
+              key={`${sessionEditor.session?.id ?? "new"}:${sessionTargetBookId}:${sessionEditor.revision}`}
+              onSubmit={handleSessionSubmit}
+            >
               <label>
                 Book
-                <select name="bookId">
+                <select
+                  defaultValue={sessionTargetBookId}
+                  name="bookId"
+                  required
+                >
                   {books.map((book) => (
                     <option key={book.id} value={book.id}>
                       {book.title}
@@ -286,7 +453,9 @@ export function CelestialLibraryDashboard({
               <label>
                 Date
                 <input
-                  defaultValue={todayAsInputValue()}
+                  defaultValue={
+                    sessionEditor.session?.occurredOn ?? todayAsInputValue()
+                  }
                   max={todayAsInputValue()}
                   name="occurredOn"
                   required
@@ -295,23 +464,65 @@ export function CelestialLibraryDashboard({
               </label>
               <label>
                 Minutes
-                <input min="1" name="durationMinutes" required type="number" />
+                <input
+                  defaultValue={
+                    sessionEditor.session?.durationMinutes ?? undefined
+                  }
+                  min="1"
+                  name="durationMinutes"
+                  required
+                  type="number"
+                />
               </label>
               <label>
                 Starting page
-                <input min="0" name="startPage" required type="number" />
+                <input
+                  defaultValue={
+                    sessionEditor.session?.startPage ??
+                    sessionTargetBook?.currentPage ??
+                    0
+                  }
+                  min="0"
+                  name="startPage"
+                  required
+                  type="number"
+                />
               </label>
               <label>
                 Ending page
-                <input min="0" name="endPage" required type="number" />
+                <input
+                  defaultValue={sessionEditor.session?.endPage ?? undefined}
+                  min="0"
+                  name="endPage"
+                  required
+                  type="number"
+                />
               </label>
               <label className="library-action__wide">
                 Reflection
-                <textarea maxLength={1600} name="reflection" rows={2} />
+                <textarea
+                  defaultValue={sessionEditor.session?.reflection ?? ""}
+                  maxLength={1600}
+                  name="reflection"
+                  rows={2}
+                />
               </label>
               <button disabled={isSaving} type="submit">
-                Save reading session
+                {isSaving
+                  ? "Saving"
+                  : sessionEditor.session === null
+                    ? "Save reading session"
+                    : "Save changes"}
               </button>
+              {sessionEditor.session !== null ? (
+                <button
+                  disabled={isSaving}
+                  onClick={() => resetSessionEditor()}
+                  type="button"
+                >
+                  Cancel edit
+                </button>
+              ) : null}
             </form>
           )}
         </details>
@@ -332,12 +543,40 @@ export function CelestialLibraryDashboard({
                     <span>{book.author || "Unknown author"}</span>
                   </div>
                   <label>
-                    Page
+                    Title
+                    <input
+                      defaultValue={book.title}
+                      name="title"
+                      required
+                      type="text"
+                    />
+                  </label>
+                  <label>
+                    Author
+                    <input
+                      defaultValue={book.author}
+                      name="author"
+                      type="text"
+                    />
+                  </label>
+                  <label>
+                    Total pages
+                    <input
+                      defaultValue={book.totalPages}
+                      min="1"
+                      name="totalPages"
+                      required
+                      type="number"
+                    />
+                  </label>
+                  <label>
+                    Current page
                     <input
                       defaultValue={book.currentPage}
                       max={book.totalPages}
                       min="0"
                       name="currentPage"
+                      required
                       type="number"
                     />
                   </label>
@@ -374,7 +613,16 @@ export function CelestialLibraryDashboard({
                     />
                   </label>
                   <button disabled={isSaving} type="submit">
-                    Update
+                    Update book
+                  </button>
+                  <button
+                    disabled={isSaving}
+                    onClick={() => void handleRemoveBook(book)}
+                    type="button"
+                  >
+                    {pendingRemovalKey === `book:${book.id}`
+                      ? "Deleting"
+                      : "Delete book"}
                   </button>
                 </form>
               ))}
@@ -405,6 +653,26 @@ export function CelestialLibraryDashboard({
                     {session.reflection.length > 0 ? (
                       <p>{session.reflection}</p>
                     ) : null}
+                    <span className="library-action library-action__wide">
+                      <button
+                        disabled={isSaving}
+                        onClick={() =>
+                          openSessionEditor(session.bookId, session)
+                        }
+                        type="button"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        disabled={isSaving}
+                        onClick={() => void handleRemoveSession(session)}
+                        type="button"
+                      >
+                        {pendingRemovalKey === `session:${session.id}`
+                          ? "Deleting"
+                          : "Delete"}
+                      </button>
+                    </span>
                   </li>
                 );
               })}
@@ -413,6 +681,9 @@ export function CelestialLibraryDashboard({
         </details>
       </div>
 
+      <p className="immersive-dashboard__feedback">
+        Saved locally first. Cloud sync status is shown in Mission.
+      </p>
       {storageError !== null ? (
         <p className="immersive-dashboard__error">{storageError}</p>
       ) : null}

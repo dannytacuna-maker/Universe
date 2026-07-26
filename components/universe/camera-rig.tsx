@@ -63,7 +63,9 @@ export function CameraRig({
 }: CameraRigProps) {
   const getThreeState = useThree((state) => state.get);
   const invalidate = useThree((state) => state.invalidate);
+  const canvasElement = useThree((state) => state.gl.domElement);
   const viewportSize = useThree((state) => state.size);
+  const onArriveRef = useRef(onArrive);
   const elapsedTime = useRef(0);
   const currentLookTarget = useRef(new Vector3(0, 0, 0));
   const destinationPosition = useRef(new Vector3());
@@ -117,6 +119,10 @@ export function CameraRig({
   );
 
   useEffect(() => {
+    onArriveRef.current = onArrive;
+  }, [onArrive]);
+
+  useEffect(() => {
     if (!motionEnabled) {
       return;
     }
@@ -125,8 +131,9 @@ export function CameraRig({
 
     transitionStartPosition.current.copy(camera.position);
     transitionStartLook.current.copy(currentLookTarget.current);
-    transitionStartFov.current =
-      camera instanceof PerspectiveCamera ? camera.fov : responsiveFov;
+    if (camera instanceof PerspectiveCamera) {
+      transitionStartFov.current = camera.fov;
+    }
     transitionProgress.current = 0;
     hasReportedArrival.current = false;
     currentZoom.current = 1;
@@ -138,14 +145,10 @@ export function CameraRig({
     invalidate,
     motionEnabled,
     navigationLevel,
-    onArrive,
-    responsiveFov,
     resetToken,
     selectedGalaxyId,
     selectedPlanetId,
     selectedSystemId,
-    targetLook,
-    targetPosition,
   ]);
 
   useEffect(() => {
@@ -169,12 +172,11 @@ export function CameraRig({
 
     camera.updateMatrixWorld();
     invalidate();
-    onArrive();
+    onArriveRef.current();
   }, [
     getThreeState,
     invalidate,
     motionEnabled,
-    onArrive,
     responsiveFov,
     targetLook,
     targetPosition,
@@ -238,14 +240,14 @@ export function CameraRig({
       }
     };
 
-    window.addEventListener("wheel", handleWheel, { passive: true });
+    canvasElement.addEventListener("wheel", handleWheel, { passive: true });
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      window.removeEventListener("wheel", handleWheel);
+      canvasElement.removeEventListener("wheel", handleWheel);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [invalidate, navigationLevel]);
+  }, [canvasElement, invalidate, navigationLevel]);
 
   useFrame(({ camera }, delta) => {
     const safeDelta = Math.min(delta, 0.075);
@@ -329,7 +331,7 @@ export function CameraRig({
 
       if (progress === 1 && !hasReportedArrival.current) {
         hasReportedArrival.current = true;
-        onArrive();
+        onArriveRef.current();
       }
 
       return;

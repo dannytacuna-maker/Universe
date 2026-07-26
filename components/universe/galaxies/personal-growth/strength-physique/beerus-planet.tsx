@@ -168,7 +168,10 @@ export function BeerusPlanet({
       scale={isEmphasized ? 1.035 : 1}
       visible={isVisible}
     >
-      <SpatialLabelAnchor anchorId={`planet:${beerusPlanetDefinition.id}`} />
+      <SpatialLabelAnchor
+        anchorId={`planet:${beerusPlanetDefinition.id}`}
+        enabled={isInteractive && isVisible}
+      />
 
       <mesh ref={planet} rotation={[0.12, 0.25, -0.08]}>
         <sphereGeometry args={[0.078, 48, 34]} />

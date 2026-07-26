@@ -202,7 +202,10 @@ export function PersonalGrowthDestinationPlanet({
       scale={isEmphasized ? 1.045 : 1}
       visible={isVisible}
     >
-      <SpatialLabelAnchor anchorId={`planet:${definition.id}`} />
+      <SpatialLabelAnchor
+        anchorId={`planet:${definition.id}`}
+        enabled={isInteractive && isVisible}
+      />
 
       <group ref={planet} rotation={[0.18, -0.22, 0.1]}>
         <mesh>

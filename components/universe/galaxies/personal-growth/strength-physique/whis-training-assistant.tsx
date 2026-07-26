@@ -11,17 +11,28 @@ import type {
   BodyWeightEntry,
   NewBodyWeightEntry,
   NewStrengthPersonalRecord,
+  NewStrengthTrainingSession,
+  StrengthLiftObservation,
   StrengthPersonalRecord,
+  StrengthTrainingSession,
+  StrengthTrainingSessionUpdate,
 } from "./strength-physique-record";
 import { StrengthRecords } from "./strength-records";
+import { StrengthSessionLog } from "./strength-session-log";
 import { WorkoutSplit } from "./workout-split";
 
 type WhisTrainingAssistantProps = Readonly<{
   bodyWeightEntries: readonly BodyWeightEntry[];
   isLoading: boolean;
   isVisible: boolean;
+  liftHistory: readonly StrengthLiftObservation[];
   onAddBodyWeight: (input: NewBodyWeightEntry) => Promise<void>;
+  onAddTrainingSession: (input: NewStrengthTrainingSession) => Promise<void>;
+  onEditTrainingSession: (
+    input: StrengthTrainingSessionUpdate,
+  ) => Promise<void>;
   onRemoveBodyWeight: (entryId: string) => Promise<void>;
+  onRemoveTrainingSession: (sessionId: string) => Promise<void>;
   onToggleWorkout: (
     dayId: StrengthWorkoutDayId,
     completed: boolean,
@@ -30,19 +41,25 @@ type WhisTrainingAssistantProps = Readonly<{
   personalRecords: readonly StrengthPersonalRecord[];
   progress: StrengthProgress;
   storageError: string | null;
+  trainingSessions: readonly StrengthTrainingSession[];
 }>;
 
 export function WhisTrainingAssistant({
   bodyWeightEntries,
   isLoading,
   isVisible,
+  liftHistory,
   onAddBodyWeight,
+  onAddTrainingSession,
+  onEditTrainingSession,
   onRemoveBodyWeight,
+  onRemoveTrainingSession,
   onToggleWorkout,
   onUpdatePersonalRecord,
   personalRecords,
   progress,
   storageError,
+  trainingSessions,
 }: WhisTrainingAssistantProps) {
   const panelId = useId();
   const [isOpen, setIsOpen] = useState(false);
@@ -107,15 +124,23 @@ export function WhisTrainingAssistant({
             completedDayIds={progress.completedDayIds}
             onToggleWorkout={onToggleWorkout}
           />
+          <StrengthSessionLog
+            onAdd={onAddTrainingSession}
+            onEdit={onEditTrainingSession}
+            onRemove={onRemoveTrainingSession}
+            sessions={trainingSessions}
+          />
           <StrengthRecords
             bodyWeightEntries={bodyWeightEntries}
+            liftHistory={liftHistory}
             onAddBodyWeight={onAddBodyWeight}
             onRemoveBodyWeight={onRemoveBodyWeight}
             onUpdatePersonalRecord={onUpdatePersonalRecord}
             personalRecords={personalRecords}
           />
           <p className="strength-tracker__storage">
-            Stored privately in this browser on this device.
+            Saved locally first and synchronized when private cloud access is
+            active.
           </p>
           {storageError !== null ? (
             <p className="strength-tracker__error">{storageError}</p>

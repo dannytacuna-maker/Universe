@@ -8,6 +8,7 @@ import type {
   BodyWeightEntry,
   NewBodyWeightEntry,
   NewStrengthPersonalRecord,
+  StrengthLiftObservation,
   StrengthPersonalRecord,
 } from "./strength-physique-record";
 import { StrengthRecords } from "./strength-records";
@@ -17,6 +18,7 @@ type StrengthPhysiqueTrackerProps = Readonly<{
   bodyWeightEntries: readonly BodyWeightEntry[];
   isLoading: boolean;
   isVisible: boolean;
+  liftHistory: readonly StrengthLiftObservation[];
   onAddBodyWeight: (input: NewBodyWeightEntry) => Promise<void>;
   onRemoveBodyWeight: (entryId: string) => Promise<void>;
   onToggleWorkout: (
@@ -33,6 +35,7 @@ export function StrengthPhysiqueTracker({
   bodyWeightEntries,
   isLoading,
   isVisible,
+  liftHistory,
   onAddBodyWeight,
   onRemoveBodyWeight,
   onToggleWorkout,
@@ -77,6 +80,7 @@ export function StrengthPhysiqueTracker({
           />
           <StrengthRecords
             bodyWeightEntries={bodyWeightEntries}
+            liftHistory={liftHistory}
             onAddBodyWeight={onAddBodyWeight}
             onRemoveBodyWeight={onRemoveBodyWeight}
             onUpdatePersonalRecord={onUpdatePersonalRecord}

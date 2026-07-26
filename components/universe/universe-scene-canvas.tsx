@@ -3,6 +3,7 @@
 import type { NavigationLevel } from "@/store/navigation-store";
 import type { JiuJitsuProgress } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-progress";
 import type { StrengthProgress } from "./galaxies/personal-growth/strength-physique/strength-physique-progress";
+import type { UniverseActivitySignals } from "./universe-activity";
 
 import { UniverseCanvas } from "./universe-canvas";
 import { UniverseScene } from "./universe-scene";
@@ -16,6 +17,7 @@ const camera = {
 
 export type UniverseSceneCanvasProps = Readonly<{
   activeSystemId: string | null;
+  activitySignals: UniverseActivitySignals;
   cameraResetToken: number;
   emphasizedGalaxyId: string | null;
   emphasizedPlanetId: string | null;
@@ -39,6 +41,7 @@ export type UniverseSceneCanvasProps = Readonly<{
 
 export function UniverseSceneCanvas({
   activeSystemId,
+  activitySignals,
   cameraResetToken,
   emphasizedGalaxyId,
   emphasizedPlanetId,
@@ -64,6 +67,7 @@ export function UniverseSceneCanvas({
       <UniverseCanvas camera={camera} className="h-full w-full">
         <UniverseScene
           activeSystemId={activeSystemId}
+          activitySignals={activitySignals}
           cameraResetToken={cameraResetToken}
           emphasizedGalaxyId={emphasizedGalaxyId}
           emphasizedPlanetId={emphasizedPlanetId}

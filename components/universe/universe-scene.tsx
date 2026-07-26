@@ -33,9 +33,11 @@ import {
   personalGrowthGalaxyId,
   universityGalaxyId,
 } from "./universe-destinations";
+import type { UniverseActivitySignals } from "./universe-activity";
 
 type UniverseSceneProps = Readonly<{
   activeSystemId: string | null;
+  activitySignals: UniverseActivitySignals;
   cameraResetToken: number;
   emphasizedGalaxyId: string | null;
   emphasizedPlanetId: string | null;
@@ -63,6 +65,7 @@ const genericPersonalGrowthSurfaces = standardPersonalGrowthPlanets.filter(
 
 export function UniverseScene({
   activeSystemId,
+  activitySignals,
   cameraResetToken,
   emphasizedGalaxyId,
   emphasizedPlanetId,
@@ -108,6 +111,18 @@ export function UniverseScene({
   const universityNavigationLevel = universitySelected
     ? navigationLevel
     : "universe";
+  const isBeerusSurfaceSelected =
+    navigationLevel === "planet" &&
+    selectedPlanetId === beerusPlanetDefinition.id;
+  const isTimeChamberSurfaceSelected =
+    navigationLevel === "planet" &&
+    selectedPlanetId === hyperbolicTimeChamberDefinition.id;
+  const selectedGenericPersonalGrowthSurface =
+    navigationLevel === "planet"
+      ? (genericPersonalGrowthSurfaces.find(
+          (planet) => planet.id === selectedPlanetId,
+        ) ?? null)
+      : null;
 
   return (
     <>
@@ -146,13 +161,14 @@ export function UniverseScene({
           onGalaxyHoverChange(isHovered ? universityGalaxyId : null)
         }
         presence={
-          navigationLevel === "universe"
+          (navigationLevel === "universe"
             ? 1
             : universitySelected && navigationLevel === "galaxy"
               ? 0.24
               : universitySelected
                 ? 0.01
-                : 0.025
+                : 0.025) *
+          (0.92 + activitySignals.galaxy.university * 0.08)
         }
       />
       <UniversityInteriorField
@@ -168,6 +184,7 @@ export function UniverseScene({
         motionEnabled={motionEnabled}
         onActivate={onSystemActivate}
         onHoverChange={onSystemHoverChange}
+        signals={activitySignals.university}
       />
       <PersonalGrowthGalaxy
         isEmphasized={emphasizedGalaxyId === personalGrowthGalaxyId}
@@ -179,13 +196,14 @@ export function UniverseScene({
           onGalaxyHoverChange(isHovered ? personalGrowthGalaxyId : null)
         }
         presence={
-          navigationLevel === "universe"
+          (navigationLevel === "universe"
             ? 0.92
             : personalGrowthSelected && navigationLevel === "galaxy"
               ? 0.24
               : personalGrowthSelected
                 ? 0.01
-                : 0.022
+                : 0.022) *
+          (0.92 + activitySignals.galaxy.personalGrowth * 0.08)
         }
       />
       <PersonalGrowthInteriorField
@@ -211,6 +229,7 @@ export function UniverseScene({
         motionEnabled={motionEnabled}
         onActivate={onSystemActivate}
         onHoverChange={onSystemHoverChange}
+        signals={activitySignals.personalGrowth}
         strengthProgress={strengthProgress}
       />
       <BeerusPlanet
@@ -256,30 +275,19 @@ export function UniverseScene({
         />
       ))}
       <Suspense fallback={null}>
-        <BeerusPlanetSurface
-          isVisible={
-            navigationLevel === "planet" &&
-            selectedPlanetId === beerusPlanetDefinition.id
-          }
-          motionEnabled={motionEnabled}
-        />
-        <TimeChamberSurface
-          isVisible={
-            navigationLevel === "planet" &&
-            selectedPlanetId === hyperbolicTimeChamberDefinition.id
-          }
-          motionEnabled={motionEnabled}
-        />
-        {genericPersonalGrowthSurfaces.map((planet) => (
+        {isBeerusSurfaceSelected ? (
+          <BeerusPlanetSurface isVisible motionEnabled={motionEnabled} />
+        ) : null}
+        {isTimeChamberSurfaceSelected ? (
+          <TimeChamberSurface isVisible motionEnabled={motionEnabled} />
+        ) : null}
+        {selectedGenericPersonalGrowthSurface ? (
           <PersonalGrowthDestinationSurface
-            definition={planet}
-            isVisible={
-              navigationLevel === "planet" && selectedPlanetId === planet.id
-            }
-            key={planet.id}
+            definition={selectedGenericPersonalGrowthSurface}
+            isVisible
             motionEnabled={motionEnabled}
           />
-        ))}
+        ) : null}
       </Suspense>
       <CameraRig
         motionEnabled={motionEnabled}

@@ -22,7 +22,8 @@ export type NewReadingBook = Pick<
 export type ReadingBookUpdate = Pick<
   ReadingBook,
   "currentPage" | "finalReflection" | "id" | "rating" | "status"
->;
+> &
+  Partial<Pick<ReadingBook, "author" | "title" | "totalPages">>;
 
 export type ReadingSession = Readonly<{
   bookId: string;
@@ -34,12 +35,15 @@ export type ReadingSession = Readonly<{
   pagesRead: number;
   reflection: string;
   startPage: number;
+  updatedAt: string;
 }>;
 
 export type NewReadingSession = Omit<
   ReadingSession,
-  "createdAt" | "id" | "pagesRead"
+  "createdAt" | "id" | "pagesRead" | "updatedAt"
 >;
+
+export type ReadingSessionUpdate = NewReadingSession & Readonly<{ id: string }>;
 
 export const readingBookStatusLabels = {
   abandoned: "Abandoned",

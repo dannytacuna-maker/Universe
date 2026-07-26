@@ -1,13 +1,21 @@
 const databaseName = "mission-control";
-const databaseVersion = 4;
+const databaseVersion = 5;
 
 export const personalGrowthStoreNames = {
   bodyWeight: "strength-body-weight",
   jiuJitsuSessions: "jiu-jitsu-sessions",
+  liftHistory: "strength-lift-history",
   personalRecords: "strength-personal-records",
   readingBooks: "reading-books",
   readingSessions: "reading-sessions",
+  strengthSessions: "strength-training-sessions",
   workoutCompletions: "strength-workout-completions",
+} as const;
+
+export const universityStoreNames = {
+  assignments: "university-assignments",
+  grades: "university-grades",
+  notes: "university-notes",
 } as const;
 
 export const missionOperatingStoreNames = {
@@ -18,6 +26,21 @@ export const missionOperatingStoreNames = {
   identity: "mission-identity",
   weeklyReviews: "mission-weekly-reviews",
 } as const;
+
+export const missionSyncStoreNames = {
+  drafts: "mission-form-drafts",
+  outbox: "mission-sync-outbox",
+  state: "mission-sync-state",
+} as const;
+
+export const missionRecordStoreNames = {
+  ...personalGrowthStoreNames,
+  ...universityStoreNames,
+  ...missionOperatingStoreNames,
+} as const;
+
+export type MissionRecordStoreName =
+  (typeof missionRecordStoreNames)[keyof typeof missionRecordStoreNames];
 
 export function requestResult<T>(request: IDBRequest<T>) {
   return new Promise<T>((resolve, reject) => {
@@ -125,6 +148,36 @@ export async function openMissionControlDatabase() {
     );
     createIndexedStore(database, missionOperatingStoreNames.experiments, "id", [
       "status",
+      "updatedAt",
+    ]);
+    createIndexedStore(
+      database,
+      personalGrowthStoreNames.strengthSessions,
+      "id",
+      ["occurredOn", "focus"],
+    );
+    createIndexedStore(database, personalGrowthStoreNames.liftHistory, "id", [
+      "liftId",
+      "achievedOn",
+    ]);
+    createIndexedStore(database, universityStoreNames.assignments, "id", [
+      "courseId",
+      "dueAt",
+      "status",
+    ]);
+    createIndexedStore(database, universityStoreNames.grades, "id", [
+      "courseId",
+      "occurredOn",
+    ]);
+    createIndexedStore(database, universityStoreNames.notes, "id", [
+      "courseId",
+      "updatedAt",
+    ]);
+    createIndexedStore(database, missionSyncStoreNames.outbox, "id", [
+      "createdAt",
+    ]);
+    createIndexedStore(database, missionSyncStoreNames.state, "id");
+    createIndexedStore(database, missionSyncStoreNames.drafts, "id", [
       "updatedAt",
     ]);
   });

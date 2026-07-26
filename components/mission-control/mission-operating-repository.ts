@@ -4,6 +4,10 @@ import {
   requestResult,
   transactionComplete,
 } from "@/lib/mission-control-database";
+import {
+  queueMissionRecordDelete,
+  queueMissionRecordUpsert,
+} from "@/lib/mission-record-sync";
 
 import type {
   CycleEvidence,
@@ -221,6 +225,10 @@ export async function updateMissionIdentity(input: MissionIdentityUpdate) {
     );
     transaction.objectStore(missionOperatingStoreNames.identity).put(identity);
     await transactionComplete(transaction);
+    await queueMissionRecordUpsert(
+      missionOperatingStoreNames.identity,
+      identity,
+    );
     return identity;
   } finally {
     database.close();
@@ -283,6 +291,10 @@ export async function saveGrowthCycle(input: NewGrowthCycle) {
     };
     store.add(cycle);
     await transactionComplete(transaction);
+    await queueMissionRecordUpsert(
+      missionOperatingStoreNames.growthCycles,
+      cycle,
+    );
     return cycle;
   } finally {
     database.close();
@@ -332,6 +344,10 @@ export async function updateGrowthCycleStatus(
     };
     store.put(updated);
     await transactionComplete(transaction);
+    await queueMissionRecordUpsert(
+      missionOperatingStoreNames.growthCycles,
+      updated,
+    );
     return updated;
   } finally {
     database.close();
@@ -364,11 +380,19 @@ export async function toggleTodayCycleEvidence(cycleId: string) {
       };
       store.add(evidence);
       await transactionComplete(transaction);
+      await queueMissionRecordUpsert(
+        missionOperatingStoreNames.cycleEvidence,
+        evidence,
+      );
       return evidence;
     }
 
     store.delete(id);
     await transactionComplete(transaction);
+    await queueMissionRecordDelete(
+      missionOperatingStoreNames.cycleEvidence,
+      id,
+    );
     return null;
   } finally {
     database.close();
@@ -400,6 +424,10 @@ export async function saveMissionCapture(input: NewMissionCapture) {
     );
     transaction.objectStore(missionOperatingStoreNames.captures).add(capture);
     await transactionComplete(transaction);
+    await queueMissionRecordUpsert(
+      missionOperatingStoreNames.captures,
+      capture,
+    );
     return capture;
   } finally {
     database.close();
@@ -433,6 +461,10 @@ export async function updateMissionCaptureStatus(
     };
     store.put(updated);
     await transactionComplete(transaction);
+    await queueMissionRecordUpsert(
+      missionOperatingStoreNames.captures,
+      updated,
+    );
     return updated;
   } finally {
     database.close();
@@ -466,6 +498,10 @@ export async function saveWeeklyReview(input: WeeklyReviewInput) {
     };
     store.put(review);
     await transactionComplete(transaction);
+    await queueMissionRecordUpsert(
+      missionOperatingStoreNames.weeklyReviews,
+      review,
+    );
     return review;
   } finally {
     database.close();
@@ -512,6 +548,10 @@ export async function saveMissionExperiment(input: NewMissionExperiment) {
       .objectStore(missionOperatingStoreNames.experiments)
       .add(experiment);
     await transactionComplete(transaction);
+    await queueMissionRecordUpsert(
+      missionOperatingStoreNames.experiments,
+      experiment,
+    );
     return experiment;
   } finally {
     database.close();
@@ -554,6 +594,10 @@ export async function concludeMissionExperiment(
     };
     store.put(updated);
     await transactionComplete(transaction);
+    await queueMissionRecordUpsert(
+      missionOperatingStoreNames.experiments,
+      updated,
+    );
     return updated;
   } finally {
     database.close();

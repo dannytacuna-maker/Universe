@@ -4,12 +4,17 @@ import {
   requestResult,
   transactionComplete,
 } from "../personal-growth-database";
+import {
+  queueMissionRecordDelete,
+  queueMissionRecordUpsert,
+} from "@/lib/mission-record-sync";
 import type {
   NewReadingBook,
   NewReadingSession,
   ReadingBook,
   ReadingBookUpdate,
   ReadingSession,
+  ReadingSessionUpdate,
 } from "./reading-record";
 
 export type ReadingLibraryData = Readonly<{
@@ -19,6 +24,11 @@ export type ReadingLibraryData = Readonly<{
 
 const bookStoreName = personalGrowthStoreNames.readingBooks;
 const sessionStoreName = personalGrowthStoreNames.readingSessions;
+
+function normalizeSession(session: ReadingSession): ReadingSession {
+  const legacy = session as ReadingSession & { updatedAt?: string };
+  return { ...session, updatedAt: legacy.updatedAt ?? session.createdAt };
+}
 
 export async function listReadingLibraryData(): Promise<ReadingLibraryData> {
   const database = await openPersonalGrowthDatabase();
@@ -45,9 +55,11 @@ export async function listReadingLibraryData(): Promise<ReadingLibraryData> {
       books: books.toSorted((first, second) =>
         second.updatedAt.localeCompare(first.updatedAt),
       ),
-      sessions: sessions.toSorted((first, second) =>
-        second.occurredOn.localeCompare(first.occurredOn),
-      ),
+      sessions: sessions
+        .map(normalizeSession)
+        .toSorted((first, second) =>
+          second.occurredOn.localeCompare(first.occurredOn),
+        ),
     };
   } finally {
     database.close();
@@ -85,6 +97,7 @@ export async function saveReadingBook(input: NewReadingBook) {
     const transaction = database.transaction(bookStoreName, "readwrite");
     transaction.objectStore(bookStoreName).add(book);
     await transactionComplete(transaction);
+    await queueMissionRecordUpsert(bookStoreName, book);
     return book;
   } finally {
     database.close();
@@ -105,9 +118,20 @@ export async function updateReadingBook(input: ReadingBookUpdate) {
       throw new Error("This book is no longer available in the library.");
     }
 
+    const totalPages = Math.max(
+      1,
+      Math.round(input.totalPages ?? existing.totalPages),
+    );
+    const title = input.title?.trim() ?? existing.title;
+    const author = input.author?.trim() ?? existing.author;
+
+    if (title.length === 0) {
+      throw new Error("A book title is required.");
+    }
+
     const currentPage = Math.min(
       Math.max(Math.round(input.currentPage), 0),
-      existing.totalPages,
+      totalPages,
     );
     const rating =
       input.status === "completed" && input.rating !== null
@@ -115,15 +139,19 @@ export async function updateReadingBook(input: ReadingBookUpdate) {
         : null;
     const updated: ReadingBook = {
       ...existing,
+      author,
       currentPage,
       finalReflection:
         input.status === "completed" ? input.finalReflection.trim() : "",
       rating,
       status: input.status,
+      title,
+      totalPages,
       updatedAt: new Date().toISOString(),
     };
     store.put(updated);
     await transactionComplete(transaction);
+    await queueMissionRecordUpsert(bookStoreName, updated);
     return updated;
   } finally {
     database.close();
@@ -167,6 +195,7 @@ export async function saveReadingSession(input: NewReadingSession) {
       id: crypto.randomUUID(),
       pagesRead: input.endPage - input.startPage,
       reflection: input.reflection.trim(),
+      updatedAt: now,
     };
     const updatedBook: ReadingBook = {
       ...book,
@@ -182,7 +211,108 @@ export async function saveReadingSession(input: NewReadingSession) {
     writeTransaction.objectStore(bookStoreName).put(updatedBook);
     await transactionComplete(writeTransaction);
 
+    await Promise.all([
+      queueMissionRecordUpsert(sessionStoreName, session),
+      queueMissionRecordUpsert(bookStoreName, updatedBook),
+    ]);
+
     return { book: updatedBook, session };
+  } finally {
+    database.close();
+  }
+}
+
+export async function updateReadingSession(input: ReadingSessionUpdate) {
+  const database = await openPersonalGrowthDatabase();
+
+  try {
+    const transaction = database.transaction(
+      [bookStoreName, sessionStoreName],
+      "readwrite",
+    );
+    const sessionStore = transaction.objectStore(sessionStoreName);
+    const bookStore = transaction.objectStore(bookStoreName);
+    const [existing, book] = await Promise.all([
+      requestResult(
+        sessionStore.get(input.id) as IDBRequest<ReadingSession | undefined>,
+      ),
+      requestResult(
+        bookStore.get(input.bookId) as IDBRequest<ReadingBook | undefined>,
+      ),
+    ]);
+
+    if (existing === undefined || book === undefined) {
+      throw new Error("This reading session is no longer available.");
+    }
+
+    if (
+      input.durationMinutes < 1 ||
+      input.startPage < 0 ||
+      input.endPage < input.startPage ||
+      input.endPage > book.totalPages
+    ) {
+      throw new Error("Review the reading time and page range.");
+    }
+
+    const updated: ReadingSession = {
+      ...existing,
+      ...input,
+      pagesRead: input.endPage - input.startPage,
+      reflection: input.reflection.trim(),
+      updatedAt: new Date().toISOString(),
+    };
+    sessionStore.put(updated);
+    await transactionComplete(transaction);
+    await queueMissionRecordUpsert(sessionStoreName, updated);
+    return updated;
+  } finally {
+    database.close();
+  }
+}
+
+export async function deleteReadingSession(sessionId: string) {
+  const database = await openPersonalGrowthDatabase();
+
+  try {
+    const transaction = database.transaction(sessionStoreName, "readwrite");
+    transaction.objectStore(sessionStoreName).delete(sessionId);
+    await transactionComplete(transaction);
+    await queueMissionRecordDelete(sessionStoreName, sessionId);
+  } finally {
+    database.close();
+  }
+}
+
+export async function deleteReadingBook(bookId: string) {
+  const database = await openPersonalGrowthDatabase();
+
+  try {
+    const readTransaction = database.transaction(sessionStoreName, "readonly");
+    const sessions = await requestResult(
+      readTransaction.objectStore(sessionStoreName).getAll() as IDBRequest<
+        ReadingSession[]
+      >,
+    );
+    const relatedSessions = sessions.filter(
+      (session) => session.bookId === bookId,
+    );
+    const transaction = database.transaction(
+      [bookStoreName, sessionStoreName],
+      "readwrite",
+    );
+    transaction.objectStore(bookStoreName).delete(bookId);
+
+    for (const session of relatedSessions) {
+      transaction.objectStore(sessionStoreName).delete(session.id);
+    }
+
+    await transactionComplete(transaction);
+    await Promise.all([
+      queueMissionRecordDelete(bookStoreName, bookId),
+      ...relatedSessions.map((session) =>
+        queueMissionRecordDelete(sessionStoreName, session.id),
+      ),
+    ]);
   } finally {
     database.close();
   }

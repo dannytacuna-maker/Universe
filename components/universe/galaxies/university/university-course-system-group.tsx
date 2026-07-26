@@ -2,6 +2,7 @@
 
 import { CourseStarSystem } from "./course-star-system";
 import { universityCourseSystems } from "./university-course-systems";
+import type { UniverseActivitySignals } from "../../universe-activity";
 
 type UniversityCourseSystemGroupProps = Readonly<{
   activeCourseId: string | null;
@@ -12,6 +13,7 @@ type UniversityCourseSystemGroupProps = Readonly<{
   motionEnabled: boolean;
   onActivate: (courseId: string) => void;
   onHoverChange: (courseId: string | null) => void;
+  signals: UniverseActivitySignals["university"];
 }>;
 
 export function UniversityCourseSystemGroup({
@@ -23,6 +25,7 @@ export function UniversityCourseSystemGroup({
   motionEnabled,
   onActivate,
   onHoverChange,
+  signals,
 }: UniversityCourseSystemGroupProps) {
   return universityCourseSystems.map((definition) => (
     <CourseStarSystem
@@ -39,6 +42,7 @@ export function UniversityCourseSystemGroup({
       motionEnabled={motionEnabled}
       onActivate={onActivate}
       onHoverChange={onHoverChange}
+      signal={signals[definition.id]}
     />
   ));
 }
