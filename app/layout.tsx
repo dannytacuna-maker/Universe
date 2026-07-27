@@ -29,7 +29,22 @@ type RootLayoutProps = Readonly<{
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      localization={{
+        signIn: {
+          start: {
+            subtitle: "Continue with Daniel's approved Google account.",
+            title: "Enter Mission Control",
+          },
+        },
+        signUp: {
+          start: {
+            subtitle: "Connect Daniel's approved Google account.",
+            title: "Initialize Mission Control",
+          },
+        },
+      }}
+    >
       <html className={`${GeistSans.variable} ${GeistMono.variable}`} lang="en">
         <body className={GeistSans.className}>
           <ApplicationShell>{children}</ApplicationShell>
