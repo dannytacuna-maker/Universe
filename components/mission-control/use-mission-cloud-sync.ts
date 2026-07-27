@@ -11,7 +11,9 @@ import {
 
 type SessionStatus = Readonly<{
   authenticated: boolean;
+  authorized: boolean;
   configured: boolean;
+  ownerEmail: string | null;
 }>;
 
 export function useMissionCloudSync() {
@@ -19,6 +21,7 @@ export function useMissionCloudSync() {
     getMissionSyncStatus(),
   );
   const [isConfigured, setIsConfigured] = useState(false);
+  const [ownerEmail, setOwnerEmail] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     const response = await fetch("/api/mission/session", {
@@ -27,14 +30,15 @@ export function useMissionCloudSync() {
     });
     const session = (await response.json()) as SessionStatus;
     setIsConfigured(session.configured);
+    setOwnerEmail(session.ownerEmail);
 
-    if (session.authenticated) {
+    if (session.authenticated && session.authorized) {
       await synchronizeMissionRecords();
     } else {
       setStatus({
         detail: session.configured
-          ? "Cloud sync is locked. Local records remain available."
-          : "Using private storage on this device.",
+          ? "Google sign-in is required. Local records remain available."
+          : "Cloud synchronization is not configured.",
         pendingCount: 0,
         state: session.configured ? "locked" : "local",
         syncedAt: null,
@@ -78,37 +82,5 @@ export function useMissionCloudSync() {
     };
   }, [refresh]);
 
-  const unlock = useCallback(async (accessKey: string) => {
-    const response = await fetch("/api/mission/session", {
-      body: JSON.stringify({ accessKey }),
-      credentials: "same-origin",
-      headers: { "content-type": "application/json" },
-      method: "POST",
-    });
-    const body = (await response.json().catch(() => null)) as {
-      error?: string;
-    } | null;
-
-    if (!response.ok) {
-      throw new Error(body?.error ?? "Cloud access could not be unlocked.");
-    }
-
-    setIsConfigured(true);
-    await synchronizeMissionRecords();
-  }, []);
-
-  const lock = useCallback(async () => {
-    await fetch("/api/mission/session", {
-      credentials: "same-origin",
-      method: "DELETE",
-    });
-    setStatus({
-      detail: "Cloud sync is locked. Local records remain available.",
-      pendingCount: 0,
-      state: "locked",
-      syncedAt: null,
-    });
-  }, []);
-
-  return { isConfigured, lock, refresh, status, unlock };
+  return { isConfigured, ownerEmail, refresh, status };
 }

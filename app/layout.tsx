@@ -1,3 +1,4 @@
+import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { GeistMono } from "geist/font/mono";
@@ -28,10 +29,12 @@ type RootLayoutProps = Readonly<{
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html className={`${GeistSans.variable} ${GeistMono.variable}`} lang="en">
-      <body className={GeistSans.className}>
-        <ApplicationShell>{children}</ApplicationShell>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html className={`${GeistSans.variable} ${GeistMono.variable}`} lang="en">
+        <body className={GeistSans.className}>
+          <ApplicationShell>{children}</ApplicationShell>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

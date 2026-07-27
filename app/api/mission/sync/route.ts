@@ -6,12 +6,13 @@ import {
   applyMissionRecordMutations,
   isMissionDatabaseConfigured,
   listMissionRecords,
+  migrateMissionRecordOwner,
 } from "@/lib/server/mission-record-database";
 import {
-  hasValidMissionSession,
+  getMissionAuthorization,
   isSameOriginRequest,
-  missionOwnerId,
-} from "@/lib/server/mission-session";
+  legacyMissionOwnerId,
+} from "@/lib/server/mission-auth";
 
 export const runtime = "nodejs";
 
@@ -54,8 +55,20 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!(await hasValidMissionSession())) {
-    return Response.json({ error: "Cloud sync is locked." }, { status: 401 });
+  const authorization = await getMissionAuthorization();
+
+  if (!authorization.authenticated) {
+    return Response.json(
+      { error: "Google sign-in is required." },
+      { status: 401 },
+    );
+  }
+
+  if (authorization.owner === null) {
+    return Response.json(
+      { error: "This Google account is not authorized for Mission Control." },
+      { status: 403 },
+    );
   }
 
   const body = (await request.json().catch(() => null)) as unknown;
@@ -78,11 +91,13 @@ export async function POST(request: Request) {
   }
 
   try {
+    const ownerId = authorization.owner.id;
+    await migrateMissionRecordOwner(legacyMissionOwnerId, ownerId);
     await applyMissionRecordMutations(
-      missionOwnerId,
+      ownerId,
       mutations as MissionRecordMutation[],
     );
-    const collections = await listMissionRecords(missionOwnerId);
+    const collections = await listMissionRecords(ownerId);
 
     return Response.json({ collections, syncedAt: new Date().toISOString() });
   } catch (error: unknown) {

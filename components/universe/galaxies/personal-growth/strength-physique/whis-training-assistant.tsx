@@ -139,8 +139,8 @@ export function WhisTrainingAssistant({
             personalRecords={personalRecords}
           />
           <p className="strength-tracker__storage">
-            Saved locally first and synchronized when private cloud access is
-            active.
+            Saved locally first and synchronized through Daniel&apos;s Google
+            identity.
           </p>
           {storageError !== null ? (
             <p className="strength-tracker__error">{storageError}</p>

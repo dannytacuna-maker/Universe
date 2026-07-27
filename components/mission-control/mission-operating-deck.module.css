@@ -1237,8 +1237,7 @@
   border-bottom: 1px solid rgb(166 205 219 / 10%);
 }
 
-.panelHeader span,
-.syncUnlock label > span {
+.panelHeader span {
   color: rgb(170 196 207 / 58%);
   font-size: 0.61rem;
   letter-spacing: 0.17em;
@@ -1287,7 +1286,7 @@
 
 .syncSummary dl {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.7rem;
 }
 
@@ -1311,29 +1310,6 @@
   font-size: 0.77rem;
 }
 
-.syncUnlock {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: 0.7rem;
-}
-
-.syncUnlock label {
-  display: grid;
-  gap: 0.42rem;
-}
-
-.syncUnlock input {
-  width: 100%;
-  min-height: 2.75rem;
-  border: 1px solid rgb(155 198 213 / 14%);
-  border-radius: 0.62rem;
-  background: rgb(3 11 17 / 62%);
-  padding: 0 0.8rem;
-  color: rgb(231 241 245 / 91%);
-}
-
-.syncUnlock button,
 .syncActions button {
   min-height: 2.75rem;
   border: 1px solid rgb(147 200 215 / 16%);
@@ -1558,7 +1534,7 @@
     padding: 1.15rem 0.9rem calc(1.5rem + env(safe-area-inset-bottom));
   }
 
-  .syncUnlock {
+  .syncSummary dl {
     grid-template-columns: minmax(0, 1fr);
   }
 

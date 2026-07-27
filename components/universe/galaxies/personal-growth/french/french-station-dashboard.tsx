@@ -254,7 +254,7 @@ export function FrenchStationDashboard({
               Update telemetry
             </button>
             <p className={styles.note}>
-              Saved locally first and synchronized across unlocked devices.
+              Saved locally first and synchronized across signed-in devices.
               Mission Control never receives your Duolingo password.
             </p>
           </form>

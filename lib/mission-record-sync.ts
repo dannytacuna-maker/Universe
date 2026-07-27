@@ -14,7 +14,7 @@ import {
   type MissionRecordMutation,
 } from "@/lib/mission-record-collections";
 
-const bootstrapStateId = "remote-bootstrap-v1";
+const bootstrapStateId = "remote-bootstrap-v2-google";
 const syncStatusEventName = "mission-control:sync-status";
 const dataChangedEventName = "mission-control:data-changed";
 
@@ -39,7 +39,7 @@ type SyncResponse = Readonly<{
 }>;
 
 const initialStatus: MissionSyncStatus = {
-  detail: "Checking private cloud access.",
+  detail: "Checking Google-authenticated cloud access.",
   pendingCount: 0,
   state: "checking",
   syncedAt: null,
@@ -260,7 +260,7 @@ async function performSync() {
 
     if (response.status === 401) {
       const lockedStatus: MissionSyncStatus = {
-        detail: "Cloud sync is locked. Local records remain available.",
+        detail: "Google sign-in is required. Local records remain available.",
         pendingCount: outbox.length,
         state: "locked",
         syncedAt: currentStatus.syncedAt,
@@ -271,7 +271,7 @@ async function performSync() {
 
     if (response.status === 503) {
       const localStatus: MissionSyncStatus = {
-        detail: "Using private storage on this device.",
+        detail: "Using local storage while cloud sync is unavailable.",
         pendingCount: outbox.length,
         state: "local",
         syncedAt: null,
@@ -281,7 +281,7 @@ async function performSync() {
     }
 
     if (!response.ok) {
-      throw new Error("The private cloud did not accept this sync.");
+      throw new Error("The personal cloud did not accept this sync.");
     }
 
     const payload = (await response.json()) as SyncResponse;
@@ -291,7 +291,7 @@ async function performSync() {
       outbox.map((mutation) => mutation.id),
     );
     const syncedStatus: MissionSyncStatus = {
-      detail: "Phone and desktop share one private source of truth.",
+      detail: "Signed-in devices share one personal source of truth.",
       pendingCount: 0,
       state: "synced",
       syncedAt: payload.syncedAt,

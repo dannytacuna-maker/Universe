@@ -358,7 +358,10 @@ procedural library environment.
 French is represented by one deliberate galaxy-level destination, Lumière Station.
 It is neither a planet nor a solar system. The exterior combines a pressurized metallic
 spine, habitat ring, truss, docking ports, antenna, navigation lights, and four solar
-arrays so its silhouette remains legible at the Personal Growth overview distance. It
+arrays so its silhouette remains legible at the Personal Growth overview distance. Its
+overview presentation is half the original prototype scale while the invisible interaction
+target remains intentionally generous, preserving the hierarchy of three stellar systems
+and one smaller constructed station. It
 is entered directly from that overview. A quiet observation-deck landing environment
 and a semantic DOM instrument remain separated across the existing WebGL boundary. The
 station stores a Duolingo username, manually
@@ -436,24 +439,30 @@ redundant panel toggle, is the only way to leave them. Both supporting planets u
 procedural markers and static horizon surfaces rather than new texture packs or
 rendering loops.
 
-### Private cloud and offline ownership
+### Authenticated cloud and offline ownership
 
 Postgres on Neon is the synchronized source of truth when the Vercel environment
-provides `DATABASE_URL`, `MISSION_CONTROL_ACCESS_KEY`, and
-`MISSION_CONTROL_SESSION_SECRET`. Server-only API routes validate an allowlisted
-collection envelope, enforce idempotent client mutation IDs, retain deletion
-tombstones, and require a signed, HTTP-only, SameSite session belonging to the sole
-owner. Secrets never enter the browser bundle.
+provides `DATABASE_URL` and Clerk provides its server and publishable keys. Clerk owns
+the Google OAuth session; Mission Control never receives or stores Google credentials.
+The application and synchronization routes additionally compare the verified Clerk
+identity with `MISSION_CONTROL_OWNER_EMAIL`, so a signed-in account that is not Daniel's
+allowlisted address cannot enter the universe or read and write records. Server-only API
+routes validate the allowlisted collection envelope, enforce idempotent client mutation
+IDs, and retain deletion tombstones. Provider secrets never enter the browser bundle.
+Clerk's provider-level allowlist is also enabled for the same address, while the server
+comparison remains the final authorization boundary owned by Mission Control.
 
-The production Vercel project provisions Neon through the Vercel Marketplace and
-supplies those three values to Production and Preview. Development receives the same
-database connection plus local-only copies of the owner credentials through the
-gitignored `.env.local`. Each device unlocks once and receives a signed 30-day HTTP-only
-session; it does not receive the database URL or signing secret.
+The production Vercel project provisions Neon and Clerk through the Vercel Marketplace.
+Records are partitioned under a stable owner ID derived from the approved email. The
+former `daniel` owner is copied idempotently into that authenticated owner on first sync
+and retained as a recovery source rather than destructively deleted. A new authenticated
+bootstrap marker causes each existing device to offer its preserved local records once;
+source timestamps continue to resolve duplicates. There is no separate Mission Control
+access key or custom session cookie.
 
 IndexedDB remains the fast offline adapter. Every feature repository commits locally
 first, adds a typed mutation to the durable outbox, and requests synchronization.
-Offline, locked, and failed requests leave the outbox intact and expose an honest
+Offline, signed-out, and failed requests leave the outbox intact and expose an honest
 status through the compact Mission footer. The first authenticated device bootstrap
 uploads preserved version-4 records with deterministic mutation IDs before accepting
 the canonical server snapshot. Successful synchronization then atomically replaces

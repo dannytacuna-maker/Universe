@@ -184,7 +184,7 @@ export function MissionOperatingDeck({
                 ))}
               </div>
               <button
-                aria-label="Open private cloud status"
+                aria-label="Open personal cloud status"
                 className={styles.deckStatus}
                 onClick={() => setActivePanel("sync")}
                 type="button"
@@ -245,9 +245,8 @@ export function MissionOperatingDeck({
               ) : (
                 <CloudSyncPanel
                   isConfigured={cloudSync.isConfigured}
-                  onLock={cloudSync.lock}
                   onRefresh={cloudSync.refresh}
-                  onUnlock={cloudSync.unlock}
+                  ownerEmail={cloudSync.ownerEmail}
                   status={cloudSync.status}
                 />
               )}

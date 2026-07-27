@@ -52,7 +52,7 @@ export function FrenchLearningStation({
   return (
     <group
       position={frenchStationDefinition.position}
-      scale={isEmphasized ? 1.16 : 1.1}
+      scale={isEmphasized ? 0.58 : 0.55}
       visible={isVisible}
     >
       <SpatialLabelAnchor
@@ -246,7 +246,7 @@ export function FrenchLearningStation({
             onHoverChange(true);
           }}
         >
-          <sphereGeometry args={[0.64, 16, 10]} />
+          <sphereGeometry args={[1.16, 16, 10]} />
           <meshBasicMaterial
             colorWrite={false}
             depthWrite={false}

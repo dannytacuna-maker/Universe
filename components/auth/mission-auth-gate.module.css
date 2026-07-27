@@ -1,0 +1,108 @@
+.gate {
+  align-items: center;
+  background:
+    radial-gradient(circle at 50% 42%, rgb(33 53 77 / 22%), transparent 28rem),
+    #020409;
+  color: #eef5fb;
+  display: flex;
+  isolation: isolate;
+  justify-content: center;
+  min-height: 100dvh;
+  overflow: hidden;
+  padding: 2rem;
+  position: relative;
+}
+
+.gate::before,
+.gate::after {
+  content: "";
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+}
+
+.gate::before {
+  background-image:
+    radial-gradient(circle, rgb(205 229 247 / 55%) 0 0.7px, transparent 0.9px),
+    radial-gradient(circle, rgb(117 164 202 / 38%) 0 0.55px, transparent 0.75px);
+  background-position:
+    0 0,
+    33px 41px;
+  background-size:
+    89px 89px,
+    131px 131px;
+  mask-image: radial-gradient(circle at center, black, transparent 78%);
+  opacity: 0.5;
+}
+
+.gate::after {
+  background: radial-gradient(circle at center, transparent 25%, #020409 86%);
+}
+
+.content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  max-width: 31rem;
+  position: relative;
+  text-align: center;
+  z-index: 1;
+}
+
+.eyebrow {
+  color: #8195a8;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+}
+
+.content h1 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-weight: 460;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  margin: 0;
+}
+
+.content p {
+  color: #91a0ad;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  margin: 1rem 0 1.8rem;
+  max-width: 26rem;
+}
+
+.signInButton {
+  background: rgb(213 231 244 / 96%);
+  border: 1px solid rgb(255 255 255 / 45%);
+  border-radius: 999px;
+  color: #08111b;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 620;
+  letter-spacing: 0.015em;
+  min-height: 2.8rem;
+  padding: 0.75rem 1.35rem;
+  transition:
+    background-color 180ms ease,
+    transform 180ms ease;
+}
+
+.signInButton:hover {
+  background: #f2f8fc;
+  transform: translateY(-1px);
+}
+
+.signInButton:focus-visible {
+  outline: 2px solid #83c8f2;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signInButton {
+    transition: none;
+  }
+}

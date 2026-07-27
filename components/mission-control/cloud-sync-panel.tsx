@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { SignOutButton } from "@clerk/nextjs";
+import { useState } from "react";
 
 import type { MissionSyncStatus } from "@/lib/mission-record-sync";
 
@@ -8,9 +9,8 @@ import styles from "./mission-operating-deck.module.css";
 
 type CloudSyncPanelProps = Readonly<{
   isConfigured: boolean;
-  onLock: () => Promise<void>;
   onRefresh: () => Promise<void>;
-  onUnlock: (accessKey: string) => Promise<void>;
+  ownerEmail: string | null;
   status: MissionSyncStatus;
 }>;
 
@@ -29,35 +29,23 @@ function formatSyncTime(value: string | null) {
 
 export function CloudSyncPanel({
   isConfigured,
-  onLock,
   onRefresh,
-  onUnlock,
+  ownerEmail,
   status,
 }: CloudSyncPanelProps) {
   const [feedback, setFeedback] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(false);
 
-  const handleUnlock = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const accessKey = formData.get("accessKey");
-
-    if (typeof accessKey !== "string" || accessKey.length === 0) {
-      setFeedback("Enter the private access key.");
-      return;
-    }
-
+  const handleRefresh = async () => {
     setIsPending(true);
     setFeedback(null);
 
     try {
-      await onUnlock(accessKey);
-      form.reset();
-      setFeedback("Private cloud synchronization is active.");
+      await onRefresh();
+      setFeedback("Your records are synchronized.");
     } catch (error: unknown) {
       setFeedback(
-        error instanceof Error ? error.message : "Cloud access failed.",
+        error instanceof Error ? error.message : "Synchronization failed.",
       );
     } finally {
       setIsPending(false);
@@ -69,7 +57,7 @@ export function CloudSyncPanel({
       <header className={styles.panelHeader}>
         <div>
           <span>Data reliability</span>
-          <h2>Private cloud</h2>
+          <h2>Personal cloud</h2>
         </div>
         <span className={styles.syncState} data-state={status.state}>
           {status.state}
@@ -79,6 +67,10 @@ export function CloudSyncPanel({
       <div className={styles.syncSummary}>
         <p>{status.detail}</p>
         <dl>
+          <div>
+            <dt>Google account</dt>
+            <dd>{ownerEmail ?? "Not connected"}</dd>
+          </div>
           <div>
             <dt>Last alignment</dt>
             <dd>{formatSyncTime(status.syncedAt)}</dd>
@@ -90,33 +82,18 @@ export function CloudSyncPanel({
         </dl>
       </div>
 
-      {status.state === "locked" && isConfigured ? (
-        <form className={styles.syncUnlock} onSubmit={handleUnlock}>
-          <label>
-            <span>Private access key</span>
-            <input
-              autoComplete="current-password"
-              name="accessKey"
-              placeholder="Unlock this device"
-              type="password"
-            />
-          </label>
-          <button disabled={isPending} type="submit">
-            {isPending ? "Unlocking…" : "Unlock cloud sync"}
-          </button>
-        </form>
-      ) : status.state === "synced" ? (
+      {isConfigured && ownerEmail !== null ? (
         <div className={styles.syncActions}>
           <button
             disabled={isPending}
-            onClick={() => void onRefresh()}
+            onClick={() => void handleRefresh()}
             type="button"
           >
-            Synchronize now
+            {isPending ? "Synchronizing…" : "Synchronize now"}
           </button>
-          <button onClick={() => void onLock()} type="button">
-            Lock this device
-          </button>
+          <SignOutButton>
+            <button type="button">Sign out</button>
+          </SignOutButton>
         </div>
       ) : null}
 
@@ -128,7 +105,7 @@ export function CloudSyncPanel({
 
       <p className={styles.syncPrivacy}>
         IndexedDB remains the offline cache. The server owns the synchronized
-        copy; your access key never enters the client bundle.
+        copy, and only Daniel&apos;s approved Google identity can access it.
       </p>
     </section>
   );
