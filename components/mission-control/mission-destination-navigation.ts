@@ -57,5 +57,12 @@ export function createMissionDestinationState(
         selectedPlanetId: null,
         selectedSystemId: destinationId,
       };
+    case "observatory":
+      return {
+        level: "planet",
+        selectedGalaxyId: null,
+        selectedPlanetId: "global-observatory",
+        selectedSystemId: null,
+      };
   }
 }

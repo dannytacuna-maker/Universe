@@ -41,6 +41,11 @@ export const missionDestinations = [
     id: "celestial-library",
     label: "Celestial Library",
   },
+  {
+    areaId: "general",
+    id: "observatory",
+    label: "The Observatory",
+  },
 ] as const satisfies readonly {
   areaId: MissionAreaId;
   id: string;

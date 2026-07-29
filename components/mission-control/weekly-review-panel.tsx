@@ -15,6 +15,8 @@ import styles from "./mission-operating-deck.module.css";
 import { ReflectionIntelligence } from "./reflection-intelligence";
 
 type WeeklyReviewPanelProps = Readonly<{
+  ceremonyReady?: boolean;
+  onOpenObservatory?: () => void;
   onSubmit: (input: WeeklyReviewInput) => Promise<void>;
   patterns: readonly MissionPattern[];
   reflections: readonly MissionReflectionEntry[];
@@ -32,6 +34,8 @@ const emptyDraft: ReviewDraft = {
 };
 
 export function WeeklyReviewPanel({
+  ceremonyReady = false,
+  onOpenObservatory,
   onSubmit,
   patterns,
   reflections,
@@ -45,7 +49,14 @@ export function WeeklyReviewPanel({
   const [draft, setDraft] = useState<ReviewDraft>(currentReview ?? emptyDraft);
   const [feedback, setFeedback] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [showCeremony, setShowCeremony] = useState(ceremonyReady);
   const isDraftDirtyRef = useRef(false);
+
+  useEffect(() => {
+    if (ceremonyReady) {
+      setShowCeremony(true);
+    }
+  }, [ceremonyReady]);
 
   useEffect(() => {
     if (isDraftDirtyRef.current || currentReview === null) {
@@ -69,7 +80,8 @@ export function WeeklyReviewPanel({
     try {
       await onSubmit({ ...draft, weekStart });
       isDraftDirtyRef.current = false;
-      setFeedback("Weekly review saved. The next adjustment is now explicit.");
+      setShowCeremony(true);
+      setFeedback("Weekly review saved. Continue to the Observatory to close the week.");
     } catch (error: unknown) {
       setFeedback(
         error instanceof Error
@@ -167,6 +179,18 @@ export function WeeklyReviewPanel({
           </p>
         </div>
       </form>
+
+      {showCeremony && onOpenObservatory !== undefined ? (
+        <div className={styles.ceremonyBanner}>
+          <p>
+            End-of-week ceremony: personal review is set. Open the Observatory
+            for the world briefing that closes the loop.
+          </p>
+          <button onClick={onOpenObservatory} type="button">
+            Continue to Observatory
+          </button>
+        </div>
+      ) : null}
 
       {reviews.filter((review) => review.weekStart !== weekStart).length > 0 ? (
         <details className={styles.composer}>

@@ -45,6 +45,7 @@ type UniverseSceneProps = Readonly<{
   activeSystemId: string | null;
   activitySignals: UniverseActivitySignals;
   cameraResetToken: number;
+  constellationIntensity?: number;
   emphasizedGalaxyId: string | null;
   emphasizedPlanetId: string | null;
   emphasizedSystemId: string | null;
@@ -73,6 +74,7 @@ export function UniverseScene({
   activeSystemId,
   activitySignals,
   cameraResetToken,
+  constellationIntensity = 0,
   emphasizedGalaxyId,
   emphasizedPlanetId,
   emphasizedSystemId,
@@ -142,7 +144,10 @@ export function UniverseScene({
       <fog attach="fog" args={["#01030a", 72, 168]} />
 
       <DeepSpaceBackdrop />
-      <CosmicFilamentField motionEnabled={motionEnabled} />
+      <CosmicFilamentField
+        insightIntensity={constellationIntensity}
+        motionEnabled={motionEnabled}
+      />
       <DistantCelestialStructures />
       <Suspense fallback={null}>
         <CosmicGuardian

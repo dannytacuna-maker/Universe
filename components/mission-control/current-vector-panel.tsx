@@ -132,10 +132,7 @@ export function CurrentVectorPanel({
 
       <nav aria-label="Quick actions" className={styles.commandActions}>
         <span>Act now</span>
-        <button
-          onClick={() => onNavigate("hyperbolic-time-chamber")}
-          type="button"
-        >
+        <button onClick={() => onNavigate("jiu-jitsu")} type="button">
           Log Jiu-Jitsu
         </button>
         <button onClick={() => onNavigate("french-station")} type="button">

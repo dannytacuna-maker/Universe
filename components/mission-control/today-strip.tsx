@@ -1,10 +1,20 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 
 import type { MissionIntelligence } from "@/components/mission-control/mission-intelligence";
+import { requestOpenMissionDeckPanel } from "@/components/mission-control/mission-operating-deck";
+import {
+  findMissionDestination,
+  getWeekStartKey,
+  type MissionDestinationId,
+} from "@/components/mission-control/mission-operating-record";
 import { useMissionOperatingSystem } from "@/components/mission-control/use-mission-operating-system";
-import { requestEvidenceComet } from "@/lib/living-universe";
+import {
+  getLastMissionDestination,
+  getSeenWeeklyCeremonyWeek,
+  requestEvidenceComet,
+} from "@/lib/living-universe";
 
 import styles from "./today-strip.module.css";
 
@@ -13,30 +23,62 @@ type TodayStripProps = Readonly<{
   isVisible: boolean;
   nextDeadlineLabel: string | null;
   onOpenMission: () => void;
+  onResumeDestination?: (destinationId: MissionDestinationId) => void;
   onVectorStateChange?: (incompleteEvidenceRatio: number) => void;
 }>;
+
+function isWeekendPromptDay(date = new Date()) {
+  const day = date.getDay();
+  return day === 0 || day === 5 || day === 6;
+}
 
 export function TodayStrip({
   intelligence,
   isVisible,
   nextDeadlineLabel,
   onOpenMission,
+  onResumeDestination,
   onVectorStateChange,
 }: TodayStripProps) {
   const operatingSystem = useMissionOperatingSystem(intelligence.activityDates);
   const [captureText, setCaptureText] = useState("");
   const [feedback, setFeedback] = useState("");
   const [pendingCycleId, setPendingCycleId] = useState<string | null>(null);
+  const [resumeId, setResumeId] = useState<MissionDestinationId | null>(null);
   const evidencedCount = operatingSystem.currentVector.filter(
     (item) => item.isCompleteToday,
   ).length;
   const totalCycles = operatingSystem.currentVector.length;
   const incompleteEvidenceRatio =
     totalCycles === 0 ? 0 : (totalCycles - evidencedCount) / totalCycles;
+  const weekStart = getWeekStartKey();
+  const hasCurrentReview = operatingSystem.reviews.some(
+    (review) => review.weekStart === weekStart,
+  );
+  const showCeremonyNudge = useMemo(
+    () =>
+      isWeekendPromptDay() &&
+      !hasCurrentReview &&
+      !getSeenWeeklyCeremonyWeek(weekStart),
+    [hasCurrentReview, weekStart],
+  );
+  const resumeLabel = findMissionDestination(resumeId)?.label ?? null;
 
   useEffect(() => {
     onVectorStateChange?.(incompleteEvidenceRatio);
   }, [incompleteEvidenceRatio, onVectorStateChange]);
+
+  useEffect(() => {
+    if (!isVisible) {
+      return;
+    }
+
+    const stored = getLastMissionDestination();
+    const destination = findMissionDestination(
+      stored as MissionDestinationId | null,
+    );
+    setResumeId(destination?.id ?? null);
+  }, [isVisible]);
 
   if (!isVisible) {
     return null;
@@ -120,6 +162,29 @@ export function TodayStrip({
           <p className={styles.deadline}>No university deadlines this week</p>
         )}
       </header>
+
+      {resumeLabel !== null &&
+      resumeId !== null &&
+      onResumeDestination !== undefined ? (
+        <button
+          className={styles.resume}
+          onClick={() => onResumeDestination(resumeId)}
+          type="button"
+        >
+          <span>Resume</span>
+          <strong>{resumeLabel}</strong>
+        </button>
+      ) : null}
+
+      {showCeremonyNudge ? (
+        <button
+          className={styles.ceremony}
+          onClick={() => requestOpenMissionDeckPanel("review")}
+          type="button"
+        >
+          End-of-week ceremony available
+        </button>
+      ) : null}
 
       <div className={styles.cycles}>
         {operatingSystem.currentVector.length === 0 ? (

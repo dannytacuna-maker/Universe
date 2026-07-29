@@ -9,6 +9,7 @@ import { ObservatoryExperience } from "@/components/intelligence/observatory-exp
 import { createMissionDestinationState } from "@/components/mission-control/mission-destination-navigation";
 import { buildMissionIntelligence } from "@/components/mission-control/mission-intelligence";
 import type { MissionDestinationId } from "@/components/mission-control/mission-operating-record";
+import { getLocalDateKey } from "@/components/mission-control/mission-operating-record";
 import {
   MissionOperatingDeck,
   requestOpenMissionDeck,
@@ -16,6 +17,7 @@ import {
 import { TodayStrip } from "@/components/mission-control/today-strip";
 import { useMissionCloudSync } from "@/components/mission-control/use-mission-cloud-sync";
 import { CommandDock } from "@/components/ui/command-dock";
+import { rememberMissionDestination } from "@/lib/living-universe";
 import type { NavigationState } from "@/store/navigation-store";
 import { useNavigationStore } from "@/store/navigation-store-provider";
 
@@ -44,6 +46,7 @@ import {
   gymPlaylistPlanetDefinition,
   trainingArchivePlanetDefinition,
 } from "./galaxies/personal-growth/strength-physique/strength-planets";
+import { strengthWorkoutSplit } from "./galaxies/personal-growth/strength-physique/strength-physique-plan";
 import { TrainingProgramArchive } from "./galaxies/personal-growth/strength-physique/training-program-archive";
 import { useStrengthPhysique } from "./galaxies/personal-growth/strength-physique/use-strength-physique";
 import { WhisTrainingAssistant } from "./galaxies/personal-growth/strength-physique/whis-training-assistant";
@@ -446,6 +449,7 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
       }
 
       if (planetId === globalObservatoryDefinition.id) {
+        rememberMissionDestination("observatory");
         clearInteractionState();
         beginCameraTravel();
         setAnnouncement("Entering The Observatory.");
@@ -730,6 +734,23 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
         return;
       }
 
+      rememberMissionDestination(destinationId);
+
+      if (destinationId === "observatory") {
+        clearInteractionState();
+        beginCameraTravel();
+        setAnnouncement("Entering The Observatory.");
+        const nextState: NavigationState = {
+          level: "planet",
+          selectedGalaxyId: null,
+          selectedPlanetId: globalObservatoryDefinition.id,
+          selectedSystemId: null,
+        };
+        pushNavigationUrl(nextState);
+        replaceNavigationState(nextState);
+        return;
+      }
+
       const nextState = createMissionDestinationState(destinationId);
       const destination =
         nextState.level === "galaxy"
@@ -801,9 +822,37 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
       navigationLevel,
       planetArrivalPhase,
       pushNavigationUrl,
+      replaceNavigationState,
       travelThroughPlanetClouds,
     ],
   );
+
+  const handleQuickLogJiuJitsu = useCallback(async () => {
+    await addSession({
+      classType: "gi",
+      durationMinutes: 60,
+      mobilityWork: false,
+      notes: "",
+      occurredOn: getLocalDateKey(),
+      reflection: "",
+      sparringRounds: 0,
+      techniques: [],
+    });
+    return "Jiu-Jitsu class logged for today (60 min · Gi).";
+  }, [addSession]);
+
+  const handleQuickLogStrength = useCallback(async () => {
+    const nextDay = strengthWorkoutSplit.find(
+      (day) => !strengthProgress.completedDayIds.includes(day.id),
+    );
+
+    if (nextDay === undefined) {
+      return "All Whis split days are already marked this week.";
+    }
+
+    await toggleWorkout(nextDay.id, true);
+    return `Marked ${nextDay.name} complete for this week.`;
+  }, [strengthProgress.completedDayIds, toggleWorkout]);
 
   useEffect(() => {
     return () => {
@@ -953,6 +1002,10 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
             activeSystemId={activeSystemId}
             activitySignals={activitySignals}
             cameraResetToken={cameraResetToken}
+            constellationIntensity={Math.min(
+              1,
+              missionIntelligence.patterns.length * 0.55,
+            )}
             emphasizedGalaxyId={emphasizedGalaxyId}
             emphasizedPlanetId={emphasizedPlanetId}
             emphasizedSystemId={emphasizedSystemId}
@@ -1015,6 +1068,7 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
         isVisible={navigationLevel === "universe" && isViewSettled}
         nextDeadlineLabel={nextDeadlineLabel}
         onOpenMission={requestOpenMissionDeck}
+        onResumeDestination={handleMissionDestinationNavigate}
         onVectorStateChange={handleVectorStateChange}
       />
 
@@ -1023,6 +1077,8 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
           cloudSync={cloudSync}
           intelligence={missionIntelligence}
           onNavigate={handleMissionDestinationNavigate}
+          onQuickLogJiuJitsu={handleQuickLogJiuJitsu}
+          onQuickLogStrength={handleQuickLogStrength}
         />
 
         <JarvisDock context={jarvisContext} />

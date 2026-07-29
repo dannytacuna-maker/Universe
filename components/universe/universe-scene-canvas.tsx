@@ -19,6 +19,7 @@ export type UniverseSceneCanvasProps = Readonly<{
   activeSystemId: string | null;
   activitySignals: UniverseActivitySignals;
   cameraResetToken: number;
+  constellationIntensity?: number;
   emphasizedGalaxyId: string | null;
   emphasizedPlanetId: string | null;
   emphasizedSystemId: string | null;
@@ -43,6 +44,7 @@ export function UniverseSceneCanvas({
   activeSystemId,
   activitySignals,
   cameraResetToken,
+  constellationIntensity = 0,
   emphasizedGalaxyId,
   emphasizedPlanetId,
   emphasizedSystemId,
@@ -69,6 +71,7 @@ export function UniverseSceneCanvas({
           activeSystemId={activeSystemId}
           activitySignals={activitySignals}
           cameraResetToken={cameraResetToken}
+          constellationIntensity={constellationIntensity}
           emphasizedGalaxyId={emphasizedGalaxyId}
           emphasizedPlanetId={emphasizedPlanetId}
           emphasizedSystemId={emphasizedSystemId}

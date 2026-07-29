@@ -126,9 +126,11 @@ function CosmicFilament({
 }
 
 export function CosmicFilamentField({
+  insightIntensity = 0,
   motionEnabled,
-}: Readonly<{ motionEnabled: boolean }>) {
+}: Readonly<{ insightIntensity?: number; motionEnabled: boolean }>) {
   const fieldGroup = useRef<Group>(null);
+  const boost = Math.min(1, Math.max(0, insightIntensity));
 
   useFrame((_, delta) => {
     if (!motionEnabled || fieldGroup.current === null) {
@@ -136,14 +138,21 @@ export function CosmicFilamentField({
     }
 
     const safeDelta = Math.min(delta, 0.075);
-    fieldGroup.current.rotation.y += safeDelta * 0.00045;
-    fieldGroup.current.rotation.z -= safeDelta * 0.00018;
+    fieldGroup.current.rotation.y += safeDelta * (0.00045 + boost * 0.00035);
+    fieldGroup.current.rotation.z -= safeDelta * (0.00018 + boost * 0.00012);
   });
 
   return (
-    <group ref={fieldGroup}>
+    <group ref={fieldGroup} scale={1 + boost * 0.04}>
       {filamentDefinitions.map((definition) => (
-        <CosmicFilament definition={definition} key={definition.seed} />
+        <CosmicFilament
+          definition={{
+            ...definition,
+            opacity: definition.opacity * (1 + boost * 0.35),
+            size: definition.size * (1 + boost * 0.12),
+          }}
+          key={definition.seed}
+        />
       ))}
     </group>
   );

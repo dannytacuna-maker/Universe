@@ -133,7 +133,11 @@ export function ReflectionIntelligence({
       )}
 
       <div className={styles.patternSection}>
-        <span className={styles.eyebrow}>Cross-system patterns</span>
+        <span className={styles.eyebrow}>Constellation insights</span>
+        <p className={styles.constellationNote}>
+          Non-causal co-occurrence across systems — a faint pattern, not a
+          verdict.
+        </p>
         {patterns.length === 0 ? (
           <p>
             Patterns remain quiet until at least six complete weeks contain

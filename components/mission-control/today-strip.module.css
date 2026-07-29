@@ -60,6 +60,43 @@
   text-align: right;
 }
 
+.resume,
+.ceremony {
+  display: grid;
+  gap: 0.12rem;
+  width: 100%;
+  min-height: 2.2rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid rgb(148 196 210 / 12%);
+  border-radius: 0.58rem;
+  background: rgb(255 255 255 / 2.5%);
+  color: rgb(214 230 236 / 82%);
+  text-align: left;
+  cursor: pointer;
+}
+
+.resume span,
+.ceremony {
+  color: rgb(146 190 206 / 55%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.44rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.resume strong {
+  color: rgb(232 244 248 / 90%);
+  font-size: var(--text-ui-sm, 0.72rem);
+  font-weight: 520;
+}
+
+.ceremony {
+  color: rgb(176 214 200 / 78%);
+  border-color: rgb(156 204 188 / 16%);
+  background: rgb(58 120 108 / 8%);
+  font-size: 0.52rem;
+}
+
 .cycles {
   display: grid;
   gap: 0.35rem;
