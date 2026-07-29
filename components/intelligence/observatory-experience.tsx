@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import type { IntelligenceBriefing } from "@/lib/intelligence/contracts";
+import type { WeeklyIntelligenceBriefing } from "@/lib/intelligence/weekly-briefing";
 
 import type { IntelligenceBriefingDashboardState } from "./intelligence-briefing";
 import { IntelligenceBriefingDashboard } from "./intelligence-briefing-dashboard";
@@ -34,14 +35,22 @@ export function ObservatoryExperience({
           payload !== null &&
           "briefing" in payload
         ) {
-          setState({
-            briefing: (
-              payload as Readonly<{
-                briefing: IntelligenceBriefing | null;
-              }>
-            ).briefing,
-            status: "source-ready",
-          });
+          const candidate = payload as Readonly<{
+            briefing: IntelligenceBriefing | WeeklyIntelligenceBriefing | null;
+            kind?: unknown;
+          }>;
+
+          if (candidate.kind === "weekly") {
+            setState({
+              briefing: candidate.briefing as WeeklyIntelligenceBriefing,
+              status: "ready",
+            });
+          } else {
+            setState({
+              briefing: candidate.briefing as IntelligenceBriefing | null,
+              status: "source-ready",
+            });
+          }
           return;
         }
 
@@ -51,7 +60,7 @@ export function ObservatoryExperience({
           "error" in payload &&
           typeof (payload as Readonly<{ error?: unknown }>).error === "string"
             ? (payload as Readonly<{ error: string }>).error
-            : "The daily intelligence feed could not be reached.";
+            : "The weekly intelligence briefing could not be reached.";
         setState({ message, status: "error" });
       })
       .catch((error: unknown) => {
@@ -60,7 +69,7 @@ export function ObservatoryExperience({
           message:
             error instanceof Error
               ? error.message
-              : "The daily intelligence feed could not be reached.",
+              : "The weekly intelligence briefing could not be reached.",
           status: "error",
         });
       });

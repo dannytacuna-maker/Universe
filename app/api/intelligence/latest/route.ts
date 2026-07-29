@@ -1,5 +1,6 @@
 import {
   getLatestIntelligenceBriefing,
+  getLatestWeeklyIntelligenceBriefing,
   isIntelligenceDatabaseConfigured,
 } from "@/lib/server/intelligence-database";
 import { getMissionAuthorization } from "@/lib/server/mission-auth";
@@ -36,6 +37,15 @@ export async function GET() {
   }
 
   try {
+    const weeklyBriefing = await getLatestWeeklyIntelligenceBriefing();
+
+    if (weeklyBriefing !== null) {
+      return Response.json(
+        { briefing: weeklyBriefing, kind: "weekly" },
+        { headers: privateHeaders },
+      );
+    }
+
     const briefing = await getLatestIntelligenceBriefing();
 
     if (briefing === null) {
@@ -45,7 +55,10 @@ export async function GET() {
       );
     }
 
-    return Response.json({ briefing }, { headers: privateHeaders });
+    return Response.json(
+      { briefing, kind: "source" },
+      { headers: privateHeaders },
+    );
   } catch (error: unknown) {
     console.error("The latest intelligence briefing could not be read.", error);
     const detail =

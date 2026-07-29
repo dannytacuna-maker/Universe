@@ -89,9 +89,16 @@ export function GlobalObservatory({
       <pointLight
         color="#c7dce3"
         decay={2}
-        distance={3.2}
-        intensity={1.75}
+        distance={4.2}
+        intensity={3.2}
         position={[1.35, 1.1, 1.8]}
+      />
+      <pointLight
+        color="#e9a85f"
+        decay={2}
+        distance={3.4}
+        intensity={1.35}
+        position={[-1.2, -0.6, 1.1]}
       />
 
       <group ref={station}>
@@ -99,8 +106,8 @@ export function GlobalObservatory({
           <sphereGeometry args={[0.44, 52, 36]} />
           <meshStandardMaterial
             color={palette.metalDark}
-            emissive="#06090c"
-            emissiveIntensity={0.22}
+            emissive="#111a20"
+            emissiveIntensity={0.42}
             metalness={0.94}
             roughness={0.38}
           />
@@ -110,8 +117,8 @@ export function GlobalObservatory({
           <torusGeometry args={[0.455, 0.029, 12, 96]} />
           <meshStandardMaterial
             color={palette.metalLight}
-            emissive="#121a1f"
-            emissiveIntensity={0.16}
+            emissive="#24333b"
+            emissiveIntensity={0.28}
             metalness={0.96}
             roughness={0.26}
           />
@@ -155,7 +162,7 @@ export function GlobalObservatory({
               <boxGeometry args={[0.054, 0.012, 0.004]} />
               <meshBasicMaterial
                 color={index % 4 === 0 ? palette.beacon : palette.signal}
-                opacity={0.24 + emphasis * 0.12}
+                opacity={0.38 + emphasis * 0.14}
                 toneMapped={false}
                 transparent
               />
@@ -174,7 +181,7 @@ export function GlobalObservatory({
               blending={AdditiveBlending}
               color={palette.aperture}
               depthWrite={false}
-              opacity={0.28 + emphasis * 0.14}
+              opacity={0.48 + emphasis * 0.16}
               toneMapped={false}
               transparent
             />
@@ -185,7 +192,7 @@ export function GlobalObservatory({
               blending={AdditiveBlending}
               color={palette.aperture}
               depthWrite={false}
-              opacity={0.045 + emphasis * 0.025}
+              opacity={0.085 + emphasis * 0.035}
               toneMapped={false}
               transparent
             />
@@ -215,7 +222,7 @@ export function GlobalObservatory({
             blending={AdditiveBlending}
             color={palette.signal}
             depthWrite={false}
-            opacity={0.065 + emphasis * 0.035}
+            opacity={0.12 + emphasis * 0.05}
             side={DoubleSide}
             toneMapped={false}
             transparent
@@ -258,7 +265,7 @@ export function GlobalObservatory({
           blending={AdditiveBlending}
           color={palette.aperture}
           depthWrite={false}
-          opacity={0.025 + emphasis * 0.025}
+          opacity={0.055 + emphasis * 0.035}
           side={DoubleSide}
           toneMapped={false}
           transparent
@@ -271,7 +278,7 @@ export function GlobalObservatory({
           blending={AdditiveBlending}
           color={palette.signal}
           depthWrite={false}
-          opacity={0.012 + emphasis * 0.008}
+          opacity={0.032 + emphasis * 0.014}
           toneMapped={false}
           transparent
         />

@@ -1,6 +1,7 @@
 .label {
   --spatial-label-offset-y: 3.5rem;
-  color: rgb(211 208 193 / 70%);
+  color: rgb(226 224 211 / 84%);
+  text-shadow: 0 0 1.1rem rgb(181 214 226 / 16%);
 }
 
 .label:hover,

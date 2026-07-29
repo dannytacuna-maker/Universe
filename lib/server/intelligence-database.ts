@@ -8,20 +8,20 @@ import type {
   IntelligenceSourceStatus,
   IntelligenceTopic,
 } from "@/lib/intelligence/contracts";
-import { officialIntelligenceSources } from "@/lib/intelligence/official-sources";
+import { intelligenceSources } from "@/lib/intelligence/intelligence-sources";
+import {
+  weeklyIntelligenceBriefingSchema,
+  type WeeklyIntelligenceBriefing,
+} from "@/lib/intelligence/weekly-briefing";
 
 type IntelligenceBriefingRow = Readonly<{
   briefing: unknown;
 }>;
 
-const sourceIds = new Set<string>(
-  officialIntelligenceSources.map(({ id }) => id),
+const sourceIds = new Set<string>(intelligenceSources.map(({ id }) => id));
+const topics = new Set<IntelligenceTopic>(
+  intelligenceSources.map(({ topic }) => topic),
 );
-const topics = new Set<IntelligenceTopic>([
-  "euro-area-economy",
-  "international-trade",
-  "monetary-policy",
-]);
 const failureReasons = new Set<IntelligenceSourceFailureReason>([
   "http-error",
   "invalid-feed",
@@ -65,6 +65,7 @@ function parseBriefingItem(value: unknown): IntelligenceBriefingItem | null {
 
   return {
     canonicalUrl: value.canonicalUrl,
+    excerpt: typeof value.excerpt === "string" ? value.excerpt : null,
     id: value.id,
     publishedAt: value.publishedAt,
     sourceId: value.sourceId,
@@ -186,6 +187,18 @@ function ensureIntelligenceSchema() {
       CREATE INDEX IF NOT EXISTS intelligence_briefings_generated_index
       ON intelligence_briefings (generated_at DESC)
     `;
+    await sql`
+      CREATE TABLE IF NOT EXISTS weekly_intelligence_briefings (
+        week_start DATE PRIMARY KEY,
+        briefing_id TEXT NOT NULL UNIQUE,
+        generated_at TIMESTAMPTZ NOT NULL,
+        briefing JSONB NOT NULL
+      )
+    `;
+    await sql`
+      CREATE INDEX IF NOT EXISTS weekly_intelligence_generated_index
+      ON weekly_intelligence_briefings (generated_at DESC)
+    `;
   })();
 
   return schemaPromise;
@@ -239,4 +252,53 @@ export async function getLatestIntelligenceBriefing() {
   }
 
   return briefing;
+}
+
+export async function saveWeeklyIntelligenceBriefing(
+  briefing: WeeklyIntelligenceBriefing,
+) {
+  await ensureIntelligenceSchema();
+  const sql = getIntelligenceDatabase();
+  const serializedBriefing = JSON.stringify(briefing);
+
+  await sql`
+    INSERT INTO weekly_intelligence_briefings (
+      week_start,
+      briefing_id,
+      generated_at,
+      briefing
+    )
+    VALUES (
+      ${briefing.weekStartIso}::date,
+      ${briefing.id},
+      ${briefing.generatedAtIso}::timestamptz,
+      ${serializedBriefing}::jsonb
+    )
+    ON CONFLICT (week_start) DO UPDATE SET
+      briefing_id = EXCLUDED.briefing_id,
+      generated_at = EXCLUDED.generated_at,
+      briefing = EXCLUDED.briefing
+  `;
+}
+
+export async function getLatestWeeklyIntelligenceBriefing() {
+  await ensureIntelligenceSchema();
+  const sql = getIntelligenceDatabase();
+  const rows = (await sql`
+    SELECT briefing
+    FROM weekly_intelligence_briefings
+    ORDER BY generated_at DESC
+    LIMIT 1
+  `) as IntelligenceBriefingRow[];
+  const row = rows[0];
+
+  if (row === undefined) return null;
+
+  const parsed = weeklyIntelligenceBriefingSchema.safeParse(row.briefing);
+
+  if (!parsed.success) {
+    throw new Error("The stored weekly intelligence briefing is invalid.");
+  }
+
+  return parsed.data;
 }

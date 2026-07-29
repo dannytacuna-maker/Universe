@@ -2,7 +2,7 @@
   position: fixed;
   z-index: 18;
   top: max(1.1rem, calc(env(safe-area-inset-top) + 0.75rem));
-  right: max(1.1rem, calc(env(safe-area-inset-right) + 0.75rem));
+  right: max(11.8rem, calc(env(safe-area-inset-right) + 11.45rem));
   display: grid;
   grid-template-columns: auto auto auto;
   align-items: center;
@@ -1064,7 +1064,7 @@
 @media (max-width: 42rem) {
   .launcher {
     top: max(0.72rem, calc(env(safe-area-inset-top) + 0.45rem));
-    right: max(0.72rem, calc(env(safe-area-inset-right) + 0.45rem));
+    right: max(4.85rem, calc(env(safe-area-inset-right) + 4.5rem));
     min-height: 2.65rem;
     border-radius: 50%;
     grid-template-columns: auto;
@@ -1072,7 +1072,7 @@
   }
 
   :global(.universe-viewport[data-navigation-level="planet"]) .launcher {
-    right: max(4.25rem, calc(env(safe-area-inset-right) + 3.9rem));
+    right: max(4.85rem, calc(env(safe-area-inset-right) + 4.5rem));
   }
 
   .launcher > span:nth-child(2),

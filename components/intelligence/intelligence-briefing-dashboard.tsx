@@ -2,14 +2,14 @@ import type {
   IntelligenceBriefing as OfficialIntelligenceBriefing,
   IntelligenceTopic,
 } from "@/lib/intelligence/contracts";
-
 import type {
-  DailyIntelligenceBriefing,
   EconomicPulseDirection,
   IntelligenceBriefingCategory,
-  IntelligenceBriefingDashboardState,
   IntelligenceSource,
-} from "./intelligence-briefing";
+  WeeklyIntelligenceBriefing,
+} from "@/lib/intelligence/weekly-briefing";
+
+import type { IntelligenceBriefingDashboardState } from "./intelligence-briefing";
 import styles from "./intelligence-briefing-dashboard.module.css";
 
 const MAX_BRIEFING_ITEMS = 8;
@@ -32,9 +32,13 @@ const directionLabels: Readonly<Record<EconomicPulseDirection, string>> = {
 };
 
 const topicLabels: Readonly<Record<IntelligenceTopic, string>> = {
-  "euro-area-economy": "Euro area economy",
+  "business-and-industry": "Business & industry",
+  geopolitics: "World affairs",
+  "global-economy": "Global economy",
   "international-trade": "International trade",
   "monetary-policy": "Monetary policy",
+  "spain-and-eu": "Spain & European Union",
+  "technology-and-ai": "Technology & AI",
 };
 
 export type IntelligenceBriefingDashboardProps = Readonly<{
@@ -70,12 +74,13 @@ function BriefingHeader({
         <span className={styles.eyebrow}>Global intelligence station</span>
         <h1 id={headingId}>The Observatory</h1>
         <p>
-          A finite, source-grounded view of the developments shaping business.
+          A concise weekly view of the world developments most worth
+          understanding.
         </p>
       </div>
       {edition === null ? null : (
         <div className={styles.edition}>
-          <span>Daily brief</span>
+          <span>Weekly brief</span>
           <time dateTime={edition.editionDateIso}>
             {edition.editionDateLabel}
           </time>
@@ -93,7 +98,7 @@ function BriefingHeader({
 
 function ReadyBriefing({
   briefing,
-}: Readonly<{ briefing: DailyIntelligenceBriefing }>) {
+}: Readonly<{ briefing: WeeklyIntelligenceBriefing }>) {
   const items = briefing.items.slice(0, MAX_BRIEFING_ITEMS);
   const pulse = briefing.economicPulse.slice(0, MAX_PULSE_OBSERVATIONS);
 
@@ -158,13 +163,13 @@ function ReadyBriefing({
       )}
 
       <section
-        aria-labelledby="observatory-daily-intelligence"
+        aria-labelledby="observatory-weekly-intelligence"
         className={styles.briefSection}
       >
         <div className={styles.sectionHeading}>
           <div>
-            <span>Daily intelligence</span>
-            <h2 id="observatory-daily-intelligence">
+            <span>Weekly intelligence</span>
+            <h2 id="observatory-weekly-intelligence">
               What changed and why it matters
             </h2>
           </div>
@@ -246,20 +251,20 @@ function SourceFeedBriefing({
         aria-labelledby="observatory-source-feed"
         className={styles.overview}
       >
-        <span>Official-source watch</span>
+        <span>Source watch</span>
         <h2 id="observatory-source-feed">
           Verified developments awaiting analysis
         </h2>
         <p>
-          These headlines arrive directly from monitored institutions. They are
-          presented without generated summaries until the analysis layer is
-          available.
+          These headlines arrive directly from monitored publishers and public
+          institutions. They remain available when the weekly analysis layer is
+          temporarily unavailable.
         </p>
       </section>
 
       {briefing.partial ? (
         <p className={styles.partialNotice} role="status">
-          This edition is partial because one or more official feeds could not
+          This edition is partial because one or more monitored feeds could not
           be reached. Available sources remain visible below.
         </p>
       ) : null}
@@ -271,7 +276,7 @@ function SourceFeedBriefing({
         <div className={styles.sectionHeading}>
           <div>
             <span>Source status</span>
-            <h2 id="observatory-source-status">Institutional feeds</h2>
+            <h2 id="observatory-source-status">Monitored feeds</h2>
           </div>
           <small>{briefing.sources.length} monitored sources</small>
         </div>
@@ -296,14 +301,14 @@ function SourceFeedBriefing({
       </section>
 
       <section
-        aria-labelledby="observatory-official-developments"
+        aria-labelledby="observatory-source-developments"
         className={styles.briefSection}
       >
         <div className={styles.sectionHeading}>
           <div>
             <span>Latest signals</span>
-            <h2 id="observatory-official-developments">
-              Developments from official institutions
+            <h2 id="observatory-source-developments">
+              Developments from monitored sources
             </h2>
           </div>
           <small>{items.length} developments</small>
@@ -367,13 +372,13 @@ export function IntelligenceBriefingDashboard({
       {state.status === "loading" ? (
         <div className={styles.state} role="status">
           <span className={styles.stateMark} aria-hidden="true" />
-          <strong>Receiving today’s intelligence</strong>
+          <strong>Receiving this week’s intelligence</strong>
           <p>The Observatory is assembling a finite, source-grounded brief.</p>
         </div>
       ) : state.status === "error" ? (
         <div className={styles.state} role="alert">
           <span className={styles.errorMark} aria-hidden="true" />
-          <strong>The daily brief is unavailable</strong>
+          <strong>The weekly brief is unavailable</strong>
           <p>{state.message}</p>
         </div>
       ) : state.briefing === null || state.briefing.items.length === 0 ? (

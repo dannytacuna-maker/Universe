@@ -1,11 +1,13 @@
 import {
   isIntelligenceDatabaseConfigured,
   saveIntelligenceBriefing,
+  saveWeeklyIntelligenceBriefing,
 } from "@/lib/server/intelligence-database";
-import { ingestOfficialIntelligenceFeeds } from "@/lib/server/intelligence-ingestion";
+import { analyzeWeeklyIntelligence } from "@/lib/server/intelligence-analysis";
+import { ingestIntelligenceFeeds } from "@/lib/server/intelligence-ingestion";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 30;
+export const maxDuration = 60;
 export const runtime = "nodejs";
 
 function hasValidCronAuthorization(request: Request) {
@@ -31,7 +33,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const result = await ingestOfficialIntelligenceFeeds();
+    const result = await ingestIntelligenceFeeds();
 
     if (result.briefing === null) {
       console.error(
@@ -40,7 +42,7 @@ export async function GET(request: Request) {
       );
       return Response.json(
         {
-          error: "No official intelligence source was available.",
+          error: "No monitored intelligence source was available.",
           sources: result.sources,
         },
         { status: 502 },
@@ -49,7 +51,21 @@ export async function GET(request: Request) {
 
     await saveIntelligenceBriefing(result.briefing);
 
+    let analysisPublished = false;
+
+    try {
+      const weeklyBriefing = await analyzeWeeklyIntelligence(result.briefing);
+      await saveWeeklyIntelligenceBriefing(weeklyBriefing);
+      analysisPublished = true;
+    } catch (analysisError: unknown) {
+      console.warn(
+        "Weekly intelligence analysis was not published; the source briefing remains available.",
+        analysisError,
+      );
+    }
+
     return Response.json({
+      analysisPublished,
       briefingDate: result.briefing.briefingDate,
       generatedAt: result.briefing.generatedAt,
       itemCount: result.briefing.items.length,
@@ -58,14 +74,14 @@ export async function GET(request: Request) {
       sources: result.briefing.sources,
     });
   } catch (error: unknown) {
-    console.error("Daily intelligence ingestion failed.", error);
+    console.error("Weekly intelligence ingestion failed.", error);
     const detail =
       process.env.NODE_ENV === "development" && error instanceof Error
         ? ` ${error.message}`
         : "";
 
     return Response.json(
-      { error: `Daily intelligence ingestion failed.${detail}` },
+      { error: `Weekly intelligence ingestion failed.${detail}` },
       { status: 500 },
     );
   }

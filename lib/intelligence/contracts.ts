@@ -1,16 +1,34 @@
-export type IntelligenceInstitutionId = "ecb" | "eurostat" | "federal-reserve";
+export type IntelligenceInstitutionId =
+  | "bbc"
+  | "ecb"
+  | "eurostat"
+  | "federal-reserve"
+  | "guardian"
+  | "united-nations";
 
 export type IntelligenceSourceId =
+  | "bbc-business"
+  | "bbc-technology"
+  | "bbc-world"
   | "ecb-policy-and-media"
-  | "ecb-statistical-releases"
   | "eurostat-economy-and-finance"
   | "eurostat-international-trade"
-  | "federal-reserve-monetary-policy";
+  | "federal-reserve-monetary-policy"
+  | "guardian-business"
+  | "guardian-world"
+  | "united-nations-world";
 
 export type IntelligenceTopic =
-  "euro-area-economy" | "international-trade" | "monetary-policy";
+  | "business-and-industry"
+  | "geopolitics"
+  | "global-economy"
+  | "international-trade"
+  | "monetary-policy"
+  | "spain-and-eu"
+  | "technology-and-ai";
 
 export type IntelligenceFeedFormat = "atom" | "rss";
+export type IntelligenceSourceKind = "journalism" | "official" | "research";
 
 export type IntelligenceSourceDefinition = Readonly<{
   feedFormat: IntelligenceFeedFormat;
@@ -18,6 +36,7 @@ export type IntelligenceSourceDefinition = Readonly<{
   homepageUrl: string;
   id: IntelligenceSourceId;
   institution: IntelligenceInstitutionId;
+  kind: IntelligenceSourceKind;
   name: string;
   priority: number;
   topic: IntelligenceTopic;
@@ -25,6 +44,7 @@ export type IntelligenceSourceDefinition = Readonly<{
 
 export type IntelligenceBriefingItem = Readonly<{
   canonicalUrl: string;
+  excerpt: string | null;
   id: string;
   publishedAt: string | null;
   sourceId: IntelligenceSourceId;

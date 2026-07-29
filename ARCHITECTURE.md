@@ -488,16 +488,19 @@ the server reloads authoritative history before generation. Thread endpoints enf
 the same Clerk owner boundary and same-origin checks as record synchronization.
 
 Model selection is expressed as product intent rather than provider names: Quick routes
-to GPT-5.6 Luna without reasoning, Analyze routes to GPT-5.6 Terra with low reasoning,
-and Deep Review routes to GPT-5.6 Sol in Pro mode with medium reasoning. The server owns
-this routing, bounded output limits, a per-minute request allowance, stable hashed safety
-identifier, and the Vercel AI Gateway identity. Provider storage is disabled. Jarvis tools are
+to GPT-5.6 Luna with minimal reasoning, Analyze routes to GPT-5.6 Terra with low reasoning,
+and Deep Review routes to GPT-5.6 Sol in Pro mode with medium reasoning. All modes declare
+GPT-5 Nano as the bounded Gateway fallback so text remains useful when a primary model is
+unavailable to the current Gateway plan. The server owns this routing, bounded output limits,
+a per-minute request allowance, stable hashed safety identifier, and the Vercel AI Gateway
+identity. Provider storage is disabled. Jarvis tools are
 read-only: they can retrieve a bounded view of synchronized Mission Control records,
 the latest Observatory briefing, or provider-executed web search; no tool can mutate a
 record, navigate, send, schedule, or claim completion.
 
 Voice is explicitly activated from the Jarvis composer and never listens passively. The
-authenticated server mints a short-lived GPT Realtime client secret; the browser holds
+authenticated server mints a short-lived GPT Realtime client secret using a dedicated
+`AI_GATEWAY_API_KEY`; OIDC alone is insufficient for realtime client-secret minting. The browser holds
 the microphone only for the visible session, stops all tracks on exit, and persists the
 normalized transcript back to the current owner-scoped thread. Voice remains an
 experimental enhancement: text chat and all other Mission Control functions remain
@@ -511,13 +514,17 @@ under `components/intelligence/`. It is visible at universe scale, owns a genero
 invisible interaction target and projected DOM label, uses the shared 30 FPS ambient
 scheduler, and adds no textures, post-processing, shadows, physics, or private loop.
 
-A secured Vercel Cron runs daily at 06:00 UTC and ingests a finite set of official ECB,
-Eurostat, and Federal Reserve RSS/Atom feeds with per-source timeouts, response caps,
-deterministic deduplication, and graceful partial editions. Neon stores one JSONB briefing
-per date. The owner-authenticated dashboard presents at most eight source-linked items
-and clearly labels raw institutional headlines as awaiting analysis; it does not fabricate
-summaries or claim comprehensive world-news coverage. `CRON_SECRET` protects ingestion,
-and the AI Gateway identity is independent of the feed pipeline.
+A secured Vercel Cron runs every Monday at 06:00 UTC and ingests a finite mix of reputable
+world, business, technology, and institutional RSS/Atom feeds from the BBC, The Guardian,
+United Nations, ECB, Eurostat, and Federal Reserve. Per-source timeouts, response caps,
+an eight-day lookback, deterministic deduplication, and graceful partial editions bound the
+pipeline. Neon stores the source edition and one generated weekly briefing per ISO week.
+AI Gateway translates only the supplied headlines and excerpts into five to eight concise,
+source-grounded developments with summaries, significance, business relevance, uncertainty,
+and direct citations. It is explicitly forbidden from inventing outside facts. If analysis
+fails, the latest successful weekly edition remains available while the current raw source
+edition is preserved as a transparent fallback. `CRON_SECRET` protects ingestion, and the
+AI Gateway identity is independent of the feed pipeline.
 
 The current conflict rule is last source timestamp wins, which is appropriate for a
 single owner but should be replaced by revision-aware merge UX before concurrent

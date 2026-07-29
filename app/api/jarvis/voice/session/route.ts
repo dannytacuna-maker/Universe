@@ -23,6 +23,16 @@ export async function POST(request: Request) {
     );
   }
 
+  if (!process.env.AI_GATEWAY_API_KEY) {
+    return Response.json(
+      {
+        error:
+          "Jarvis voice requires an AI Gateway API key in the Vercel production environment.",
+      },
+      { status: 503 },
+    );
+  }
+
   const withinAllowance = await consumeJarvisRequestAllowance(
     authorization.owner.id,
   );

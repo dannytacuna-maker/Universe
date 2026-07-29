@@ -10,6 +10,7 @@ import {
 import { listMissionRecords } from "@/lib/server/mission-record-database";
 import {
   getLatestIntelligenceBriefing,
+  getLatestWeeklyIntelligenceBriefing,
   isIntelligenceDatabaseConfigured,
 } from "@/lib/server/intelligence-database";
 
@@ -76,9 +77,9 @@ function compactValue(value: unknown, depth = 0): CompactValue {
 
 export function createJarvisTools(ownerId: string) {
   return {
-    readDailyIntelligence: tool({
+    readWeeklyIntelligence: tool({
       description:
-        "Read the latest source-grounded Observatory briefing from official economic institutions. Use for current economic, monetary-policy, trade, or institutional questions. It never changes data.",
+        "Read the latest source-grounded Observatory world briefing. Use for current geopolitics, global economy, business, trade, Spain or EU, technology, AI, monetary-policy, or institutional questions. It never changes data.",
       inputSchema: z.object({}),
       execute: async () => {
         if (!isIntelligenceDatabaseConfigured()) {
@@ -88,13 +89,29 @@ export function createJarvisTools(ownerId: string) {
           };
         }
 
-        const briefing = await getLatestIntelligenceBriefing();
-        return briefing === null
+        const weeklyBriefing = await getLatestWeeklyIntelligenceBriefing();
+
+        if (weeklyBriefing !== null) {
+          return {
+            available: true,
+            briefing: weeklyBriefing,
+            cadence: "weekly",
+            readOnly: true,
+          };
+        }
+
+        const sourceBriefing = await getLatestIntelligenceBriefing();
+        return sourceBriefing === null
           ? {
               available: false,
-              reason: "No daily briefing has been published yet.",
+              reason: "No Observatory briefing has been published yet.",
             }
-          : { available: true, briefing, readOnly: true };
+          : {
+              available: true,
+              briefing: sourceBriefing,
+              cadence: "source-fallback",
+              readOnly: true,
+            };
       },
     }),
     reviewMissionRecords: tool({

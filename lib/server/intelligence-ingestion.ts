@@ -8,18 +8,20 @@ import type {
   IntelligenceSourceFailureReason,
   IntelligenceSourceStatus,
 } from "@/lib/intelligence/contracts";
-import { officialIntelligenceSources } from "@/lib/intelligence/official-sources";
+import { intelligenceSources } from "@/lib/intelligence/intelligence-sources";
 
 const feedTimeoutMs = 6_000;
 const maximumFeedBytes = 2_000_000;
-const maximumItemsPerSource = 8;
-const maximumBriefingItems = 24;
+const maximumItemsPerSource = 5;
+const maximumBriefingItems = 36;
+const briefingLookbackMs = 8 * 24 * 60 * 60 * 1_000;
 const trackingParameters = new Set(["fbclid", "gclid", "mc_cid", "mc_eid"]);
 const sourcePriorities = new Map(
-  officialIntelligenceSources.map(({ id, priority }) => [id, priority]),
+  intelligenceSources.map(({ id, priority }) => [id, priority]),
 );
 
 type ParsedFeedItem = Readonly<{
+  excerpt: string | null;
   publishedAt: string | null;
   title: string;
   url: string;
@@ -180,8 +182,18 @@ function parseEntryBlock(
   const publishedAt = normalizePublicationDate(
     extractElementValue(block, ["pubDate", "published", "updated", "dc:date"]),
   );
+  const rawExcerpt = extractElementValue(block, [
+    "description",
+    "summary",
+    "content:encoded",
+    "content",
+  ]);
 
   return {
+    excerpt:
+      rawExcerpt === null || rawExcerpt.length === 0
+        ? null
+        : rawExcerpt.slice(0, 700),
     publishedAt,
     title: title.slice(0, 500),
     url: url.slice(0, 2_048),
@@ -318,6 +330,7 @@ function toBriefingItem(
 
   return {
     canonicalUrl,
+    excerpt: item.excerpt,
     id: createItemId(canonicalUrl),
     publishedAt: item.publishedAt,
     sourceId: source.id,
@@ -375,8 +388,14 @@ async function fetchSource(
     }
 
     const parsedItems = parseFeed(xml, source);
+    const earliestTimestamp = now.getTime() - briefingLookbackMs;
+    const currentItems = parsedItems.filter(
+      (item) =>
+        item.publishedAt === null ||
+        Date.parse(item.publishedAt) >= earliestTimestamp,
+    );
     const items = deduplicateIntelligenceItems(
-      parsedItems.map((item) => toBriefingItem(item, source)),
+      currentItems.map((item) => toBriefingItem(item, source)),
     )
       .slice(0, maximumItemsPerSource)
       .sort(compareItems);
@@ -437,11 +456,11 @@ function createBriefing(sourceRuns: readonly SourceRun[], now: Date) {
   } satisfies IntelligenceBriefing;
 }
 
-export async function ingestOfficialIntelligenceFeeds(
+export async function ingestIntelligenceFeeds(
   now = new Date(),
 ): Promise<IntelligenceIngestionResult> {
   const sourceRuns = await Promise.all(
-    officialIntelligenceSources.map((source) => fetchSource(source, now)),
+    intelligenceSources.map((source) => fetchSource(source, now)),
   );
   const sources = sourceRuns.map(({ status }) => status);
 
