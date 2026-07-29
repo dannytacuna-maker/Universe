@@ -199,7 +199,7 @@ export function PersonalGrowthDestinationPlanet({
   return (
     <group
       position={definition.position}
-      scale={isEmphasized ? 1.045 : 1}
+      scale={isEmphasized ? 1.06 : isInteractive ? 1.025 : 1}
       visible={isVisible}
     >
       <SpatialLabelAnchor

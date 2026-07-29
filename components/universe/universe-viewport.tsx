@@ -68,6 +68,7 @@ import {
 } from "./universe-navigation-url";
 import { useWebGLSupport } from "./use-webgl-support";
 import { deriveUniverseActivitySignals } from "./universe-activity";
+import { useObservatoryAttention } from "./use-observatory-attention";
 import { WebGLBoundary } from "./webgl-boundary";
 import { globalObservatoryDefinition } from "./observatory/observatory-definition";
 
@@ -117,6 +118,7 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
   const [focusedSystemId, setFocusedSystemId] = useState<string | null>(null);
   const [hoveredPlanetId, setHoveredPlanetId] = useState<string | null>(null);
   const [focusedPlanetId, setFocusedPlanetId] = useState<string | null>(null);
+  const [incompleteEvidenceRatio, setIncompleteEvidenceRatio] = useState(0);
   const [announcement, setAnnouncement] = useState("");
   const [cameraResetToken, setCameraResetToken] = useState(0);
   const [isCameraSettled, setIsCameraSettled] = useState(true);
@@ -166,6 +168,11 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
   } = useReadingLibrary();
   const universityRecords = useUniversityRecords();
   const cloudSync = useMissionCloudSync();
+  const { attention: observatoryAttention, markBriefingSeen } =
+    useObservatoryAttention(navigationLevel === "universe");
+  const handleVectorStateChange = useCallback((ratio: number) => {
+    setIncompleteEvidenceRatio(ratio);
+  }, []);
   const missionIntelligence = useMemo(
     () =>
       buildMissionIntelligence({
@@ -193,11 +200,13 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
           loading: frenchLearning.isLoading,
           summary: frenchLearning.summary,
         },
+        incompleteEvidenceRatio,
         jiuJitsu: {
           error: trainingStorageError,
           loading: isTrainingLogLoading,
           progress: jiuJitsuProgress,
         },
+        observatoryAttention,
         reading: {
           error: readingStorageError,
           loading: isReadingLoading,
@@ -221,10 +230,12 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
       frenchLearning.isLoading,
       frenchLearning.storageError,
       frenchLearning.summary,
+      incompleteEvidenceRatio,
       isReadingLoading,
       isStrengthLoading,
       isTrainingLogLoading,
       jiuJitsuProgress,
+      observatoryAttention,
       readingSessions,
       readingStorageError,
       readingSummary,
@@ -1004,6 +1015,7 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
         isVisible={navigationLevel === "universe" && isViewSettled}
         nextDeadlineLabel={nextDeadlineLabel}
         onOpenMission={requestOpenMissionDeck}
+        onVectorStateChange={handleVectorStateChange}
       />
 
       <CommandDock>
@@ -1099,7 +1111,10 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
         summary={frenchLearning.summary}
       />
 
-      <ObservatoryExperience isVisible={isObservatoryActive && isViewSettled} />
+      <ObservatoryExperience
+        isVisible={isObservatoryActive && isViewSettled}
+        onBriefingSeen={markBriefingSeen}
+      />
 
       <span aria-live="polite" className="sr-only">
         {announcement}

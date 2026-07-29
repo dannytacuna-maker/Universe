@@ -17,11 +17,17 @@ export type UniverseActivitySignal = Readonly<{
   state: "error" | "loading" | "ready";
 }>;
 
+export type UniverseGalaxyPresence = Readonly<{
+  activity: number;
+  attention: number;
+}>;
+
 export type UniverseActivitySignals = Readonly<{
   galaxy: Readonly<{
-    personalGrowth: number;
-    university: number;
+    personalGrowth: UniverseGalaxyPresence;
+    university: UniverseGalaxyPresence;
   }>;
+  observatoryAttention: number;
   personalGrowth: Readonly<{
     french: UniverseActivitySignal;
     "jiu-jitsu": UniverseActivitySignal;
@@ -38,7 +44,9 @@ type ActivityLoadState = Readonly<{
 
 type UniverseActivityInput = Readonly<{
   french: ActivityLoadState & Readonly<{ summary: FrenchLearningSummary }>;
+  incompleteEvidenceRatio?: number;
   jiuJitsu: ActivityLoadState & Readonly<{ progress: JiuJitsuProgress }>;
+  observatoryAttention?: number;
   reading: ActivityLoadState &
     Readonly<{
       sessions: readonly ReadingSession[];
@@ -134,6 +142,10 @@ export function deriveUniverseActivitySignals(
     ).length;
     const dueSoonCount = openAssignments.filter((assignment) => {
       const dueAt = Date.parse(assignment.dueAt);
+      return dueAt >= now && dueAt <= now + 2 * 24 * 60 * 60 * 1000;
+    }).length;
+    const dueThisWeekCount = openAssignments.filter((assignment) => {
+      const dueAt = Date.parse(assignment.dueAt);
       return dueAt >= now && dueAt <= now + 7 * 24 * 60 * 60 * 1000;
     }).length;
 
@@ -142,7 +154,10 @@ export function deriveUniverseActivitySignals(
       signal(
         input.university,
         Math.min(recentRecordCount / 4, 1),
-        Math.min(overdueCount * 0.5 + dueSoonCount * 0.22, 1),
+        Math.min(
+          overdueCount * 0.55 + dueSoonCount * 0.38 + dueThisWeekCount * 0.12,
+          1,
+        ),
       ),
     ] as const;
   });
@@ -150,19 +165,39 @@ export function deriveUniverseActivitySignals(
     UniversityCourseId,
     UniverseActivitySignal
   >;
+  const universityActivity = average(
+    universityCourseSystems.map((course) => university[course.id].activity),
+  );
+  const universityAttention = clamp(
+    Math.max(
+      ...universityCourseSystems.map((course) => university[course.id].attention),
+      0,
+    ),
+  );
+  const personalGrowthActivity = average([
+    french.activity,
+    jiuJitsu.activity,
+    reading.activity,
+    strength.activity,
+  ]);
+  const incompleteEvidenceRatio = clamp(input.incompleteEvidenceRatio ?? 0);
+  const personalGrowthAttention = clamp(
+    incompleteEvidenceRatio * 0.72 +
+      (1 - personalGrowthActivity) * 0.28 * (incompleteEvidenceRatio > 0 ? 1 : 0.35),
+  );
 
   return {
     galaxy: {
-      personalGrowth: average([
-        french.activity,
-        jiuJitsu.activity,
-        reading.activity,
-        strength.activity,
-      ]),
-      university: average(
-        universityCourseSystems.map((course) => university[course.id].activity),
-      ),
+      personalGrowth: {
+        activity: personalGrowthActivity,
+        attention: personalGrowthAttention,
+      },
+      university: {
+        activity: universityActivity,
+        attention: universityAttention,
+      },
     },
+    observatoryAttention: clamp(input.observatoryAttention ?? 0),
     personalGrowth: {
       french,
       "jiu-jitsu": jiuJitsu,

@@ -3,7 +3,7 @@
 import { useCursor } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
-import { AdditiveBlending, DoubleSide, type Group, type Mesh } from "three";
+import { AdditiveBlending, DoubleSide, type Group, type Mesh, type PointLight } from "three";
 
 import { StellarGlow } from "../galaxies/university/stellar-glow";
 import { SpatialLabelAnchor } from "../spatial-label-anchor";
@@ -51,6 +51,7 @@ const outerRelays = Array.from({ length: OUTER_RELAY_COUNT }, (_, index) => {
 });
 
 export type GlobalObservatoryProps = Readonly<{
+  briefingPulse?: number;
   definition?: ObservatoryDefinition;
   isEmphasized: boolean;
   isHovered: boolean;
@@ -62,6 +63,7 @@ export type GlobalObservatoryProps = Readonly<{
 }>;
 
 export function GlobalObservatory({
+  briefingPulse = 0,
   definition = globalObservatoryDefinition,
   isEmphasized,
   isHovered,
@@ -72,11 +74,20 @@ export function GlobalObservatory({
   onHoverChange,
 }: GlobalObservatoryProps) {
   const station = useRef<Group>(null);
+  const root = useRef<Group>(null);
+  const coreLight = useRef<PointLight>(null);
+  const pulseGlow = useRef<Mesh>(null);
   const innerOrbit = useRef<Group>(null);
   const outerOrbit = useRef<Group>(null);
   const sweepRing = useRef<Mesh>(null);
+  const pulsePhase = useRef(0);
 
   useCursor(isHovered && isInteractive, "pointer", "auto");
+
+  const emphasis = isEmphasized ? 1 : 0;
+  const hoverLift = isHovered ? 0.12 : 0;
+  const palette = definition.palette;
+  const presence = 0.88 + emphasis * 0.12 + hoverLift;
 
   useFrame((_, delta) => {
     if (!motionEnabled || !isVisible) return;
@@ -98,16 +109,39 @@ export function GlobalObservatory({
     if (sweepRing.current !== null) {
       sweepRing.current.rotation.z += safeDelta * 0.022;
     }
-  });
 
-  const emphasis = isEmphasized ? 1 : 0;
-  const hoverLift = isHovered ? 0.12 : 0;
-  const palette = definition.palette;
-  const presence = 0.88 + emphasis * 0.12 + hoverLift;
+    const pulse =
+      briefingPulse > 0.05
+        ? (0.5 + 0.5 * Math.sin(pulsePhase.current)) * briefingPulse
+        : 0;
+
+    if (briefingPulse > 0.05) {
+      pulsePhase.current += safeDelta * (1.4 + briefingPulse * 1.8);
+    }
+
+    if (root.current !== null) {
+      const nextScale =
+        definition.scale *
+        (1 + emphasis * 0.045 + hoverLift * 0.015 + pulse * 0.035);
+      root.current.scale.setScalar(nextScale);
+    }
+
+    if (coreLight.current !== null) {
+      coreLight.current.intensity = 4.2 + emphasis * 1.4 + pulse * 1.1;
+    }
+
+    if (pulseGlow.current !== null) {
+      const material = pulseGlow.current.material;
+      if (!Array.isArray(material) && "opacity" in material) {
+        material.opacity = 0.018 + pulse * 0.07;
+      }
+    }
+  });
 
   return (
     <group
       position={definition.position}
+      ref={root}
       rotation={definition.orientation}
       scale={definition.scale * (1 + emphasis * 0.045 + hoverLift * 0.015)}
       visible={isVisible}
@@ -123,6 +157,7 @@ export function GlobalObservatory({
         distance={5.8}
         intensity={4.2 + emphasis * 1.4}
         position={[0.4, 0.55, 1.6]}
+        ref={coreLight}
       />
       <pointLight
         color={palette.aperture}
@@ -154,6 +189,18 @@ export function GlobalObservatory({
         opacity={0.008 + emphasis * 0.006}
         radius={2.45}
       />
+
+      <mesh ref={pulseGlow} scale={2.2}>
+        <sphereGeometry args={[1, 24, 16]} />
+        <meshBasicMaterial
+          blending={AdditiveBlending}
+          color={palette.beacon}
+          depthWrite={false}
+          opacity={0.018}
+          toneMapped={false}
+          transparent
+        />
+      </mesh>
 
       <ObservatoryDataVeil
         apertureColor={palette.aperture}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { IntelligenceBriefing } from "@/lib/intelligence/contracts";
 import type { WeeklyIntelligenceBriefing } from "@/lib/intelligence/weekly-briefing";
@@ -8,14 +8,19 @@ import type { WeeklyIntelligenceBriefing } from "@/lib/intelligence/weekly-brief
 import type { IntelligenceBriefingDashboardState } from "./intelligence-briefing";
 import { IntelligenceBriefingDashboard } from "./intelligence-briefing-dashboard";
 
-type ObservatoryExperienceProps = Readonly<{ isVisible: boolean }>;
+type ObservatoryExperienceProps = Readonly<{
+  isVisible: boolean;
+  onBriefingSeen?: (briefingId: string) => void;
+}>;
 
 export function ObservatoryExperience({
   isVisible,
+  onBriefingSeen,
 }: ObservatoryExperienceProps) {
   const [state, setState] = useState<IntelligenceBriefingDashboardState>({
     status: "loading",
   });
+  const markedBriefingId = useRef<string | null>(null);
 
   useEffect(() => {
     if (!isVisible) return;
@@ -76,6 +81,21 @@ export function ObservatoryExperience({
 
     return () => controller.abort();
   }, [isVisible]);
+
+  useEffect(() => {
+    if (!isVisible || onBriefingSeen === undefined) {
+      return;
+    }
+
+    if (
+      (state.status === "ready" || state.status === "source-ready") &&
+      state.briefing !== null &&
+      markedBriefingId.current !== state.briefing.id
+    ) {
+      markedBriefingId.current = state.briefing.id;
+      onBriefingSeen(state.briefing.id);
+    }
+  }, [isVisible, onBriefingSeen, state]);
 
   return isVisible ? <IntelligenceBriefingDashboard state={state} /> : null;
 }

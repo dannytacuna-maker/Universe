@@ -5,6 +5,7 @@ import { ProceduralGalaxy } from "./procedural-galaxy";
 import { universityGalaxyDefinition } from "./university-galaxy-definition";
 
 type UniversityGalaxyProps = Readonly<{
+  attention?: number;
   isEmphasized: boolean;
   isHovered: boolean;
   isInteractive: boolean;

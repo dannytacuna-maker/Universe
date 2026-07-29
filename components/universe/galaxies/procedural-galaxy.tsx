@@ -14,6 +14,7 @@ import {
 } from "./procedural-galaxy-data";
 
 type ProceduralGalaxyProps = Readonly<{
+  attention?: number;
   definition: GalaxyDefinition;
   isEmphasized: boolean;
   isHovered: boolean;
@@ -49,6 +50,7 @@ function ParticleLayer({ data, opacity, size }: ParticleLayerProps) {
 }
 
 export function ProceduralGalaxy({
+  attention = 0,
   definition,
   isEmphasized,
   isHovered,
@@ -76,14 +78,15 @@ export function ProceduralGalaxy({
       Math.min(delta, 0.075) * definition.rotationSpeed;
   });
 
-  const clarity = isEmphasized ? 1 : 0;
+  const clarity = isEmphasized ? 1 : Math.min(1, attention * 0.55);
   const particleSizeScale = Math.max(0.28, Math.sqrt(presence));
+  const presenceScale = definition.scale * (1 + Math.min(attention, 1) * 0.028);
 
   return (
     <group
       position={definition.position}
       rotation={definition.orientation}
-      scale={definition.scale}
+      scale={presenceScale}
     >
       <SpatialLabelAnchor anchorId={labelAnchorId} enabled={isInteractive} />
 

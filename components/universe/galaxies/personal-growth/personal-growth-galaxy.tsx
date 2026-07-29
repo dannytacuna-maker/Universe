@@ -5,6 +5,7 @@ import { ProceduralGalaxy } from "../procedural-galaxy";
 import { personalGrowthGalaxyDefinition } from "./personal-growth-galaxy-definition";
 
 type PersonalGrowthGalaxyProps = Readonly<{
+  attention?: number;
   isEmphasized: boolean;
   isHovered: boolean;
   isInteractive: boolean;

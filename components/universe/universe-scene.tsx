@@ -12,6 +12,7 @@ import { CosmicFilamentField } from "./cosmic-filament-field";
 import { CosmicGuardian } from "./cosmic-guardian";
 import { DeepSpaceBackdrop } from "./deep-space-backdrop";
 import { DistantCelestialStructures } from "./distant-celestial-structures";
+import { EvidenceComet } from "./evidence-comet";
 import { UniversityGalaxy } from "./galaxies/university-galaxy";
 import { UniversityCourseSystemGroup } from "./galaxies/university/university-course-system-group";
 import { UniversityInteriorField } from "./galaxies/university/university-interior-field";
@@ -163,6 +164,7 @@ export function UniverseScene({
         presence={starfieldPresence}
       />
       <UniversityGalaxy
+        attention={activitySignals.galaxy.university.attention}
         isEmphasized={emphasizedGalaxyId === universityGalaxyId}
         isHovered={hoveredGalaxyId === universityGalaxyId}
         isInteractive={navigationLevel === "universe"}
@@ -179,7 +181,7 @@ export function UniverseScene({
               : universitySelected
                 ? 0.01
                 : 0.025) *
-          (0.92 + activitySignals.galaxy.university * 0.08)
+          (0.92 + activitySignals.galaxy.university.activity * 0.08)
         }
       />
       <UniversityInteriorField
@@ -202,6 +204,7 @@ export function UniverseScene({
         signals={activitySignals.university}
       />
       <PersonalGrowthGalaxy
+        attention={activitySignals.galaxy.personalGrowth.attention}
         isEmphasized={emphasizedGalaxyId === personalGrowthGalaxyId}
         isHovered={hoveredGalaxyId === personalGrowthGalaxyId}
         isInteractive={navigationLevel === "universe"}
@@ -218,7 +221,7 @@ export function UniverseScene({
               : personalGrowthSelected
                 ? 0.01
                 : 0.022) *
-          (0.92 + activitySignals.galaxy.personalGrowth * 0.08)
+          (0.92 + activitySignals.galaxy.personalGrowth.activity * 0.08)
         }
       />
       <PersonalGrowthInteriorField
@@ -278,6 +281,7 @@ export function UniverseScene({
         }
       />
       <GlobalObservatory
+        briefingPulse={activitySignals.observatoryAttention}
         isEmphasized={emphasizedPlanetId === globalObservatoryDefinition.id}
         isHovered={hoveredPlanetId === globalObservatoryDefinition.id}
         isInteractive={navigationLevel === "universe"}
@@ -287,6 +291,10 @@ export function UniverseScene({
         onHoverChange={(isHovered) =>
           onPlanetHoverChange(isHovered ? globalObservatoryDefinition.id : null)
         }
+      />
+      <EvidenceComet
+        isVisible={navigationLevel === "universe"}
+        motionEnabled={motionEnabled}
       />
       {standardPersonalGrowthPlanets.map((planet) => (
         <PersonalGrowthDestinationPlanet

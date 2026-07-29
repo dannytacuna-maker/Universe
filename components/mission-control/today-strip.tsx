@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import type { MissionIntelligence } from "@/components/mission-control/mission-intelligence";
 import { useMissionOperatingSystem } from "@/components/mission-control/use-mission-operating-system";
+import { requestEvidenceComet } from "@/lib/living-universe";
 
 import styles from "./today-strip.module.css";
 
@@ -12,6 +13,7 @@ type TodayStripProps = Readonly<{
   isVisible: boolean;
   nextDeadlineLabel: string | null;
   onOpenMission: () => void;
+  onVectorStateChange?: (incompleteEvidenceRatio: number) => void;
 }>;
 
 export function TodayStrip({
@@ -19,6 +21,7 @@ export function TodayStrip({
   isVisible,
   nextDeadlineLabel,
   onOpenMission,
+  onVectorStateChange,
 }: TodayStripProps) {
   const operatingSystem = useMissionOperatingSystem(intelligence.activityDates);
   const [captureText, setCaptureText] = useState("");
@@ -28,17 +31,37 @@ export function TodayStrip({
     (item) => item.isCompleteToday,
   ).length;
   const totalCycles = operatingSystem.currentVector.length;
+  const incompleteEvidenceRatio =
+    totalCycles === 0 ? 0 : (totalCycles - evidencedCount) / totalCycles;
+
+  useEffect(() => {
+    onVectorStateChange?.(incompleteEvidenceRatio);
+  }, [incompleteEvidenceRatio, onVectorStateChange]);
 
   if (!isVisible) {
     return null;
   }
 
   const handleEvidence = async (cycleId: string) => {
+    const cycle = operatingSystem.currentVector.find(
+      (item) => item.cycle.id === cycleId,
+    );
+    const markingComplete = cycle !== undefined && !cycle.isCompleteToday;
     setPendingCycleId(cycleId);
     setFeedback("");
 
     try {
       await operatingSystem.toggleEvidence(cycleId);
+      if (markingComplete) {
+        const nextEvidenced = evidencedCount + 1;
+        requestEvidenceComet({
+          incompleteEvidenceRatio:
+            totalCycles === 0
+              ? 0
+              : Math.max(0, (totalCycles - nextEvidenced) / totalCycles),
+          target: "personal-growth",
+        });
+      }
     } catch (error: unknown) {
       setFeedback(
         error instanceof Error
