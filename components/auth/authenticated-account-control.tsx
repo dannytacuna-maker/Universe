@@ -71,7 +71,10 @@ export function AuthenticatedAccountControl({
   }, [isOpen]);
 
   return (
-    <div className={styles.accountControl} ref={rootRef}>
+    <div
+      className={`${styles.accountControl} account-dock-control`}
+      ref={rootRef}
+    >
       <button
         aria-controls={panelId}
         aria-expanded={isOpen}
@@ -80,6 +83,7 @@ export function AuthenticatedAccountControl({
         className={styles.trigger}
         onClick={() => setIsOpen((current) => !current)}
         ref={triggerRef}
+        title="Account and cloud sync"
         type="button"
       >
         <span aria-hidden="true" className={styles.avatar}>

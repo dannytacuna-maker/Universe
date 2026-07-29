@@ -1,12 +1,19 @@
 # Mission Control
 
 Mission Control is a personal operating system navigated through an interactive
-universe. Galaxies represent major areas of life, while star systems establish
-destinations for focused areas such as university courses and personal growth.
+universe. Galaxies represent major areas of life. Star systems and stations are
+destinations for focused work such as university courses, training, reading, and
+intelligence.
 
-The current prototype includes a procedural WebGL universe, staged spatial
-navigation, a University galaxy with real course scheduling, and a Personal
-Growth galaxy with a local-first Jiu-Jitsu training log.
+## Current capability
+
+- Procedural WebGL universe with staged spatial navigation
+- University galaxy with real course schedules and operations records
+- Personal Growth galaxy (Jiu-Jitsu, Strength & Physique, Reading, French station)
+- Mission operating deck (`Ctrl/Cmd + K`): Identity, Current Vector, Capture, Review, Experiments
+- Jarvis (`Ctrl/Cmd + J`): read-only mission intelligence assistant
+- Observatory: weekly world-intelligence briefing
+- Local-first IndexedDB with authenticated Neon cloud sync (Clerk Google OAuth)
 
 ## Requirements
 
@@ -22,17 +29,19 @@ pnpm dev
 
 Open `http://localhost:3000`.
 
-## Data and privacy
+## Production
 
-The Jiu-Jitsu training log currently uses browser-local IndexedDB storage. It is
-not synchronized across devices, included in the repository, or sent to a
-server. External university documents are also not included in this project.
+Live site: [https://mission-control-universe.vercel.app/](https://mission-control-universe.vercel.app/)
 
-## Deployment
+Prefer production deploy with:
 
-The application is compatible with Vercel's native Next.js deployment flow.
-Production deployments should be created from the `main` branch after the
-validation commands below pass.
+```bash
+vercel deploy --prod
+```
+
+## Update line
+
+**REBIRTH UPDATE: CURSORS INTRODUCTION** — daily orbit instruments, unified command dock, living-cosmos roadmap.
 
 ## Validation
 
@@ -41,5 +50,5 @@ pnpm check
 pnpm build
 ```
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for the folder responsibilities,
-performance boundaries, and growth rules.
+See [ARCHITECTURE.md](./ARCHITECTURE.md) for folder responsibilities, performance
+boundaries, and growth rules.

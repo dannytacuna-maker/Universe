@@ -24,6 +24,19 @@
     transform 220ms ease;
 }
 
+:global(.jarvis-dock-launcher).launcher {
+  position: static;
+  right: auto;
+  bottom: auto;
+  min-height: 2.75rem;
+  border-color: transparent;
+  border-radius: 0.72rem;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  transform: none;
+}
+
 .launcher:hover {
   border-color: rgb(160 193 249 / 38%);
   background: rgb(9 15 27 / 92%);

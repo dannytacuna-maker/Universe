@@ -1,0 +1,113 @@
+.dock {
+  position: fixed;
+  z-index: 80;
+  top: max(0.85rem, calc(env(safe-area-inset-top) + 0.55rem));
+  right: max(0.85rem, calc(env(safe-area-inset-right) + 0.55rem));
+  display: flex;
+  align-items: stretch;
+  gap: 0.35rem;
+  padding: 0.28rem;
+  border: 1px solid rgb(174 206 224 / 14%);
+  border-radius: 1rem;
+  background:
+    linear-gradient(135deg, rgb(6 12 21 / 88%), rgb(4 8 16 / 78%)),
+    rgb(2 6 12 / 72%);
+  box-shadow:
+    0 1.2rem 3.6rem rgb(0 0 0 / 28%),
+    inset 0 1px rgb(255 255 255 / 4%);
+  backdrop-filter: blur(18px) saturate(118%);
+  pointer-events: auto;
+}
+
+.dock :global(.mission-dock-launcher),
+.dock :global(.jarvis-dock-launcher),
+.dock :global(.account-dock-control) {
+  position: static;
+  inset: auto;
+  z-index: auto;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  min-height: 2.75rem;
+  transform: none;
+  box-shadow: none;
+}
+
+.dock :global(.mission-dock-launcher),
+.dock :global(.jarvis-dock-launcher) {
+  border-radius: 0.72rem;
+  background: transparent;
+  border-color: transparent;
+}
+
+.dock :global(.mission-dock-launcher:hover),
+.dock :global(.mission-dock-launcher:focus-visible),
+.dock :global(.jarvis-dock-launcher:hover),
+.dock :global(.jarvis-dock-launcher:focus-visible) {
+  border-color: rgb(162 210 225 / 22%);
+  background: rgb(255 255 255 / 4%);
+  transform: none;
+}
+
+.dock :global(.account-dock-control) {
+  display: flex;
+  align-items: center;
+}
+
+.dock :global(.account-dock-control > button) {
+  min-height: 2.75rem;
+  border-radius: 0.72rem;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.dock :global(.account-dock-control > button:hover),
+.dock :global(.account-dock-control > button[aria-expanded="true"]) {
+  border-color: rgb(162 210 225 / 22%);
+  background: rgb(255 255 255 / 4%);
+}
+
+.versionMark {
+  display: none;
+  align-items: center;
+  padding: 0 0.55rem 0 0.35rem;
+  color: rgb(156 196 214 / 48%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.42rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@media (min-width: 52rem) {
+  .versionMark {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 42rem) {
+  .dock {
+    gap: 0.2rem;
+    padding: 0.22rem;
+    border-radius: 999px;
+  }
+
+  .dock :global(.mission-dock-launcher > span:nth-child(2)),
+  .dock :global(.mission-dock-launcher kbd),
+  .dock :global(.jarvis-dock-launcher > span:nth-child(2)),
+  .dock :global(.jarvis-dock-launcher kbd),
+  .dock :global(.account-dock-control .triggerText) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock :global(.mission-dock-launcher),
+  .dock :global(.jarvis-dock-launcher),
+  .dock :global(.account-dock-control > button) {
+    transition: none;
+  }
+}

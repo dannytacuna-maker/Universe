@@ -1,0 +1,121 @@
+.breadcrumb {
+  position: absolute;
+  z-index: 3;
+  top: max(1.15rem, calc(env(safe-area-inset-top) + 0.85rem));
+  left: 50%;
+  max-width: min(42rem, calc(100vw - 14rem));
+  transform: translateX(-50%);
+  pointer-events: auto;
+  animation: breadcrumb-arrive 520ms var(--universe-ease, ease) both;
+}
+
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem 0.4rem;
+  margin: 0;
+  padding: 0.42rem 0.7rem;
+  list-style: none;
+  border: 1px solid rgb(148 184 206 / 10%);
+  border-radius: 999px;
+  background: rgb(3 8 15 / 42%);
+  backdrop-filter: blur(12px) saturate(110%);
+}
+
+.breadcrumb li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.breadcrumb li > span {
+  color: rgb(140 168 186 / 34%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.48rem;
+}
+
+.breadcrumb button,
+.breadcrumb strong {
+  overflow: hidden;
+  max-width: 9.5rem;
+  color: rgb(186 208 222 / 58%);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.52rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.breadcrumb button {
+  appearance: none;
+  padding: 0.12rem 0.08rem;
+  border: 0;
+  outline: 1px solid transparent;
+  outline-offset: 0.16rem;
+  background: transparent;
+  cursor: pointer;
+  transition: color 220ms ease;
+}
+
+.breadcrumb button:hover,
+.breadcrumb button:focus-visible {
+  color: rgb(232 242 249 / 88%);
+}
+
+.breadcrumb button:focus-visible {
+  outline-color: rgb(139 180 212 / 56%);
+}
+
+.breadcrumb strong {
+  color: rgb(228 239 247 / 86%);
+}
+
+@keyframes breadcrumb-arrive {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -0.3rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 42rem) {
+  .breadcrumb {
+    top: max(4.2rem, calc(env(safe-area-inset-top) + 3.6rem));
+    left: max(0.7rem, env(safe-area-inset-left));
+    right: max(0.7rem, env(safe-area-inset-right));
+    max-width: none;
+    transform: none;
+  }
+
+  .breadcrumb ol {
+    justify-content: flex-start;
+    border-radius: 0.75rem;
+  }
+
+  @keyframes breadcrumb-arrive {
+    from {
+      opacity: 0;
+      transform: translateY(-0.3rem);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .breadcrumb {
+    animation: none;
+  }
+}

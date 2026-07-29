@@ -1,0 +1,114 @@
+.welcome {
+  position: fixed;
+  z-index: 90;
+  bottom: max(1.1rem, calc(env(safe-area-inset-bottom) + 0.85rem));
+  left: 50%;
+  display: flex;
+  width: min(34rem, calc(100vw - 1.6rem));
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 0.9rem 0.85rem 1.05rem;
+  transform: translateX(-50%);
+  border: 1px solid rgb(174 206 224 / 16%);
+  border-radius: 1rem;
+  background:
+    radial-gradient(circle at 12% 0%, rgb(88 160 184 / 12%), transparent 42%),
+    linear-gradient(145deg, rgb(5 11 19 / 94%), rgb(3 7 13 / 90%));
+  box-shadow:
+    0 1.6rem 4.5rem rgb(0 0 0 / 42%),
+    inset 0 1px rgb(255 255 255 / 5%);
+  backdrop-filter: blur(18px) saturate(120%);
+  animation: rebirth-welcome-arrive 640ms var(--universe-ease, ease) both;
+}
+
+.copy {
+  display: grid;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.copy span {
+  color: rgb(146 196 214 / 62%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.48rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.copy strong {
+  color: rgb(240 248 252 / 94%);
+  font-size: 0.82rem;
+  font-weight: 520;
+  letter-spacing: 0.04em;
+}
+
+.copy p {
+  margin: 0.12rem 0 0;
+  color: rgb(178 204 216 / 62%);
+  font-size: var(--text-ui-sm, 0.72rem);
+  line-height: 1.45;
+}
+
+.welcome button {
+  flex: 0 0 auto;
+  min-height: 2.45rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid rgb(141 204 216 / 24%);
+  border-radius: 0.62rem;
+  background: linear-gradient(
+    135deg,
+    rgb(79 160 175 / 22%),
+    rgb(76 126 146 / 10%)
+  );
+  color: rgb(232 246 250 / 92%);
+  font-size: 0.62rem;
+  font-weight: 540;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.welcome button:hover,
+.welcome button:focus-visible {
+  border-color: rgb(151 216 226 / 38%);
+  background: linear-gradient(
+    135deg,
+    rgb(88 179 193 / 30%),
+    rgb(75 129 148 / 14%)
+  );
+}
+
+.welcome button:focus-visible {
+  outline: 1px solid rgb(137 204 220 / 72%);
+  outline-offset: 0.18rem;
+}
+
+@keyframes rebirth-welcome-arrive {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 0.7rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@media (max-width: 42rem) {
+  .welcome {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .welcome button {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .welcome {
+    animation: none;
+  }
+}

@@ -2,6 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import {
+  activateInterfaceSurface,
+  subscribeToInterfaceSurfaces,
+} from "@/lib/interface-surface";
+import { useModifierKeyLabel } from "@/lib/modifier-key-label";
+
 import type { MissionDestinationId } from "./mission-operating-record";
 import type { MissionIntelligence } from "./mission-intelligence";
 import { CapturePanel } from "./capture-panel";
@@ -13,6 +19,12 @@ import styles from "./mission-operating-deck.module.css";
 import { useMissionOperatingSystem } from "./use-mission-operating-system";
 import type { MissionCloudSyncController } from "./use-mission-cloud-sync";
 import { WeeklyReviewPanel } from "./weekly-review-panel";
+
+export const openMissionDeckEvent = "mission-control:open-mission";
+
+export function requestOpenMissionDeck() {
+  window.dispatchEvent(new CustomEvent(openMissionDeckEvent));
+}
 
 type MissionOperatingDeckProps = Readonly<{
   cloudSync: MissionCloudSyncController;
@@ -44,6 +56,7 @@ export function MissionOperatingDeck({
   const launcherRef = useRef<HTMLButtonElement>(null);
   const [activePanel, setActivePanel] = useState<DeckPanelId>("vector");
   const [isOpen, setIsOpen] = useState(false);
+  const modifierKey = useModifierKeyLabel();
   const operatingSystem = useMissionOperatingSystem(intelligence.activityDates);
   const activeEvidenceCount = operatingSystem.currentVector.filter(
     (item) => item.isCompleteToday,
@@ -52,6 +65,16 @@ export function MissionOperatingDeck({
     (capture) => capture.status === "inbox",
   ).length;
 
+  const openDeck = () => {
+    activateInterfaceSurface("mission");
+    setIsOpen(true);
+  };
+
+  const closeDeck = () => {
+    setIsOpen(false);
+    window.requestAnimationFrame(() => launcherRef.current?.focus());
+  };
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
@@ -59,16 +82,38 @@ export function MissionOperatingDeck({
         setIsOpen((current) => {
           if (current) {
             window.requestAnimationFrame(() => launcherRef.current?.focus());
+            return false;
           }
 
-          return !current;
+          activateInterfaceSurface("mission");
+          return true;
         });
       }
     };
 
+    const handleOpenRequest = () => {
+      openDeck();
+    };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener(openMissionDeckEvent, handleOpenRequest);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener(openMissionDeckEvent, handleOpenRequest);
+    };
   }, []);
+
+  useEffect(
+    () =>
+      subscribeToInterfaceSurfaces((surfaceId) => {
+        if (surfaceId === "mission") {
+          return;
+        }
+
+        setIsOpen(false);
+      }),
+    [],
+  );
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -84,11 +129,6 @@ export function MissionOperatingDeck({
     }
   }, [isOpen]);
 
-  const closeDeck = () => {
-    setIsOpen(false);
-    window.requestAnimationFrame(() => launcherRef.current?.focus());
-  };
-
   const navigate = (destinationId: MissionDestinationId) => {
     closeDeck();
     onNavigate(destinationId);
@@ -97,13 +137,14 @@ export function MissionOperatingDeck({
   return (
     <>
       <button
-        aria-label="Open Mission deck"
+        aria-label="Open Mission deck. Evidence, capture, and weekly review."
         aria-controls="mission-operating-deck"
         aria-expanded={isOpen}
         aria-haspopup="dialog"
-        className={styles.launcher}
-        onClick={() => setIsOpen(true)}
+        className={`${styles.launcher} mission-dock-launcher`}
+        onClick={openDeck}
         ref={launcherRef}
+        title="Evidence, capture, and weekly review"
         type="button"
       >
         <span aria-hidden="true" className={styles.launcherMark}>
@@ -119,7 +160,10 @@ export function MissionOperatingDeck({
                 : `${activeEvidenceCount}/${operatingSystem.currentVector.length} aligned today`}
           </small>
         </span>
-        <kbd>⌘K</kbd>
+        <kbd>
+          {modifierKey}
+          {modifierKey === "⌘" ? "" : "+"}K
+        </kbd>
       </button>
 
       <dialog

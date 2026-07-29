@@ -11,6 +11,7 @@ import { UniversityWeeklySchedule } from "./galaxies/university/university-weekl
 import { UniversityGalaxyLabel } from "./galaxies/university-galaxy-label";
 import { ObservatoryLabel } from "./observatory/observatory-label";
 import { globalObservatoryDefinition } from "./observatory/observatory-definition";
+import { LocationBreadcrumb } from "./location-breadcrumb";
 import {
   personalGrowthGalaxyId,
   universityGalaxyId,
@@ -32,7 +33,9 @@ type UniverseNavigationOverlayProps = Readonly<{
   onPlanetActivate: (planetId: string) => void;
   onPlanetFocusChange: (planetId: string | null) => void;
   onPlanetHoverChange: (planetId: string | null) => void;
+  onReturnToGalaxy: () => void;
   onReturnToOrigin: () => void;
+  onReturnToSystem: () => void;
   onSystemActivate: (systemId: string) => void;
   onSystemFocusChange: (systemId: string | null) => void;
   onSystemHoverChange: (systemId: string | null) => void;
@@ -57,7 +60,9 @@ export function UniverseNavigationOverlay({
   onPlanetActivate,
   onPlanetFocusChange,
   onPlanetHoverChange,
+  onReturnToGalaxy,
   onReturnToOrigin,
+  onReturnToSystem,
   onSystemActivate,
   onSystemFocusChange,
   onSystemHoverChange,
@@ -181,6 +186,21 @@ export function UniverseNavigationOverlay({
         </button>
       ) : null}
 
+      <LocationBreadcrumb
+        isVisible={isViewSettled}
+        level={level}
+        onReturnToGalaxy={onReturnToGalaxy}
+        onReturnToOrigin={onReturnToOrigin}
+        onReturnToSystem={
+          selectedGalaxyId !== null && selectedSystemId !== null
+            ? onReturnToSystem
+            : undefined
+        }
+        selectedGalaxyName={selectedGalaxyName}
+        selectedPlanetName={activePlanetName}
+        selectedSystemName={activeSystemName}
+      />
+
       {level === "galaxy" && isViewSettled ? (
         <div className="university-context-label">
           <strong>{selectedGalaxyName}</strong>
@@ -203,16 +223,18 @@ export function UniverseNavigationOverlay({
         </div>
       ) : null}
 
-      <button
-        aria-label="Return to universe origin"
-        className="universe-origin-control"
-        data-active={level !== "universe"}
-        onClick={onReturnToOrigin}
-        type="button"
-      >
-        <span aria-hidden="true" className="universe-origin-mark" />
-        <span>Origin</span>
-      </button>
+      {level !== "universe" ? (
+        <button
+          aria-label="Return to universe origin"
+          className="universe-origin-control"
+          data-active="true"
+          onClick={onReturnToOrigin}
+          type="button"
+        >
+          <span aria-hidden="true" className="universe-origin-mark" />
+          <span>Origin</span>
+        </button>
+      ) : null}
     </div>
   );
 }

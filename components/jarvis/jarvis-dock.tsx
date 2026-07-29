@@ -13,6 +13,8 @@ import {
   subscribeToInterfaceSurfaces,
 } from "@/lib/interface-surface";
 
+import { useModifierKeyLabel } from "@/lib/modifier-key-label";
+
 import { JarvisConversation } from "./jarvis-conversation";
 import styles from "./jarvis.module.css";
 
@@ -36,6 +38,7 @@ export function JarvisDock({ context }: JarvisDockProps) {
   const [activeThread, setActiveThread] = useState<JarvisThread | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
+  const modifierKey = useModifierKeyLabel();
 
   const loadThreads = useCallback(async () => {
     const response = await fetch("/api/jarvis/threads", { cache: "no-store" });
@@ -177,16 +180,21 @@ export function JarvisDock({ context }: JarvisDockProps) {
       <button
         aria-expanded={isOpen}
         aria-haspopup="dialog"
-        className={styles.launcher}
+        aria-label="Open Jarvis. Ask about Mission Control and the weekly briefing."
+        className={`${styles.launcher} jarvis-dock-launcher`}
         onClick={openJarvis}
         ref={launcherRef}
+        title="Ask about Mission Control and the weekly briefing"
         type="button"
       >
         <span aria-hidden="true" className={styles.launcherCore}>
           J
         </span>
         <span>Jarvis</span>
-        <kbd>⌘ J</kbd>
+        <kbd>
+          {modifierKey}
+          {modifierKey === "⌘" ? " " : "+"}J
+        </kbd>
       </button>
 
       {isOpen ? (

@@ -2,6 +2,10 @@ export type InterfaceSurfaceId =
   | "jarvis"
   | "jiu-jitsu-review"
   | "jiu-jitsu-training-log"
+  | "mission"
+  | "observatory"
+  | "reading-library"
+  | "strength-whis"
   | "university-operations";
 
 const interfaceSurfaceEvent = "mission-control:interface-surface";

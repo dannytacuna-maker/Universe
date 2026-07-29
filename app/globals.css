@@ -5,6 +5,10 @@
   --background: #01030a;
   --foreground: #f8fafc;
   --universe-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --text-cinematic: 0.58rem;
+  --text-ui-sm: 0.75rem;
+  --text-ui: 0.875rem;
+  --text-display: clamp(0.95rem, 0.82rem + 0.55vw, 1.28rem);
 }
 
 * {
@@ -1081,6 +1085,7 @@ body {
     inset 0 1px rgb(225 242 237 / 5%);
   backdrop-filter: blur(1.3rem) saturate(112%);
   animation: destination-label-arrival 520ms var(--universe-ease) both;
+  font-size: var(--text-ui);
 }
 
 .jiu-jitsu-log__summary {
@@ -1338,6 +1343,7 @@ body {
   backdrop-filter: blur(1.35rem) saturate(108%);
   animation: destination-label-arrival 520ms var(--universe-ease) both;
   transition: width 320ms var(--universe-ease);
+  font-size: var(--text-ui);
 }
 
 .strength-tracker[data-open="true"] {
@@ -2093,6 +2099,7 @@ body {
   backdrop-filter: blur(1.35rem) saturate(110%);
   animation: destination-label-arrival 520ms var(--universe-ease) both;
   transition: width 360ms var(--universe-ease);
+  font-size: var(--text-ui);
 }
 
 .destination-panel[data-open="true"] {
@@ -2339,6 +2346,7 @@ body {
   scrollbar-color: rgb(145 193 183 / 24%) transparent;
   backdrop-filter: blur(1.1rem) saturate(108%);
   animation: immersive-dashboard-arrival 620ms var(--universe-ease) both;
+  font-size: var(--text-ui);
 }
 
 .time-chamber-guide {

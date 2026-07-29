@@ -26,6 +26,20 @@
     transform 500ms var(--universe-ease);
 }
 
+:global(.mission-dock-launcher).launcher {
+  position: static;
+  top: auto;
+  right: auto;
+  min-height: 2.75rem;
+  padding: 0.42rem 0.5rem;
+  border-color: transparent;
+  border-radius: 0.72rem;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  transform: none;
+}
+
 .launcher:hover,
 .launcher:focus-visible {
   border-color: rgb(162 210 225 / 28%);

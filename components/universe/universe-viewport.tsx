@@ -9,8 +9,14 @@ import { ObservatoryExperience } from "@/components/intelligence/observatory-exp
 import { createMissionDestinationState } from "@/components/mission-control/mission-destination-navigation";
 import { buildMissionIntelligence } from "@/components/mission-control/mission-intelligence";
 import type { MissionDestinationId } from "@/components/mission-control/mission-operating-record";
-import { MissionOperatingDeck } from "@/components/mission-control/mission-operating-deck";
+import {
+  MissionOperatingDeck,
+  requestOpenMissionDeck,
+} from "@/components/mission-control/mission-operating-deck";
+import { TodayStrip } from "@/components/mission-control/today-strip";
 import { useMissionCloudSync } from "@/components/mission-control/use-mission-cloud-sync";
+import { CommandDock } from "@/components/ui/command-dock";
+import { RebirthWelcome } from "@/components/ui/rebirth-welcome";
 import type { NavigationState } from "@/store/navigation-store";
 import { useNavigationStore } from "@/store/navigation-store-provider";
 
@@ -23,6 +29,7 @@ import {
 } from "./galaxies/university/course-schedule";
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
 import { UniversityOperationsDashboard } from "./galaxies/university/university-operations-dashboard";
+import { deriveUniversityOperationsSummary } from "./galaxies/university/university-operations-summary";
 import { useUniversityRecords } from "./galaxies/university/use-university-records";
 import { hyperbolicTimeChamberDefinition } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-planets";
 import { JiuJitsuReviewDashboard } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-review-dashboard";
@@ -232,6 +239,30 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
       universityRecords.storageError,
     ],
   );
+  const nextDeadlineLabel = useMemo(() => {
+    const summary = deriveUniversityOperationsSummary(
+      universityRecords.assignments,
+    );
+    const next = summary.deadlines[0];
+    if (next === undefined) {
+      return null;
+    }
+
+    const title = next.assignment.title;
+    if (next.urgency === "overdue") {
+      return `Overdue · ${title}`;
+    }
+
+    if (next.daysFromNow <= 0) {
+      return `Due today · ${title}`;
+    }
+
+    if (next.daysFromNow === 1) {
+      return `Due tomorrow · ${title}`;
+    }
+
+    return `Due in ${next.daysFromNow}d · ${title}`;
+  }, [universityRecords.assignments]);
   const emphasizedGalaxyId = hoveredGalaxyId ?? focusedGalaxyId;
   const emphasizedSystemId = hoveredSystemId ?? focusedSystemId;
   const emphasizedPlanetId = hoveredPlanetId ?? focusedPlanetId;
@@ -613,6 +644,76 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
     travelThroughPlanetClouds,
   ]);
 
+  const handleReturnToGalaxy = useCallback(() => {
+    if (selectedGalaxy === null || planetArrivalPhase !== "idle") {
+      return;
+    }
+
+    clearInteractionState();
+    beginCameraTravel();
+    setAnnouncement(`Returning to ${selectedGalaxy.name}.`);
+    const nextState: NavigationState = {
+      level: "galaxy",
+      selectedGalaxyId: selectedGalaxy.id,
+      selectedPlanetId: null,
+      selectedSystemId: null,
+    };
+    pushNavigationUrl(nextState);
+    returnToGalaxy(selectedGalaxy.id);
+  }, [
+    beginCameraTravel,
+    clearInteractionState,
+    planetArrivalPhase,
+    pushNavigationUrl,
+    returnToGalaxy,
+    selectedGalaxy,
+  ]);
+
+  const handleReturnToSystem = useCallback(() => {
+    if (
+      selectedGalaxy === null ||
+      activeSystem === null ||
+      planetArrivalPhase !== "idle"
+    ) {
+      return;
+    }
+
+    const goToSystem = () => {
+      clearInteractionState();
+      beginCameraTravel();
+      setAnnouncement(`Returning to the ${activeSystem.name} system.`);
+      const nextState: NavigationState = {
+        level: "system",
+        selectedGalaxyId: selectedGalaxy.id,
+        selectedPlanetId: null,
+        selectedSystemId: activeSystem.id,
+      };
+      pushNavigationUrl(nextState);
+      returnToSystem(selectedGalaxy.id, activeSystem.id);
+    };
+
+    if (navigationLevel === "planet" && activeStation === null) {
+      travelThroughPlanetClouds(
+        "A wave of cloud is rising for the return to system.",
+        goToSystem,
+      );
+      return;
+    }
+
+    goToSystem();
+  }, [
+    activeStation,
+    activeSystem,
+    beginCameraTravel,
+    clearInteractionState,
+    navigationLevel,
+    planetArrivalPhase,
+    pushNavigationUrl,
+    returnToSystem,
+    selectedGalaxy,
+    travelThroughPlanetClouds,
+  ]);
+
   const handleMissionDestinationNavigate = useCallback(
     (destinationId: MissionDestinationId) => {
       if (planetArrivalPhase !== "idle") {
@@ -886,7 +987,9 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
         onPlanetActivate={handlePlanetActivate}
         onPlanetFocusChange={setFocusedPlanetId}
         onPlanetHoverChange={setHoveredPlanetId}
+        onReturnToGalaxy={handleReturnToGalaxy}
         onReturnToOrigin={handleReturnToOrigin}
+        onReturnToSystem={handleReturnToSystem}
         onSystemActivate={handleSystemActivate}
         onSystemFocusChange={setFocusedSystemId}
         onSystemHoverChange={setHoveredSystemId}
@@ -897,18 +1000,29 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
         selectedSystemId={activeSystemId}
       />
 
-      <MissionOperatingDeck
-        cloudSync={cloudSync}
+      <TodayStrip
         intelligence={missionIntelligence}
-        onNavigate={handleMissionDestinationNavigate}
+        isVisible={navigationLevel === "universe" && isViewSettled}
+        nextDeadlineLabel={nextDeadlineLabel}
+        onOpenMission={requestOpenMissionDeck}
       />
 
-      <AuthenticatedAccountControl
-        ownerEmail={ownerEmail}
-        status={cloudSync.status}
-      />
+      <CommandDock>
+        <MissionOperatingDeck
+          cloudSync={cloudSync}
+          intelligence={missionIntelligence}
+          onNavigate={handleMissionDestinationNavigate}
+        />
 
-      <JarvisDock context={jarvisContext} />
+        <JarvisDock context={jarvisContext} />
+
+        <AuthenticatedAccountControl
+          ownerEmail={ownerEmail}
+          status={cloudSync.status}
+        />
+      </CommandDock>
+
+      <RebirthWelcome />
 
       <UniversityOperationsDashboard
         courseId={activeCourse?.id ?? null}
