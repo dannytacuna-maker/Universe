@@ -1,12 +1,41 @@
 .label {
-  --spatial-label-offset-y: 3.5rem;
-  color: rgb(226 224 211 / 84%);
-  text-shadow: 0 0 1.1rem rgb(181 214 226 / 16%);
+  --spatial-label-offset-y: 3.8rem;
+  color: rgb(214 236 244 / 86%);
+  letter-spacing: 0.17em;
+  text-shadow:
+    0 0 1.2rem rgb(110 205 228 / 22%),
+    0 0 0.45rem rgb(245 192 106 / 12%);
+}
+
+.label::before {
+  box-shadow:
+    0 0 0.85rem rgb(110 205 228 / 55%),
+    0 0 1.4rem rgb(245 192 106 / 28%);
+  opacity: 0.58;
 }
 
 .label:hover,
 .label:focus-visible,
 .label[data-emphasized="true"] {
-  color: rgb(244 232 211 / 92%);
-  text-shadow: 0 0 1rem rgb(215 157 88 / 22%);
+  color: rgb(255 248 236 / 96%);
+  text-shadow:
+    0 0 1.4rem rgb(245 192 106 / 32%),
+    0 0 0.8rem rgb(158 228 244 / 24%);
+}
+
+.label:hover::before,
+.label:focus-visible::before,
+.label[data-emphasized="true"]::before {
+  opacity: 1;
+  transform: scale(1.08);
+}
+
+.label :global(.course-system-label__preview) {
+  color: rgb(176 228 240 / 0%);
+}
+
+.label:hover :global(.course-system-label__preview),
+.label:focus-visible :global(.course-system-label__preview),
+.label[data-emphasized="true"] :global(.course-system-label__preview) {
+  color: rgb(176 228 240 / 68%);
 }

@@ -3,6 +3,7 @@ import type { Vector3Tuple } from "../galaxies/galaxy-definition";
 export type ObservatoryPalette = Readonly<{
   aperture: string;
   beacon: string;
+  core: string;
   metalDark: string;
   metalLight: string;
   signal: string;
@@ -31,14 +32,15 @@ export const globalObservatoryDefinition: ObservatoryDefinition = {
   galaxyId: null,
   id: "global-observatory",
   name: "The Observatory",
-  orientation: [0.12, -0.28, -0.08],
+  orientation: [0.1, -0.24, -0.06],
   palette: {
-    aperture: "#efad60",
-    beacon: "#effcff",
-    metalDark: "#202a32",
-    metalLight: "#84939d",
-    signal: "#b8dce5",
+    aperture: "#f5c06a",
+    beacon: "#f8feff",
+    core: "#9de8f4",
+    metalDark: "#0e151c",
+    metalLight: "#5a7284",
+    signal: "#6ecde8",
   },
   position: [0.9, -3.35, -12.2],
-  scale: 1.02,
+  scale: 1.18,
 };
