@@ -731,7 +731,10 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
   const handleMissionDestinationNavigate = useCallback(
     (destinationId: MissionDestinationId) => {
       if (planetArrivalPhase !== "idle") {
-        return;
+        setAnnouncement(
+          "Hold for a moment — the previous journey is still settling.",
+        );
+        return false;
       }
 
       rememberMissionDestination(destinationId);
@@ -748,7 +751,7 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
         };
         pushNavigationUrl(nextState);
         replaceNavigationState(nextState);
-        return;
+        return true;
       }
 
       const nextState = createMissionDestinationState(destinationId);
@@ -771,7 +774,7 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
               );
 
       if (destination === null) {
-        return;
+        return false;
       }
 
       const travel = () => {
@@ -811,6 +814,8 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
       } else {
         travel();
       }
+
+      return true;
     },
     [
       beginCameraTravel,

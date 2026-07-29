@@ -80,15 +80,13 @@ const staticCommands: readonly PaletteCommand[] = [
   },
   ...missionDestinations
     .filter((destination) => destination.id !== "observatory")
-    .map(
-      (destination): PaletteCommand => ({
-        action: { kind: "go", destinationId: destination.id },
-        group: "Go",
-        id: `go-${destination.id}`,
-        keywords: `go ${destination.label} ${destination.areaId}`,
-        label: `Go to ${destination.label}`,
-      }),
-    ),
+    .map((destination): PaletteCommand => ({
+      action: { kind: "go", destinationId: destination.id },
+      group: "Go",
+      id: `go-${destination.id}`,
+      keywords: `go ${destination.label} ${destination.areaId}`,
+      label: `Go to ${destination.label}`,
+    })),
 ];
 
 export function MissionCommandPalette({
@@ -164,10 +162,13 @@ export function MissionCommandPalette({
 
   return (
     <section aria-label="Mission command palette" className={styles.palette}>
-      <form className={styles.paletteForm} onSubmit={(event) => void handleSubmit(event)}>
-          <label className="sr-only" htmlFor="mission-command-palette">
-            Search Mission commands
-          </label>
+      <form
+        className={styles.paletteForm}
+        onSubmit={(event) => void handleSubmit(event)}
+      >
+        <label className="sr-only" htmlFor="mission-command-palette">
+          Search Mission commands
+        </label>
         <input
           autoComplete="off"
           id="mission-command-palette"

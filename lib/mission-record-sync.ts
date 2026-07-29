@@ -348,3 +348,11 @@ export function subscribeToMissionDataChanges(listener: () => void) {
   window.addEventListener(dataChangedEventName, listener);
   return () => window.removeEventListener(dataChangedEventName, listener);
 }
+
+export function notifyMissionDataChanged() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.dispatchEvent(new Event(dataChangedEventName));
+}

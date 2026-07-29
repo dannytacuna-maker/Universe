@@ -47,14 +47,14 @@ export function LocationBreadcrumb({
     segments.push({
       id: "galaxy",
       label: selectedGalaxyName,
-      onActivate:
-        level === "galaxy"
-          ? undefined
-          : onReturnToGalaxy,
+      onActivate: level === "galaxy" ? undefined : onReturnToGalaxy,
     });
   }
 
-  if (selectedSystemName !== null && (level === "system" || level === "planet")) {
+  if (
+    selectedSystemName !== null &&
+    (level === "system" || level === "planet")
+  ) {
     segments.push({
       id: "system",
       label: selectedSystemName,

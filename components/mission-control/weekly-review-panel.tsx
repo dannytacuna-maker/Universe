@@ -49,14 +49,9 @@ export function WeeklyReviewPanel({
   const [draft, setDraft] = useState<ReviewDraft>(currentReview ?? emptyDraft);
   const [feedback, setFeedback] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [showCeremony, setShowCeremony] = useState(ceremonyReady);
+  const [ceremonyCompleted, setCeremonyCompleted] = useState(false);
   const isDraftDirtyRef = useRef(false);
-
-  useEffect(() => {
-    if (ceremonyReady) {
-      setShowCeremony(true);
-    }
-  }, [ceremonyReady]);
+  const showCeremony = ceremonyReady || ceremonyCompleted;
 
   useEffect(() => {
     if (isDraftDirtyRef.current || currentReview === null) {
@@ -80,8 +75,10 @@ export function WeeklyReviewPanel({
     try {
       await onSubmit({ ...draft, weekStart });
       isDraftDirtyRef.current = false;
-      setShowCeremony(true);
-      setFeedback("Weekly review saved. Continue to the Observatory to close the week.");
+      setCeremonyCompleted(true);
+      setFeedback(
+        "Weekly review saved. Continue to the Observatory to close the week.",
+      );
     } catch (error: unknown) {
       setFeedback(
         error instanceof Error
@@ -183,8 +180,9 @@ export function WeeklyReviewPanel({
       {showCeremony && onOpenObservatory !== undefined ? (
         <div className={styles.ceremonyBanner}>
           <p>
-            End-of-week ceremony: personal review is set. Open the Observatory
-            for the world briefing that closes the loop.
+            {currentReview !== null
+              ? "End-of-week ceremony: personal review is recorded. Open the Observatory for the world briefing that closes the loop."
+              : "End-of-week ceremony: save this week's review first, or continue to the Observatory if you only need the briefing."}
           </p>
           <button onClick={onOpenObservatory} type="button">
             Continue to Observatory

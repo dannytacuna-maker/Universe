@@ -1,6 +1,8 @@
 "use client";
 
-import { useId, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+
+import { activateInterfaceSurface } from "@/lib/interface-surface";
 
 import {
   readingBookStatusLabels,
@@ -81,6 +83,14 @@ export function CelestialLibraryDashboard({
     session: null,
   });
   const operationLockRef = useRef(false);
+
+  useEffect(() => {
+    if (!isVisible) {
+      return;
+    }
+
+    activateInterfaceSurface("reading-library");
+  }, [isVisible]);
 
   if (!isVisible) {
     return null;

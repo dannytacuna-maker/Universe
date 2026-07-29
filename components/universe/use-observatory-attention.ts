@@ -14,7 +14,9 @@ function getIsoWeekId(date = new Date()) {
   const day = utc.getUTCDay() || 7;
   utc.setUTCDate(utc.getUTCDate() + 4 - day);
   const yearStart = new Date(Date.UTC(utc.getUTCFullYear(), 0, 1));
-  const week = Math.ceil(((utc.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+  const week = Math.ceil(
+    ((utc.getTime() - yearStart.getTime()) / 86400000 + 1) / 7,
+  );
   return `${utc.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
 }
 
@@ -45,7 +47,7 @@ export function useObservatoryAttention(isUniverseView: boolean) {
         }
 
         const candidate = payload as Readonly<{
-          briefing?: Readonly<{ id?: unknown; weekId?: unknown }> | null;
+          briefing?: Readonly<{ id?: unknown; weekStartIso?: unknown }> | null;
           kind?: unknown;
         }>;
 
@@ -57,8 +59,8 @@ export function useObservatoryAttention(isUniverseView: boolean) {
         const briefingId =
           typeof candidate.briefing.id === "string"
             ? candidate.briefing.id
-            : typeof candidate.briefing.weekId === "string"
-              ? candidate.briefing.weekId
+            : typeof candidate.briefing.weekStartIso === "string"
+              ? candidate.briefing.weekStartIso
               : getIsoWeekId();
         const isWeekly = candidate.kind === "weekly";
         const seenId = getSeenObservatoryBriefingId();

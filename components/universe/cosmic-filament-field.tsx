@@ -100,7 +100,13 @@ function createFilament(definition: FilamentDefinition): FilamentData {
 
 function CosmicFilament({
   definition,
-}: Readonly<{ definition: FilamentDefinition }>) {
+  opacityScale,
+  sizeScale,
+}: Readonly<{
+  definition: FilamentDefinition;
+  opacityScale: number;
+  sizeScale: number;
+}>) {
   const field = useMemo(() => createFilament(definition), [definition]);
 
   return (
@@ -114,8 +120,8 @@ function CosmicFilament({
         blending={AdditiveBlending}
         depthWrite={false}
         fog
-        opacity={definition.opacity}
-        size={definition.size}
+        opacity={definition.opacity * opacityScale}
+        size={definition.size * sizeScale}
         sizeAttenuation
         toneMapped={false}
         transparent
@@ -131,6 +137,8 @@ export function CosmicFilamentField({
 }: Readonly<{ insightIntensity?: number; motionEnabled: boolean }>) {
   const fieldGroup = useRef<Group>(null);
   const boost = Math.min(1, Math.max(0, insightIntensity));
+  const opacityScale = 1 + boost * 0.35;
+  const sizeScale = 1 + boost * 0.12;
 
   useFrame((_, delta) => {
     if (!motionEnabled || fieldGroup.current === null) {
@@ -146,12 +154,10 @@ export function CosmicFilamentField({
     <group ref={fieldGroup} scale={1 + boost * 0.04}>
       {filamentDefinitions.map((definition) => (
         <CosmicFilament
-          definition={{
-            ...definition,
-            opacity: definition.opacity * (1 + boost * 0.35),
-            size: definition.size * (1 + boost * 0.12),
-          }}
+          definition={definition}
           key={definition.seed}
+          opacityScale={opacityScale}
+          sizeScale={sizeScale}
         />
       ))}
     </group>

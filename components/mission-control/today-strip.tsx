@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type FormEvent,
+} from "react";
 
 import type { MissionIntelligence } from "@/components/mission-control/mission-intelligence";
 import { requestOpenMissionDeckPanel } from "@/components/mission-control/mission-operating-deck";
@@ -14,6 +19,8 @@ import {
   getLastMissionDestination,
   getSeenWeeklyCeremonyWeek,
   requestEvidenceComet,
+  subscribeToLastMissionDestination,
+  subscribeToWeeklyCeremonySeen,
 } from "@/lib/living-universe";
 
 import styles from "./today-strip.module.css";
@@ -23,7 +30,7 @@ type TodayStripProps = Readonly<{
   isVisible: boolean;
   nextDeadlineLabel: string | null;
   onOpenMission: () => void;
-  onResumeDestination?: (destinationId: MissionDestinationId) => void;
+  onResumeDestination?: (destinationId: MissionDestinationId) => boolean;
   onVectorStateChange?: (incompleteEvidenceRatio: number) => void;
 }>;
 
@@ -44,7 +51,6 @@ export function TodayStrip({
   const [captureText, setCaptureText] = useState("");
   const [feedback, setFeedback] = useState("");
   const [pendingCycleId, setPendingCycleId] = useState<string | null>(null);
-  const [resumeId, setResumeId] = useState<MissionDestinationId | null>(null);
   const evidencedCount = operatingSystem.currentVector.filter(
     (item) => item.isCompleteToday,
   ).length;
@@ -55,30 +61,26 @@ export function TodayStrip({
   const hasCurrentReview = operatingSystem.reviews.some(
     (review) => review.weekStart === weekStart,
   );
-  const showCeremonyNudge = useMemo(
-    () =>
-      isWeekendPromptDay() &&
-      !hasCurrentReview &&
-      !getSeenWeeklyCeremonyWeek(weekStart),
-    [hasCurrentReview, weekStart],
+  const lastStoredDestination = useSyncExternalStore(
+    subscribeToLastMissionDestination,
+    getLastMissionDestination,
+    () => null,
   );
+  const ceremonySeen = useSyncExternalStore(
+    subscribeToWeeklyCeremonySeen,
+    () => getSeenWeeklyCeremonyWeek(weekStart),
+    () => false,
+  );
+  const resumeId =
+    findMissionDestination(lastStoredDestination as MissionDestinationId | null)
+      ?.id ?? null;
   const resumeLabel = findMissionDestination(resumeId)?.label ?? null;
+  const showCeremonyNudge =
+    isWeekendPromptDay() && !hasCurrentReview && !ceremonySeen;
 
   useEffect(() => {
     onVectorStateChange?.(incompleteEvidenceRatio);
   }, [incompleteEvidenceRatio, onVectorStateChange]);
-
-  useEffect(() => {
-    if (!isVisible) {
-      return;
-    }
-
-    const stored = getLastMissionDestination();
-    const destination = findMissionDestination(
-      stored as MissionDestinationId | null,
-    );
-    setResumeId(destination?.id ?? null);
-  }, [isVisible]);
 
   if (!isVisible) {
     return null;
@@ -207,7 +209,10 @@ export function TodayStrip({
         )}
       </div>
 
-      <form className={styles.capture} onSubmit={(event) => void handleCapture(event)}>
+      <form
+        className={styles.capture}
+        onSubmit={(event) => void handleCapture(event)}
+      >
         <label className={styles.srOnly} htmlFor="today-orbit-capture">
           Quick capture
         </label>

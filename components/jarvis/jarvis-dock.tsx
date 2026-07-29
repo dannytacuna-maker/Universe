@@ -38,6 +38,8 @@ export function JarvisDock({ context }: JarvisDockProps) {
   const [activeThread, setActiveThread] = useState<JarvisThread | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const launcherRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
   const modifierKey = useModifierKeyLabel();
 
   const loadThreads = useCallback(async () => {
@@ -150,6 +152,16 @@ export function JarvisDock({ context }: JarvisDockProps) {
   );
 
   useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      closeButtonRef.current?.focus();
+    });
+  }, [isOpen]);
+
+  useEffect(() => {
     const handleShortcut = (event: globalThis.KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "j") {
         event.preventDefault();
@@ -200,7 +212,9 @@ export function JarvisDock({ context }: JarvisDockProps) {
       {isOpen ? (
         <aside
           aria-label="Jarvis assistant"
+          aria-modal="true"
           className={styles.panel}
+          ref={panelRef}
           role="dialog"
         >
           <header className={styles.header}>
@@ -239,6 +253,7 @@ export function JarvisDock({ context }: JarvisDockProps) {
                 aria-label="Close Jarvis"
                 className={styles.iconButton}
                 onClick={closeJarvis}
+                ref={closeButtonRef}
                 type="button"
               >
                 <svg aria-hidden="true" viewBox="0 0 24 24">

@@ -170,7 +170,9 @@ export function deriveUniverseActivitySignals(
   );
   const universityAttention = clamp(
     Math.max(
-      ...universityCourseSystems.map((course) => university[course.id].attention),
+      ...universityCourseSystems.map(
+        (course) => university[course.id].attention,
+      ),
       0,
     ),
   );
@@ -183,7 +185,9 @@ export function deriveUniverseActivitySignals(
   const incompleteEvidenceRatio = clamp(input.incompleteEvidenceRatio ?? 0);
   const personalGrowthAttention = clamp(
     incompleteEvidenceRatio * 0.72 +
-      (1 - personalGrowthActivity) * 0.28 * (incompleteEvidenceRatio > 0 ? 1 : 0.35),
+      (1 - personalGrowthActivity) *
+        0.28 *
+        (incompleteEvidenceRatio > 0 ? 1 : 0.35),
   );
 
   return {

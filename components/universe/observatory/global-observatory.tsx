@@ -3,7 +3,13 @@
 import { useCursor } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
-import { AdditiveBlending, DoubleSide, type Group, type Mesh, type PointLight } from "three";
+import {
+  AdditiveBlending,
+  DoubleSide,
+  type Group,
+  type Mesh,
+  type PointLight,
+} from "three";
 
 import { StellarGlow } from "../galaxies/university/stellar-glow";
 import { SpatialLabelAnchor } from "../spatial-label-anchor";
@@ -25,7 +31,11 @@ const hexMirrors = Array.from({ length: HEX_MIRROR_COUNT }, (_, index) => {
 
   return {
     angle,
-    position: [Math.cos(angle) * 0.52, Math.sin(angle) * 0.08, Math.sin(angle) * 0.52] as const,
+    position: [
+      Math.cos(angle) * 0.52,
+      Math.sin(angle) * 0.08,
+      Math.sin(angle) * 0.52,
+    ] as const,
   };
 });
 
@@ -36,7 +46,11 @@ const innerSensors = Array.from({ length: INNER_SENSOR_COUNT }, (_, index) => {
 
   return {
     angle,
-    position: [Math.cos(angle) * 0.78, Math.sin(angle) * 0.04, Math.sin(angle) * 0.78] as const,
+    position: [
+      Math.cos(angle) * 0.78,
+      Math.sin(angle) * 0.04,
+      Math.sin(angle) * 0.78,
+    ] as const,
   };
 });
 
@@ -45,7 +59,11 @@ const outerRelays = Array.from({ length: OUTER_RELAY_COUNT }, (_, index) => {
 
   return {
     angle,
-    position: [Math.cos(angle) * 1.02, Math.sin(angle) * 0.06, Math.sin(angle) * 1.02] as const,
+    position: [
+      Math.cos(angle) * 1.02,
+      Math.sin(angle) * 0.06,
+      Math.sin(angle) * 1.02,
+    ] as const,
     scale: 0.72 + (index % 2) * 0.14,
   };
 });

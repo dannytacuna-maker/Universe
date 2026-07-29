@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { subscribeToMissionDataChanges } from "@/lib/mission-record-sync";
+import {
+  notifyMissionDataChanged,
+  subscribeToMissionDataChanges,
+} from "@/lib/mission-record-sync";
 
 import type {
   CycleEvidence,
@@ -44,6 +47,10 @@ function describeStorageError(error: unknown) {
   return error instanceof Error
     ? error.message
     : "The local mission records could not be updated.";
+}
+
+function commitLocalMissionChange() {
+  notifyMissionDataChanged();
 }
 
 type DomainEvidenceDates = Readonly<
@@ -96,6 +103,7 @@ export function useMissionOperatingSystem(
         current === null ? current : { ...current, identity },
       );
       setStorageError(null);
+      commitLocalMissionChange();
     } catch (error: unknown) {
       setStorageError(describeStorageError(error));
       throw error;
@@ -111,6 +119,7 @@ export function useMissionOperatingSystem(
           : { ...current, cycles: [...current.cycles, cycle] },
       );
       setStorageError(null);
+      commitLocalMissionChange();
     } catch (error: unknown) {
       setStorageError(describeStorageError(error));
       throw error;
@@ -132,6 +141,7 @@ export function useMissionOperatingSystem(
               },
         );
         setStorageError(null);
+        commitLocalMissionChange();
       } catch (error: unknown) {
         setStorageError(describeStorageError(error));
         throw error;
@@ -158,6 +168,7 @@ export function useMissionOperatingSystem(
         };
       });
       setStorageError(null);
+      commitLocalMissionChange();
     } catch (error: unknown) {
       setStorageError(describeStorageError(error));
       throw error;
@@ -173,6 +184,7 @@ export function useMissionOperatingSystem(
           : { ...current, captures: [capture, ...current.captures] },
       );
       setStorageError(null);
+      commitLocalMissionChange();
     } catch (error: unknown) {
       setStorageError(describeStorageError(error));
       throw error;
@@ -194,6 +206,7 @@ export function useMissionOperatingSystem(
               },
         );
         setStorageError(null);
+        commitLocalMissionChange();
       } catch (error: unknown) {
         setStorageError(describeStorageError(error));
         throw error;
@@ -221,6 +234,7 @@ export function useMissionOperatingSystem(
         return { ...current, reviews };
       });
       setStorageError(null);
+      commitLocalMissionChange();
     } catch (error: unknown) {
       setStorageError(describeStorageError(error));
       throw error;
@@ -239,6 +253,7 @@ export function useMissionOperatingSystem(
             },
       );
       setStorageError(null);
+      commitLocalMissionChange();
     } catch (error: unknown) {
       setStorageError(describeStorageError(error));
       throw error;
@@ -260,6 +275,7 @@ export function useMissionOperatingSystem(
               },
         );
         setStorageError(null);
+        commitLocalMissionChange();
       } catch (error: unknown) {
         setStorageError(describeStorageError(error));
         throw error;

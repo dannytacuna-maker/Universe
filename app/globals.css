@@ -1196,17 +1196,17 @@ body {
 .jiu-jitsu-log__form label {
   display: grid;
   gap: 0.34rem;
-  color: rgb(166 189 183 / 66%);
-  font-size: 0.55rem;
+  color: rgb(196 214 208 / 72%);
+  font-size: var(--text-ui-sm);
   font-weight: 500;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  text-transform: none;
 }
 
 .jiu-jitsu-log__form label > span {
   margin-left: 0.2rem;
-  color: rgb(137 158 153 / 42%);
-  font-size: 0.47rem;
+  color: rgb(146 170 164 / 48%);
+  font-size: var(--text-cinematic);
   letter-spacing: 0.035em;
   text-transform: none;
 }
@@ -1215,16 +1215,16 @@ body {
 .jiu-jitsu-log__form select,
 .jiu-jitsu-log__form textarea {
   width: 100%;
-  min-height: 2.35rem;
-  padding: 0.58rem 0.65rem;
+  min-height: 2.5rem;
+  padding: 0.58rem 0.7rem;
   border: 1px solid rgb(145 181 173 / 14%);
   border-radius: 0.56rem;
   outline: 1px solid transparent;
   outline-offset: 0.12rem;
   background: rgb(166 199 192 / 4%);
-  color: rgb(224 235 231 / 86%);
-  font-size: 0.66rem;
-  letter-spacing: 0.015em;
+  color: rgb(232 242 238 / 90%);
+  font-size: var(--text-ui-sm);
+  letter-spacing: 0.01em;
   color-scheme: dark;
 }
 
@@ -1730,12 +1730,18 @@ body {
 }
 
 .strength-session-log > header span,
-.strength-session-log legend,
-.strength-session-log label > span {
+.strength-session-log legend {
   color: rgb(164 181 153 / 52%);
-  font-size: 0.48rem;
+  font-size: var(--text-cinematic);
   letter-spacing: 0.09em;
   text-transform: uppercase;
+}
+
+.strength-session-log label > span {
+  color: rgb(184 198 174 / 68%);
+  font-size: var(--text-ui-sm);
+  letter-spacing: 0.02em;
+  text-transform: none;
 }
 
 .strength-session-log > header strong,
@@ -1792,8 +1798,8 @@ body {
   display: grid;
   gap: 0.26rem;
   min-width: 0;
-  color: rgb(183 195 174 / 64%);
-  font-size: 0.52rem;
+  color: rgb(196 208 188 / 78%);
+  font-size: var(--text-ui-sm);
 }
 
 .strength-session-log input,
@@ -1801,16 +1807,16 @@ body {
 .strength-session-log textarea {
   width: 100%;
   min-width: 0;
-  min-height: 2.15rem;
-  padding: 0.5rem 0.58rem;
+  min-height: 2.45rem;
+  padding: 0.55rem 0.65rem;
   border: 1px solid rgb(158 177 142 / 13%);
   border-radius: 0.5rem;
   outline: 1px solid transparent;
   outline-offset: 0.12rem;
   background: rgb(151 170 137 / 4%);
-  color: rgb(230 236 225 / 86%);
-  font: inherit;
-  font-size: 0.61rem;
+  color: rgb(232 238 224 / 90%);
+  font-size: var(--text-ui-sm);
+  letter-spacing: 0.01em;
   color-scheme: dark;
 }
 

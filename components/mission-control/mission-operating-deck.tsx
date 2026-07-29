@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import {
   activateInterfaceSurface,
@@ -10,6 +10,7 @@ import { useModifierKeyLabel } from "@/lib/modifier-key-label";
 import {
   getLastMissionDestination,
   markWeeklyCeremonySeen,
+  subscribeToLastMissionDestination,
 } from "@/lib/living-universe";
 
 import type { MissionDestinationId } from "./mission-operating-record";
@@ -51,7 +52,7 @@ export function requestOpenMissionDeckPanel(panel: DeckPanelId) {
 type MissionOperatingDeckProps = Readonly<{
   cloudSync: MissionCloudSyncController;
   intelligence: MissionIntelligence;
-  onNavigate: (destinationId: MissionDestinationId) => void;
+  onNavigate: (destinationId: MissionDestinationId) => boolean;
   onQuickLogJiuJitsu: () => Promise<string>;
   onQuickLogStrength: () => Promise<string>;
 }>;
@@ -94,6 +95,14 @@ export function MissionOperatingDeck({
   const [ceremonyReady, setCeremonyReady] = useState(false);
   const modifierKey = useModifierKeyLabel();
   const operatingSystem = useMissionOperatingSystem(intelligence.activityDates);
+  const lastStoredDestination = useSyncExternalStore(
+    subscribeToLastMissionDestination,
+    getLastMissionDestination,
+    () => null,
+  );
+  const lastDestination =
+    findMissionDestination(lastStoredDestination as MissionDestinationId | null)
+      ?.id ?? null;
   const activeEvidenceCount = operatingSystem.currentVector.filter(
     (item) => item.isCompleteToday,
   ).length;
@@ -170,6 +179,12 @@ export function MissionOperatingDeck({
 
     if (isOpen && !dialog.open) {
       dialog.showModal();
+      window.requestAnimationFrame(() => {
+        const palette = dialog.querySelector<HTMLInputElement>(
+          "#mission-command-palette",
+        );
+        palette?.focus();
+      });
     } else if (!isOpen && dialog.open) {
       dialog.close();
     }
@@ -177,56 +192,65 @@ export function MissionOperatingDeck({
 
   const navigate = (destinationId: MissionDestinationId) => {
     closeDeck();
-    onNavigate(destinationId);
+    return onNavigate(destinationId);
   };
 
   const handlePaletteAction = async (action: MissionPaletteAction) => {
     setPaletteStatus("");
 
-    if (action.kind === "go") {
-      navigate(action.destinationId);
-      return;
-    }
+    try {
+      if (action.kind === "go") {
+        navigate(action.destinationId);
+        return;
+      }
 
-    if (action.kind === "panel") {
-      setActivePanel(action.panel);
-      setPaletteStatus(`Opened ${action.panel}.`);
-      return;
-    }
+      if (action.kind === "panel") {
+        setActivePanel(action.panel);
+        setPaletteStatus(`Opened ${action.panel}.`);
+        return;
+      }
 
-    if (action.kind === "ceremony") {
-      setActivePanel("review");
-      setCeremonyReady(true);
-      setPaletteStatus("Complete the review, then continue to the Observatory.");
-      return;
-    }
+      if (action.kind === "ceremony") {
+        setActivePanel("review");
+        setCeremonyReady(true);
+        setPaletteStatus(
+          "Write this week's review, then continue to the Observatory.",
+        );
+        return;
+      }
 
-    if (action.kind === "capture") {
-      await operatingSystem.addCapture({
-        areaId: "general",
-        content: action.content,
-        kind: "note",
-      });
-      setPaletteStatus("Captured to inbox.");
-      return;
-    }
+      if (action.kind === "capture") {
+        await operatingSystem.addCapture({
+          areaId: "general",
+          content: action.content,
+          kind: "note",
+        });
+        setPaletteStatus("Captured to inbox.");
+        return;
+      }
 
-    if (action.kind === "log") {
-      const message =
-        action.target === "jiu-jitsu"
-          ? await onQuickLogJiuJitsu()
-          : await onQuickLogStrength();
-      setPaletteStatus(message);
+      if (action.kind === "log") {
+        const message =
+          action.target === "jiu-jitsu"
+            ? await onQuickLogJiuJitsu()
+            : await onQuickLogStrength();
+        setPaletteStatus(message);
+      }
+    } catch (error: unknown) {
+      setPaletteStatus(
+        error instanceof Error
+          ? error.message
+          : "The command could not be completed.",
+      );
     }
   };
 
   const handleCeremonyContinue = () => {
-    markWeeklyCeremonySeen(getWeekStartKey());
     setCeremonyReady(false);
-    navigate("observatory");
+    if (navigate("observatory")) {
+      markWeeklyCeremonySeen(getWeekStartKey());
+    }
   };
-
-  const lastDestination = getLastMissionDestination();
 
   return (
     <>
@@ -287,7 +311,6 @@ export function MissionOperatingDeck({
             </div>
             <button
               aria-label="Close Mission deck"
-              autoFocus
               className={styles.closeButton}
               onClick={closeDeck}
               type="button"

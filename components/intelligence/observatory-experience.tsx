@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import type { IntelligenceBriefing } from "@/lib/intelligence/contracts";
 import type { WeeklyIntelligenceBriefing } from "@/lib/intelligence/weekly-briefing";
+import { activateInterfaceSurface } from "@/lib/interface-surface";
 
 import type { IntelligenceBriefingDashboardState } from "./intelligence-briefing";
 import { IntelligenceBriefingDashboard } from "./intelligence-briefing-dashboard";
@@ -21,6 +22,14 @@ export function ObservatoryExperience({
     status: "loading",
   });
   const markedBriefingId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!isVisible) {
+      return;
+    }
+
+    activateInterfaceSurface("observatory");
+  }, [isVisible]);
 
   useEffect(() => {
     if (!isVisible) return;

@@ -1,6 +1,11 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
+
+import {
+  activateInterfaceSurface,
+  subscribeToInterfaceSurfaces,
+} from "@/lib/interface-surface";
 
 import {
   strengthWorkoutSplit,
@@ -77,6 +82,18 @@ export function WhisTrainingAssistant({
       ? "This week's training is complete"
       : nextWorkout.focus;
 
+  useEffect(
+    () =>
+      subscribeToInterfaceSurfaces((surfaceId) => {
+        if (surfaceId === "strength-whis") {
+          return;
+        }
+
+        setIsOpen(false);
+      }),
+    [],
+  );
+
   if (!isVisible) {
     return null;
   }
@@ -107,7 +124,15 @@ export function WhisTrainingAssistant({
         <button
           aria-controls={panelId}
           aria-expanded={isOpen}
-          onClick={() => setIsOpen((current) => !current)}
+          onClick={() => {
+            setIsOpen((current) => {
+              const next = !current;
+              if (next) {
+                activateInterfaceSurface("strength-whis");
+              }
+              return next;
+            });
+          }}
           type="button"
         >
           {isOpen ? "Close" : "Train with Whis"}
