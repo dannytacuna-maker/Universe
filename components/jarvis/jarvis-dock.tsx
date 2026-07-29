@@ -267,7 +267,7 @@ export function JarvisDock({ context }: JarvisDockProps) {
               <div className={styles.unavailableState}>
                 <strong>Jarvis is awaiting connection</strong>
                 <p>
-                  Add the OpenAI server key to this Vercel deployment to bring
+                  Activate Vercel AI Gateway for this deployment to bring
                   intelligence and voice online.
                 </p>
               </div>
