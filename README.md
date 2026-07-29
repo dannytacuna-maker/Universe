@@ -39,10 +39,6 @@ Prefer production deploy with:
 vercel deploy --prod
 ```
 
-## Update line
-
-**REBIRTH UPDATE: CURSORS INTRODUCTION** — daily orbit instruments, unified command dock, living-cosmos roadmap.
-
 ## Validation
 
 ```bash

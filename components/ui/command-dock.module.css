@@ -70,24 +70,6 @@
   background: rgb(255 255 255 / 4%);
 }
 
-.versionMark {
-  display: none;
-  align-items: center;
-  padding: 0 0.55rem 0 0.35rem;
-  color: rgb(156 196 214 / 48%);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 0.42rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-@media (min-width: 52rem) {
-  .versionMark {
-    display: inline-flex;
-  }
-}
-
 @media (max-width: 42rem) {
   .dock {
     gap: 0.2rem;

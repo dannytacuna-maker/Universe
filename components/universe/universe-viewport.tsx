@@ -16,7 +16,6 @@ import {
 import { TodayStrip } from "@/components/mission-control/today-strip";
 import { useMissionCloudSync } from "@/components/mission-control/use-mission-cloud-sync";
 import { CommandDock } from "@/components/ui/command-dock";
-import { RebirthWelcome } from "@/components/ui/rebirth-welcome";
 import type { NavigationState } from "@/store/navigation-store";
 import { useNavigationStore } from "@/store/navigation-store-provider";
 
@@ -1021,8 +1020,6 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
           status={cloudSync.status}
         />
       </CommandDock>
-
-      <RebirthWelcome />
 
       <UniversityOperationsDashboard
         courseId={activeCourse?.id ?? null}
