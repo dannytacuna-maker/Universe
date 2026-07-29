@@ -1,6 +1,11 @@
 "use client";
 
-import { useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
+
+import {
+  activateInterfaceSurface,
+  subscribeToInterfaceSurfaces,
+} from "@/lib/interface-surface";
 
 import { deriveJiuJitsuReview } from "./jiu-jitsu-review";
 import {
@@ -34,6 +39,14 @@ export function JiuJitsuReviewDashboard({
   const [isOpen, setIsOpen] = useState(false);
   const review = useMemo(() => deriveJiuJitsuReview(sessions), [sessions]);
 
+  useEffect(
+    () =>
+      subscribeToInterfaceSurfaces((surfaceId) => {
+        if (surfaceId !== "jiu-jitsu-review") setIsOpen(false);
+      }),
+    [],
+  );
+
   if (!isVisible) {
     return null;
   }
@@ -64,7 +77,13 @@ export function JiuJitsuReviewDashboard({
         <button
           aria-controls={panelId}
           aria-expanded={isOpen}
-          onClick={() => setIsOpen((current) => !current)}
+          onClick={() =>
+            setIsOpen((current) => {
+              const next = !current;
+              if (next) activateInterfaceSurface("jiu-jitsu-review");
+              return next;
+            })
+          }
           type="button"
         >
           {isOpen ? "Close review" : "Review with Goku"}

@@ -1,6 +1,11 @@
 "use client";
 
-import { useId, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+
+import {
+  activateInterfaceSurface,
+  subscribeToInterfaceSurfaces,
+} from "@/lib/interface-surface";
 
 import type { JiuJitsuProgress } from "./jiu-jitsu-progress";
 import {
@@ -52,6 +57,14 @@ export function JiuJitsuTrainingLog({
   const [pendingRemovalId, setPendingRemovalId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState("");
   const submissionLockRef = useRef(false);
+
+  useEffect(
+    () =>
+      subscribeToInterfaceSurfaces((surfaceId) => {
+        if (surfaceId !== "jiu-jitsu-training-log") setIsOpen(false);
+      }),
+    [],
+  );
   const removalLockRef = useRef(false);
 
   if (!isVisible) {
@@ -142,6 +155,7 @@ export function JiuJitsuTrainingLog({
 
   const handleEdit = (sessionId: string) => {
     setEditingSessionId(sessionId);
+    activateInterfaceSurface("jiu-jitsu-training-log");
     setIsOpen(true);
     setFeedback("Editing training session.");
   };
@@ -160,7 +174,13 @@ export function JiuJitsuTrainingLog({
         <button
           aria-controls={panelId}
           aria-expanded={isOpen}
-          onClick={() => setIsOpen((current) => !current)}
+          onClick={() =>
+            setIsOpen((current) => {
+              const next = !current;
+              if (next) activateInterfaceSurface("jiu-jitsu-training-log");
+              return next;
+            })
+          }
           type="button"
         >
           {isOpen ? "Close" : "Log training"}

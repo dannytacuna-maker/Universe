@@ -1,158 +1,141 @@
 "use client";
 
-import { gateway } from "@ai-sdk/gateway";
-import { experimental_useRealtime } from "@ai-sdk/react";
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { Experimental_RealtimeSessionConfig, UIMessage } from "ai";
+import { useEffect, useRef, useState } from "react";
 
 import styles from "./jarvis.module.css";
 
-const realtimeModel = gateway.experimental_realtime("openai/gpt-realtime-mini");
-
-const voiceInstructions =
-  "You are Jarvis, Daniel's personal Mission Control voice assistant. Speak naturally, calmly, and concisely. Lead with a direct answer. You are read-only and must not claim to change Mission Control data.";
-
-const realtimeSessionConfig: Partial<Experimental_RealtimeSessionConfig> = {
-  inputAudioTranscription: { model: "gpt-realtime-whisper" },
-  instructions: voiceInstructions,
-  outputAudioTranscription: {},
-  outputModalities: ["audio"],
-  turnDetection: {
-    prefixPaddingMs: 240,
-    silenceDurationMs: 650,
-    threshold: 0.48,
-    type: "semantic-vad",
-  },
-  voice: "marin",
-};
-
-type JarvisVoiceSessionProps = Readonly<{
-  onMessagesSaved: (messages: UIMessage[]) => void;
-  threadId: string;
+type SpeechRecognitionAlternativeLike = Readonly<{
+  transcript: string;
 }>;
 
-function messageText(message: UIMessage) {
-  return message.parts
-    .filter(
-      (
-        part,
-      ): part is Extract<(typeof message.parts)[number], { type: "text" }> =>
-        part.type === "text",
-    )
-    .map((part) => part.text)
-    .join(" ");
+type SpeechRecognitionResultLike = Readonly<{
+  0: SpeechRecognitionAlternativeLike;
+  isFinal: boolean;
+  length: number;
+}>;
+
+type SpeechRecognitionEventLike = Readonly<{
+  results: ArrayLike<SpeechRecognitionResultLike>;
+}>;
+
+type SpeechRecognitionErrorEventLike = Readonly<{
+  error: string;
+}>;
+
+type SpeechRecognitionLike = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onend: (() => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  start: () => void;
+  stop: () => void;
+};
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
+
+type VoiceWindow = Window &
+  typeof globalThis & {
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  };
+
+type JarvisVoiceSessionProps = Readonly<{
+  disabled: boolean;
+  onTranscript: (transcript: string) => void;
+}>;
+
+function getSpeechRecognition() {
+  const voiceWindow = window as VoiceWindow;
+  return voiceWindow.SpeechRecognition ?? voiceWindow.webkitSpeechRecognition;
+}
+
+function describeRecognitionError(error: string) {
+  if (error === "not-allowed" || error === "service-not-allowed") {
+    return "Microphone access is blocked in this browser.";
+  }
+  if (error === "no-speech") return "I did not hear anything. Try again.";
+  if (error === "network") return "Browser speech recognition is unavailable.";
+  return "Voice input could not start. You can still type to Jarvis.";
 }
 
 export function JarvisVoiceSession({
-  onMessagesSaved,
-  threadId,
+  disabled,
+  onTranscript,
 }: JarvisVoiceSessionProps) {
-  const mediaStreamRef = useRef<MediaStream | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const [isListening, setIsListening] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const realtime = experimental_useRealtime({
-    api: { token: "/api/jarvis/voice/session" },
-    model: realtimeModel,
-    onError: (error) => setErrorMessage(error.message),
-    sessionConfig: realtimeSessionConfig,
-  });
-  const realtimeRef = useRef(realtime);
+  const [transcript, setTranscript] = useState("");
 
   useEffect(() => {
-    realtimeRef.current = realtime;
-  }, [realtime]);
-
-  useEffect(() => {
-    if (
-      realtime.status === "connected" &&
-      mediaStreamRef.current &&
-      !realtime.isCapturing
-    ) {
-      realtime.startAudioCapture(mediaStreamRef.current);
-    }
-  }, [realtime, realtime.isCapturing, realtime.status]);
-
-  const releaseMicrophone = useCallback(() => {
-    for (const track of mediaStreamRef.current?.getTracks() ?? []) track.stop();
-    mediaStreamRef.current = null;
+    return () => recognitionRef.current?.stop();
   }, []);
 
-  useEffect(
-    () => () => {
-      realtimeRef.current.stopAudioCapture();
-      realtimeRef.current.disconnect();
-      releaseMicrophone();
-    },
-    [releaseMicrophone],
-  );
+  const stopListening = () => {
+    recognitionRef.current?.stop();
+    recognitionRef.current = null;
+    setIsListening(false);
+  };
 
-  const saveTranscript = useCallback(async () => {
-    if (realtime.messages.length === 0) return;
-
-    const response = await fetch("/api/jarvis/voice/transcript", {
-      body: JSON.stringify({ id: threadId, messages: realtime.messages }),
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-    });
-    if (!response.ok) return;
-
-    const payload: unknown = await response.json();
-    if (
-      typeof payload === "object" &&
-      payload !== null &&
-      "messages" in payload &&
-      Array.isArray((payload as Readonly<{ messages?: unknown }>).messages)
-    ) {
-      onMessagesSaved(
-        (payload as Readonly<{ messages: UIMessage[] }>).messages,
+  const startListening = () => {
+    const Recognition = getSpeechRecognition();
+    if (Recognition === undefined) {
+      setErrorMessage(
+        "Voice input is not supported here. You can still type to Jarvis.",
       );
-    }
-  }, [onMessagesSaved, realtime.messages, threadId]);
-
-  const stopVoice = useCallback(async () => {
-    realtime.stopAudioCapture();
-    realtime.stopPlayback();
-    realtime.disconnect();
-    releaseMicrophone();
-    await saveTranscript();
-  }, [realtime, releaseMicrophone, saveTranscript]);
-
-  const handleVoiceToggle = async () => {
-    if (isOpen) {
-      await stopVoice();
-      setIsOpen(false);
       return;
     }
+    if (disabled) return;
 
     setErrorMessage(null);
-    setIsOpen(true);
+    setTranscript("");
+    const recognition = new Recognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = navigator.language || "en-US";
+    recognition.onresult = (event) => {
+      let nextTranscript = "";
+      let hasFinalResult = false;
 
-    try {
-      mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          autoGainControl: true,
-          echoCancellation: true,
-          noiseSuppression: true,
-        },
-      });
-      await realtime.connect();
-    } catch (error) {
-      releaseMicrophone();
-      setErrorMessage(
-        error instanceof Error ? error.message : "Microphone access failed.",
-      );
-    }
+      for (let index = 0; index < event.results.length; index += 1) {
+        const result = event.results[index];
+        const alternative = result?.[0];
+        if (alternative === undefined) continue;
+        nextTranscript += alternative.transcript;
+        hasFinalResult ||= result?.isFinal === true;
+      }
+
+      const normalizedTranscript = nextTranscript.trim();
+      setTranscript(normalizedTranscript);
+      if (hasFinalResult && normalizedTranscript.length > 0) {
+        onTranscript(normalizedTranscript);
+      }
+    };
+    recognition.onerror = (event) => {
+      setErrorMessage(describeRecognitionError(event.error));
+      setIsListening(false);
+      recognitionRef.current = null;
+    };
+    recognition.onend = () => {
+      setIsListening(false);
+      recognitionRef.current = null;
+    };
+
+    recognitionRef.current = recognition;
+    setIsListening(true);
+    recognition.start();
   };
 
   return (
-    <div className={styles.voiceRegion} data-open={isOpen}>
+    <div className={styles.voiceRegion} data-open={isListening}>
       <button
-        aria-expanded={isOpen}
-        aria-label={
-          isOpen ? "End voice conversation" : "Start voice conversation"
-        }
+        aria-expanded={isListening}
+        aria-label={isListening ? "Stop listening" : "Ask Jarvis by voice"}
         className={styles.iconButton}
-        onClick={() => void handleVoiceToggle()}
+        disabled={disabled}
+        onClick={isListening ? stopListening : startListening}
         type="button"
       >
         <svg aria-hidden="true" viewBox="0 0 24 24">
@@ -161,46 +144,17 @@ export function JarvisVoiceSession({
         </svg>
       </button>
 
-      {isOpen ? (
-        <div className={styles.voicePanel}>
-          <div className={styles.voiceStatus} data-status={realtime.status}>
+      {isListening || errorMessage ? (
+        <div aria-live="polite" className={styles.voicePanel}>
+          <div className={styles.voiceStatus} data-status="connected">
             <span aria-hidden="true" className={styles.voiceOrb} />
             <div>
-              <strong>
-                {realtime.status === "connected"
-                  ? realtime.isPlaying
-                    ? "Jarvis is speaking"
-                    : realtime.isCapturing
-                      ? "Listening"
-                      : "Voice ready"
-                  : realtime.status === "connecting"
-                    ? "Establishing voice"
-                    : "Voice session"}
-              </strong>
-              <span>Microphone active only during this session</span>
+              <strong>{isListening ? "Listening" : "Voice unavailable"}</strong>
+              <span>
+                {errorMessage ?? (transcript || "Speak naturally, then pause")}
+              </span>
             </div>
           </div>
-
-          <div aria-live="polite" className={styles.voiceTranscript}>
-            {realtime.messages.slice(-4).map((message) => (
-              <p data-role={message.role} key={message.id}>
-                <strong>{message.role === "user" ? "You" : "Jarvis"}</strong>
-                <span>{messageText(message)}</span>
-              </p>
-            ))}
-          </div>
-
-          {errorMessage ? (
-            <p className={styles.errorText}>{errorMessage}</p>
-          ) : null}
-
-          <button
-            className={styles.endVoiceButton}
-            onClick={() => void handleVoiceToggle()}
-            type="button"
-          >
-            End voice
-          </button>
         </div>
       ) : null}
     </div>

@@ -1,9 +1,10 @@
 import { createHash } from "node:crypto";
 
 import { gateway } from "@ai-sdk/gateway";
-import { generateText, Output } from "ai";
+import { generateText, tool } from "ai";
 import { z } from "zod";
 
+import { missionControlAiModels } from "@/lib/ai-models";
 import type { IntelligenceBriefing } from "@/lib/intelligence/contracts";
 import { intelligenceSources } from "@/lib/intelligence/intelligence-sources";
 import {
@@ -31,6 +32,11 @@ const analysisOutputSchema = z.object({
     .min(5)
     .max(8),
   overview: z.string().min(1).max(1_200),
+});
+
+const publishWeeklyBriefing = tool({
+  description: "Publish the final sourced weekly intelligence briefing.",
+  inputSchema: analysisOutputSchema,
 });
 
 function getWeekStartIso(date: Date) {
@@ -149,27 +155,31 @@ export async function analyzeWeeklyIntelligence(
 ): Promise<WeeklyIntelligenceBriefing> {
   const result = await generateText({
     maxOutputTokens: 3_200,
-    model: gateway("openai/gpt-5.6-terra"),
-    output: Output.object({ schema: analysisOutputSchema }),
+    model: gateway(missionControlAiModels.primary),
     prompt: createAnalysisPrompt(briefing, now),
     providerOptions: {
       gateway: {
-        models: ["openai/gpt-5-nano"],
+        models: [missionControlAiModels.fallback],
         tags: ["feature:observatory", "cadence:weekly"],
         user: "mission-control-owner",
       },
-      openai: {
-        reasoningEffort: "low",
-        store: false,
-        textVerbosity: "medium",
-      },
     },
+    toolChoice: { toolName: "publishWeeklyBriefing", type: "tool" },
+    tools: { publishWeeklyBriefing },
   });
+  const publishedBriefingResult = analysisOutputSchema.safeParse(
+    result.toolCalls.find((call) => call.toolName === "publishWeeklyBriefing")
+      ?.input,
+  );
+  if (!publishedBriefingResult.success) {
+    throw new Error("The weekly analysis did not publish a briefing.");
+  }
+  const publishedBriefing = publishedBriefingResult.data;
   const weekStartIso = getWeekStartIso(now);
   const uniqueHeadlines = new Set<string>();
   const items: WeeklyIntelligenceItem[] = [];
 
-  for (const item of result.output.items) {
+  for (const item of publishedBriefing.items) {
     const headline =
       `${item.headline.charAt(0).toLocaleUpperCase("en")}${item.headline.slice(1)}`.trim();
     const normalizedHeadline = headline.toLocaleLowerCase("en");
@@ -208,7 +218,7 @@ export async function analyzeWeeklyIntelligence(
     generatedAtLabel: formatDateLabel(generatedAtIso, true),
     id: `weekly-intelligence:${weekStartIso}`,
     items,
-    overview: result.output.overview,
+    overview: publishedBriefing.overview,
     title: "The world this week",
     weekStartIso,
   };

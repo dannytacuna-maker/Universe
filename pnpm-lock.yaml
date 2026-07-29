@@ -11,9 +11,6 @@ importers:
       '@ai-sdk/gateway':
         specifier: 4.0.29
         version: 4.0.29(zod@4.4.3)
-      '@ai-sdk/openai':
-        specifier: ^4.0.21
-        version: 4.0.21(zod@4.4.3)
       '@ai-sdk/react':
         specifier: ^4.0.41
         version: 4.0.41(react@19.2.7)(zod@4.4.3)
@@ -98,12 +95,6 @@ packages:
 
   '@ai-sdk/mcp@2.0.17':
     resolution: {integrity: sha512-EZYMsjk22wx0RyZV7OyLSjcjaJdUQsuRLOG2SgrfBR7wcOSJDqOpK0OaUhEAnpZXBbnizJaBeLW8u6eboyelhg==}
-    engines: {node: '>=22'}
-    peerDependencies:
-      zod: ^3.25.76 || ^4.1.8
-
-  '@ai-sdk/openai@4.0.21':
-    resolution: {integrity: sha512-2z+Hf+VXfevQWiiCUgUGi2m/rH1Tew5sL2knuUWUbY/qsrdmhgpCAghDdkcMY/bj6EgCvVVzqxHN4NyrTh2FdQ==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -2522,12 +2513,6 @@ snapshots:
       '@ai-sdk/provider': 4.0.4
       '@ai-sdk/provider-utils': 5.0.13(zod@4.4.3)
       pkce-challenge: 5.0.1
-      zod: 4.4.3
-
-  '@ai-sdk/openai@4.0.21(zod@4.4.3)':
-    dependencies:
-      '@ai-sdk/provider': 4.0.4
-      '@ai-sdk/provider-utils': 5.0.13(zod@4.4.3)
       zod: 4.4.3
 
   '@ai-sdk/provider-utils@5.0.13(zod@4.4.3)':

@@ -8,6 +8,10 @@ import type {
   JarvisThread,
   JarvisThreadSummary,
 } from "@/lib/jarvis";
+import {
+  activateInterfaceSurface,
+  subscribeToInterfaceSurfaces,
+} from "@/lib/interface-surface";
 
 import { JarvisConversation } from "./jarvis-conversation";
 import styles from "./jarvis.module.css";
@@ -121,6 +125,7 @@ export function JarvisDock({ context }: JarvisDockProps) {
   }, [activeThread, createThread, loadThreads, selectThread]);
 
   const openJarvis = useCallback(() => {
+    activateInterfaceSurface("jarvis");
     setIsOpen(true);
     void prepareJarvis();
   }, [prepareJarvis]);
@@ -130,6 +135,16 @@ export function JarvisDock({ context }: JarvisDockProps) {
     setShowHistory(false);
     window.setTimeout(() => launcherRef.current?.focus(), 0);
   }, []);
+
+  useEffect(
+    () =>
+      subscribeToInterfaceSurfaces((surfaceId) => {
+        if (surfaceId === "jarvis") return;
+        setIsOpen(false);
+        setShowHistory(false);
+      }),
+    [],
+  );
 
   useEffect(() => {
     const handleShortcut = (event: globalThis.KeyboardEvent) => {
@@ -266,10 +281,7 @@ export function JarvisDock({ context }: JarvisDockProps) {
             ) : !isConfigured ? (
               <div className={styles.unavailableState}>
                 <strong>Jarvis is awaiting connection</strong>
-                <p>
-                  Activate Vercel AI Gateway for this deployment to bring
-                  intelligence and voice online.
-                </p>
+                <p>Mission Control could not reach its synchronized records.</p>
               </div>
             ) : errorMessage ? (
               <div className={styles.unavailableState}>

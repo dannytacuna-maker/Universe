@@ -1,6 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
+import {
+  activateInterfaceSurface,
+  subscribeToInterfaceSurfaces,
+} from "@/lib/interface-surface";
 
 import { formatCourseScheduleSummary } from "./course-schedule";
 import { UniversityAssignmentPanel } from "./university-assignment-panel";
@@ -66,6 +71,14 @@ export function UniversityOperationsDashboard({
     ({ assignment }) => assignment.courseId === activeCourse.id,
   );
 
+  useEffect(
+    () =>
+      subscribeToInterfaceSurfaces((surfaceId) => {
+        if (surfaceId !== "university-operations") setIsExpanded(false);
+      }),
+    [],
+  );
+
   if (!isVisible) {
     return null;
   }
@@ -121,7 +134,13 @@ export function UniversityOperationsDashboard({
           aria-controls="university-operations-content"
           aria-expanded={isExpanded}
           className={styles.toggleButton}
-          onClick={() => setIsExpanded((current) => !current)}
+          onClick={() =>
+            setIsExpanded((current) => {
+              const next = !current;
+              if (next) activateInterfaceSurface("university-operations");
+              return next;
+            })
+          }
           type="button"
         >
           {isExpanded ? "Minimize" : "Open records"}

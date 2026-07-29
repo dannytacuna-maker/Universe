@@ -65,6 +65,7 @@ export function JarvisConversation({
   const [input, setInput] = useState("");
   const [mode, setMode] = useState(thread.mode);
   const messageListRef = useRef<HTMLDivElement>(null);
+  const shouldSpeakResponseRef = useRef(false);
   const transport = useMemo(
     () =>
       new DefaultChatTransport<UIMessage>({
@@ -80,14 +81,13 @@ export function JarvisConversation({
       }),
     [context, mode],
   );
-  const { error, messages, sendMessage, setMessages, status, stop } =
-    useChat<UIMessage>({
-      id: thread.id,
-      messages: thread.messages,
-      onFinish: onThreadUpdated,
-      throttle: 40,
-      transport,
-    });
+  const { error, messages, sendMessage, status, stop } = useChat<UIMessage>({
+    id: thread.id,
+    messages: thread.messages,
+    onFinish: onThreadUpdated,
+    throttle: 40,
+    transport,
+  });
   const isBusy = status === "streaming" || status === "submitted";
 
   useEffect(() => {
@@ -116,6 +116,45 @@ export function JarvisConversation({
     setInput("");
     void sendMessage({ text });
   };
+
+  const submitVoiceMessage = (transcript: string) => {
+    if (!transcript.trim() || isBusy) return;
+    shouldSpeakResponseRef.current = true;
+    void sendMessage({ text: transcript.trim() });
+  };
+
+  useEffect(() => {
+    if (status === "error") {
+      shouldSpeakResponseRef.current = false;
+      return;
+    }
+    if (status !== "ready" || !shouldSpeakResponseRef.current) return;
+    const response = [...messages]
+      .reverse()
+      .find((message) => message.role === "assistant");
+    const responseText = response?.parts
+      .filter(
+        (
+          part,
+        ): part is Extract<(typeof response.parts)[number], { type: "text" }> =>
+          part.type === "text",
+      )
+      .map((part) => part.text)
+      .join(" ")
+      .trim();
+
+    shouldSpeakResponseRef.current = false;
+    if (!responseText || !("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(responseText));
+  }, [messages, status]);
+
+  useEffect(
+    () => () => {
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    },
+    [],
+  );
 
   const handleInputKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey) {
@@ -228,11 +267,8 @@ export function JarvisConversation({
         />
         <div className={styles.composerActions}>
           <JarvisVoiceSession
-            onMessagesSaved={(nextMessages) => {
-              setMessages(nextMessages);
-              onThreadUpdated();
-            }}
-            threadId={thread.id}
+            disabled={isBusy}
+            onTranscript={submitVoiceMessage}
           />
           {isBusy ? (
             <button

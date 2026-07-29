@@ -487,24 +487,24 @@ AI SDK `UIMessage` histories live in Neon; the client sends only the latest mess
 the server reloads authoritative history before generation. Thread endpoints enforce
 the same Clerk owner boundary and same-origin checks as record synchronization.
 
-Model selection is expressed as product intent rather than provider names: Quick routes
-to GPT-5.6 Luna with minimal reasoning, Analyze routes to GPT-5.6 Terra with low reasoning,
-and Deep Review routes to GPT-5.6 Sol in Pro mode with medium reasoning. All modes declare
-GPT-5 Nano as the bounded Gateway fallback so text remains useful when a primary model is
-unavailable to the current Gateway plan. The server owns this routing, bounded output limits,
-a per-minute request allowance, stable hashed safety identifier, and the Vercel AI Gateway
-identity. Provider storage is disabled. Jarvis tools are
-read-only: they can retrieve a bounded view of synchronized Mission Control records,
-the latest Observatory briefing, or provider-executed web search; no tool can mutate a
-record, navigate, send, schedule, or claim completion.
+Quick, Analyze, and Deep Review express response depth through bounded output limits while
+sharing a verified zero-price AI Gateway model and a separate zero-price fallback. The
+server owns routing, a per-minute request allowance, stable hashed user identifier, and
+the Vercel AI Gateway identity. Jarvis tools are read-only: they can retrieve a bounded
+view of synchronized Mission Control records or the latest source-grounded Observatory
+briefing; no tool can mutate a record, navigate, send, schedule, or claim completion.
+Jarvis must acknowledge when the weekly briefing does not contain enough current evidence
+rather than inventing an answer or silently invoking a paid search provider.
 
-Voice is explicitly activated from the Jarvis composer and never listens passively. The
-authenticated server mints a short-lived GPT Realtime client secret using a dedicated
-`AI_GATEWAY_API_KEY`; OIDC alone is insufficient for realtime client-secret minting. The browser holds
-the microphone only for the visible session, stops all tracks on exit, and persists the
-normalized transcript back to the current owner-scoped thread. Voice remains an
-experimental enhancement: text chat and all other Mission Control functions remain
-available when microphone permission, realtime transport, or audio playback fails.
+Voice is explicitly activated from the Jarvis composer and never listens passively. It uses
+the browser's speech-recognition capability to submit a transcript through the standard
+authenticated text route, then uses device speech synthesis for the reply. No separate
+audio model, client secret, or paid realtime session exists. Unsupported browsers simply
+omit the microphone control; text chat remains the canonical path.
+
+Jarvis, University operations, the Jiu-Jitsu logger, and the Time Chamber review participate
+in one typed exclusive-surface event contract. Opening one dismisses the previously open
+surface instead of stacking fixed panels or relying on escalating z-index values.
 
 ### Global intelligence Observatory
 
@@ -519,9 +519,10 @@ world, business, technology, and institutional RSS/Atom feeds from the BBC, The 
 United Nations, ECB, Eurostat, and Federal Reserve. Per-source timeouts, response caps,
 an eight-day lookback, deterministic deduplication, and graceful partial editions bound the
 pipeline. Neon stores the source edition and one generated weekly briefing per ISO week.
-AI Gateway translates only the supplied headlines and excerpts into five to eight concise,
+Zero-price AI Gateway models translate only the supplied headlines and excerpts into five to eight concise,
 source-grounded developments with summaries, significance, business relevance, uncertainty,
-and direct citations. It is explicitly forbidden from inventing outside facts. If analysis
+and direct citations. A forced typed tool call preserves the briefing schema because these
+models do not reliably honor native structured-output mode. It is explicitly forbidden from inventing outside facts. If analysis
 fails, the latest successful weekly edition remains available while the current raw source
 edition is preserved as a transparent fallback. `CRON_SECRET` protects ingestion, and the
 AI Gateway identity is independent of the feed pipeline.
