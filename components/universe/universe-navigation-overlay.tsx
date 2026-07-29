@@ -9,6 +9,8 @@ import { PersonalGrowthSystemLabels } from "./galaxies/personal-growth/personal-
 import { UniversityCourseSystemLabels } from "./galaxies/university/university-course-system-labels";
 import { UniversityWeeklySchedule } from "./galaxies/university/university-weekly-schedule";
 import { UniversityGalaxyLabel } from "./galaxies/university-galaxy-label";
+import { ObservatoryLabel } from "./observatory/observatory-label";
+import { globalObservatoryDefinition } from "./observatory/observatory-definition";
 import {
   personalGrowthGalaxyId,
   universityGalaxyId,
@@ -95,6 +97,18 @@ export function UniverseNavigationOverlay({
         }
         onHoverChange={(isHovered) =>
           onGalaxyHoverChange(isHovered ? personalGrowthGalaxyId : null)
+        }
+      />
+
+      <ObservatoryLabel
+        isEmphasized={emphasizedPlanetId === globalObservatoryDefinition.id}
+        isVisible={level === "universe" && isViewSettled}
+        onActivate={() => onPlanetActivate(globalObservatoryDefinition.id)}
+        onFocusChange={(isFocused) =>
+          onPlanetFocusChange(isFocused ? globalObservatoryDefinition.id : null)
+        }
+        onHoverChange={(isHovered) =>
+          onPlanetHoverChange(isHovered ? globalObservatoryDefinition.id : null)
         }
       />
 

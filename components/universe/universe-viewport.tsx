@@ -1,12 +1,16 @@
 "use client";
 
 import { useReducedMotion } from "framer-motion";
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { AuthenticatedAccountControl } from "@/components/auth/authenticated-account-control";
+import { ObservatoryExperience } from "@/components/intelligence/observatory-experience";
 import { createMissionDestinationState } from "@/components/mission-control/mission-destination-navigation";
 import { buildMissionIntelligence } from "@/components/mission-control/mission-intelligence";
 import type { MissionDestinationId } from "@/components/mission-control/mission-operating-record";
 import { MissionOperatingDeck } from "@/components/mission-control/mission-operating-deck";
+import { useMissionCloudSync } from "@/components/mission-control/use-mission-cloud-sync";
 import type { NavigationState } from "@/store/navigation-store";
 import { useNavigationStore } from "@/store/navigation-store-provider";
 
@@ -59,6 +63,7 @@ import {
 import { useWebGLSupport } from "./use-webgl-support";
 import { deriveUniverseActivitySignals } from "./universe-activity";
 import { WebGLBoundary } from "./webgl-boundary";
+import { globalObservatoryDefinition } from "./observatory/observatory-definition";
 
 const jiuJitsuSystemId = "jiu-jitsu";
 const planetCloudCoverDurationMs = 1180;
@@ -66,7 +71,17 @@ const planetCloudRevealDurationMs = 1500;
 const readingSystemId = "reading";
 const strengthPhysiqueSystemId = "strength-physique";
 
-export function UniverseViewport() {
+const JarvisDock = dynamic(
+  () =>
+    import("@/components/jarvis/jarvis-dock").then(
+      (module) => module.JarvisDock,
+    ),
+  { ssr: false },
+);
+
+type UniverseViewportProps = Readonly<{ ownerEmail: string }>;
+
+export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
   const shouldReduceMotion = useReducedMotion();
   const webglSupport = useWebGLSupport();
   const navigationLevel = useNavigationStore((state) => state.level);
@@ -144,6 +159,7 @@ export function UniverseViewport() {
     summary: readingSummary,
   } = useReadingLibrary();
   const universityRecords = useUniversityRecords();
+  const cloudSync = useMissionCloudSync();
   const missionIntelligence = useMemo(
     () =>
       buildMissionIntelligence({
@@ -240,6 +256,15 @@ export function UniverseViewport() {
     [selectedGalaxyId, selectedPlanetId],
   );
   const activeDestination = activePlanet ?? activeStation;
+  const jarvisContext = useMemo(
+    () => ({
+      galaxyId: selectedGalaxyId,
+      level: navigationLevel,
+      planetId: selectedPlanetId,
+      systemId: selectedSystemId,
+    }),
+    [navigationLevel, selectedGalaxyId, selectedPlanetId, selectedSystemId],
+  );
   const activeCourse = useMemo(
     () =>
       selectedGalaxyId === universityGalaxyId
@@ -379,10 +404,33 @@ export function UniverseViewport() {
         return;
       }
 
+      if (planetId === globalObservatoryDefinition.id) {
+        clearInteractionState();
+        beginCameraTravel();
+        setAnnouncement("Entering The Observatory.");
+        const nextState: NavigationState = {
+          level: "planet",
+          selectedGalaxyId: null,
+          selectedPlanetId: globalObservatoryDefinition.id,
+          selectedSystemId: null,
+        };
+        pushNavigationUrl(nextState);
+        replaceNavigationState(nextState);
+        return;
+      }
+
       const galaxy = findGalaxy(selectedGalaxyId);
       const station = findGalaxyStation(selectedGalaxyId, planetId);
 
       if (galaxy !== null && station !== null && selectedSystemId === null) {
+        if (station.id === frenchStationDefinition.id) {
+          window.open(
+            "https://www.duolingo.com/learn",
+            "_blank",
+            "noopener,noreferrer",
+          );
+        }
+
         clearInteractionState();
         beginCameraTravel();
         setAnnouncement(`Docking with ${station.name}.`);
@@ -428,6 +476,7 @@ export function UniverseViewport() {
       enterPlanet,
       planetArrivalPhase,
       pushNavigationUrl,
+      replaceNavigationState,
       selectedGalaxyId,
       selectedSystemId,
       travelThroughPlanetClouds,
@@ -436,6 +485,18 @@ export function UniverseViewport() {
 
   const handleBack = useCallback(() => {
     if (planetArrivalPhase !== "idle") {
+      return;
+    }
+
+    if (
+      navigationLevel === "planet" &&
+      activeStation?.id === globalObservatoryDefinition.id
+    ) {
+      clearInteractionState();
+      beginCameraTravel();
+      setAnnouncement("Returning to the wider universe.");
+      pushNavigationUrl(universeOriginState);
+      returnToUniverse();
       return;
     }
 
@@ -758,6 +819,10 @@ export function UniverseViewport() {
     selectedGalaxyId === personalGrowthGalaxyId &&
     activeSystemId === null &&
     selectedPlanetId === frenchStationDefinition.id;
+  const isObservatoryActive =
+    navigationLevel === "planet" &&
+    selectedSystemId === null &&
+    selectedPlanetId === globalObservatoryDefinition.id;
 
   return (
     <section
@@ -826,14 +891,24 @@ export function UniverseViewport() {
         onSystemFocusChange={setFocusedSystemId}
         onSystemHoverChange={setHoveredSystemId}
         selectedGalaxyId={selectedGalaxyId}
-        selectedGalaxyName={selectedGalaxy?.name ?? null}
+        selectedGalaxyName={
+          isObservatoryActive ? "Universe" : (selectedGalaxy?.name ?? null)
+        }
         selectedSystemId={activeSystemId}
       />
 
       <MissionOperatingDeck
+        cloudSync={cloudSync}
         intelligence={missionIntelligence}
         onNavigate={handleMissionDestinationNavigate}
       />
+
+      <AuthenticatedAccountControl
+        ownerEmail={ownerEmail}
+        status={cloudSync.status}
+      />
+
+      <JarvisDock context={jarvisContext} />
 
       <UniversityOperationsDashboard
         courseId={activeCourse?.id ?? null}
@@ -912,6 +987,8 @@ export function UniverseViewport() {
         storageError={frenchLearning.storageError}
         summary={frenchLearning.summary}
       />
+
+      <ObservatoryExperience isVisible={isObservatoryActive && isViewSettled} />
 
       <span aria-live="polite" className="sr-only">
         {announcement}

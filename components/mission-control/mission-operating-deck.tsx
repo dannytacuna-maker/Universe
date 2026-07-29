@@ -11,10 +11,11 @@ import { ExperimentsPanel } from "./experiments-panel";
 import { IdentityPanel } from "./identity-panel";
 import styles from "./mission-operating-deck.module.css";
 import { useMissionOperatingSystem } from "./use-mission-operating-system";
-import { useMissionCloudSync } from "./use-mission-cloud-sync";
+import type { MissionCloudSyncController } from "./use-mission-cloud-sync";
 import { WeeklyReviewPanel } from "./weekly-review-panel";
 
 type MissionOperatingDeckProps = Readonly<{
+  cloudSync: MissionCloudSyncController;
   intelligence: MissionIntelligence;
   onNavigate: (destinationId: MissionDestinationId) => void;
 }>;
@@ -35,6 +36,7 @@ const deckPanels = [
 }[];
 
 export function MissionOperatingDeck({
+  cloudSync,
   intelligence,
   onNavigate,
 }: MissionOperatingDeckProps) {
@@ -43,7 +45,6 @@ export function MissionOperatingDeck({
   const [activePanel, setActivePanel] = useState<DeckPanelId>("vector");
   const [isOpen, setIsOpen] = useState(false);
   const operatingSystem = useMissionOperatingSystem(intelligence.activityDates);
-  const cloudSync = useMissionCloudSync();
   const activeEvidenceCount = operatingSystem.currentVector.filter(
     (item) => item.isCompleteToday,
   ).length;

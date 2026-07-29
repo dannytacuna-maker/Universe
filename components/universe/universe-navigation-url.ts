@@ -14,6 +14,15 @@ export function readUniverseNavigation(search: string): NavigationState {
   const parameters = new URLSearchParams(search);
   const destination = parameters.get(destinationParameter);
 
+  if (destination === "observatory") {
+    return {
+      level: "planet",
+      selectedGalaxyId: null,
+      selectedPlanetId: "global-observatory",
+      selectedSystemId: null,
+    };
+  }
+
   if (destination !== null) {
     const [galaxyId, systemId, planetId, ...remainingSegments] =
       destination.split("/");
@@ -95,6 +104,13 @@ export function createUniverseNavigationUrl(
     if (state.selectedGalaxyId !== null) {
       url.searchParams.set(destinationParameter, state.selectedGalaxyId);
     }
+  } else if (
+    state.level === "planet" &&
+    state.selectedGalaxyId === null &&
+    state.selectedSystemId === null &&
+    state.selectedPlanetId === "global-observatory"
+  ) {
+    url.searchParams.set(destinationParameter, "observatory");
   } else if (
     state.level === "planet" &&
     state.selectedGalaxyId !== null &&

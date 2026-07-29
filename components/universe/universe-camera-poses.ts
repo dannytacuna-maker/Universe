@@ -8,6 +8,7 @@ import {
   personalGrowthGalaxyId,
   universityGalaxyId,
 } from "./universe-destinations";
+import { globalObservatoryDefinition } from "./observatory/observatory-definition";
 
 export type CameraPose = Readonly<{
   ambientScale: number;
@@ -45,6 +46,19 @@ export function getCameraPose(
   selectedPlanetId: string | null,
 ): CameraPose {
   if (navigationLevel === "planet") {
+    if (
+      selectedGalaxyId === null &&
+      selectedSystemId === null &&
+      selectedPlanetId === globalObservatoryDefinition.id
+    ) {
+      return {
+        ambientScale: 0.1,
+        fov: 42,
+        lookTarget: globalObservatoryDefinition.cameraLookTarget,
+        position: globalObservatoryDefinition.cameraPosition,
+      };
+    }
+
     if (
       selectedGalaxyId === frenchStationDefinition.galaxyId &&
       selectedSystemId === null &&

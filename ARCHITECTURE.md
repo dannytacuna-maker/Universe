@@ -219,6 +219,13 @@ and Zustand through `pushState` and `popstate`. Unknown or future destinations f
 back to the universe instead of fabricating unavailable navigation. This is client-side
 state reflection, not a replacement for future server-owned routes and domain data.
 
+The Observatory is the first global constructed landmark and therefore does not
+pretend to be a galaxy or belong to a life-domain system. Its deliberately small
+route extension is `destination=observatory`; navigation retains the existing
+`planet` detail level while all three parent identifiers remain null. This keeps
+camera travel inside `CameraRig`, preserves the established back path, and avoids
+adding a premature fifth navigation level for one justified landmark.
+
 ### Mission operating layer
 
 The cross-domain operating layer lives under `components/mission-control/`
@@ -362,16 +369,14 @@ arrays so its silhouette remains legible at the Personal Growth overview distanc
 overview presentation is half the original prototype scale while the invisible interaction
 target remains intentionally generous, preserving the hierarchy of three stellar systems
 and one smaller constructed station. It
-is entered directly from that overview. A quiet observation-deck landing environment
-and a semantic DOM instrument remain separated across the existing WebGL boundary. The
-station stores a Duolingo username, manually
-entered Duolingo Score and streak snapshots, weekly practice targets, and editable
-French practice sessions with focus, duration, lessons, confidence, and reflection.
-It never stores Duolingo credentials and does not imply live synchronization because
-Duolingo currently exposes no supported personal-progress API. Session activity feeds
-the same derived identity, reflection, Current Vector, and living-universe boundaries
-as the other Personal Growth systems. The station adds no external asset, post-processing,
-shadow, physics, or independent render scheduler.
+is entered directly from that overview. Activation opens the supported Duolingo Learn
+surface in a new tab from the user gesture while Mission Control remains docked at a
+minimal semantic station instrument. Duolingo owns authentication and learning data;
+Mission Control never receives credentials, scrapes the account, or implies unsupported
+personal-progress synchronization. Existing locally synchronized French records remain
+preserved for compatibility, but the current station UI no longer asks Daniel to duplicate
+Duolingo activity manually. The station adds no external asset, post-processing, shadow,
+physics, or independent render scheduler.
 
 Strength and Physique contains three landed destinations: Beerus' Planet, Training
 Archive, and Gym Playlist. Shared definitions own system-space placement, label
@@ -452,6 +457,10 @@ IDs, and retain deletion tombstones. Provider secrets never enter the browser bu
 Clerk's provider-level allowlist is also enabled for the same address, while the server
 comparison remains the final authorization boundary owned by Mission Control.
 
+A compact authenticated-account control is available at every spatial level. It reports
+the same synchronization state as the Mission deck and delegates sign-out to Clerk; it
+does not create a second session, cookie, or credential boundary.
+
 The production Vercel project provisions Neon and Clerk through the Vercel Marketplace.
 Records are partitioned under a stable owner ID derived from the approved email. The
 former `daniel` owner is copied idempotently into that authenticated owner on first sync
@@ -468,6 +477,47 @@ uploads preserved version-4 records with deterministic mutation IDs before accep
 the canonical server snapshot. Successful synchronization then atomically replaces
 the cache and clears only acknowledged outbox records. Remote changes emit one shared
 data event so feature hooks reload without copying records into Zustand.
+
+### Jarvis intelligence boundary
+
+Jarvis is a semantic DOM feature under `components/jarvis/`, outside the WebGL tree and
+available at every spatial level through one restrained launcher or `Command/Ctrl + J`.
+Conversation state is not placed in Zustand. Authenticated, owner-partitioned threads and
+AI SDK `UIMessage` histories live in Neon; the client sends only the latest message and
+the server reloads authoritative history before generation. Thread endpoints enforce
+the same Clerk owner boundary and same-origin checks as record synchronization.
+
+Model selection is expressed as product intent rather than provider names: Quick routes
+to GPT-5.6 Luna without reasoning, Analyze routes to GPT-5.6 Terra with low reasoning,
+and Deep Review routes to GPT-5.6 Sol in Pro mode with medium reasoning. The server owns
+this routing, bounded output limits, a per-minute request allowance, stable hashed safety
+identifier, and the Vercel AI Gateway identity. Provider storage is disabled. Jarvis tools are
+read-only: they can retrieve a bounded view of synchronized Mission Control records,
+the latest Observatory briefing, or provider-executed web search; no tool can mutate a
+record, navigate, send, schedule, or claim completion.
+
+Voice is explicitly activated from the Jarvis composer and never listens passively. The
+authenticated server mints a short-lived GPT Realtime client secret; the browser holds
+the microphone only for the visible session, stops all tracks on exit, and persists the
+normalized transcript back to the current owner-scoped thread. Voice remains an
+experimental enhancement: text chat and all other Mission Control functions remain
+available when microphone permission, realtime transport, or audio playback fails.
+
+### Global intelligence Observatory
+
+The Observatory is a sparse procedural metallic station rendered below
+`components/universe/observatory/` and a separately semantic, scrollable DOM dashboard
+under `components/intelligence/`. It is visible at universe scale, owns a generous
+invisible interaction target and projected DOM label, uses the shared 30 FPS ambient
+scheduler, and adds no textures, post-processing, shadows, physics, or private loop.
+
+A secured Vercel Cron runs daily at 06:00 UTC and ingests a finite set of official ECB,
+Eurostat, and Federal Reserve RSS/Atom feeds with per-source timeouts, response caps,
+deterministic deduplication, and graceful partial editions. Neon stores one JSONB briefing
+per date. The owner-authenticated dashboard presents at most eight source-linked items
+and clearly labels raw institutional headlines as awaiting analysis; it does not fabricate
+summaries or claim comprehensive world-news coverage. `CRON_SECRET` protects ingestion,
+and the AI Gateway identity is independent of the feed pipeline.
 
 The current conflict rule is last source timestamp wins, which is appropriate for a
 single owner but should be replaced by revision-aware merge UX before concurrent

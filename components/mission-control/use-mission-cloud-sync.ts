@@ -84,3 +84,5 @@ export function useMissionCloudSync() {
 
   return { isConfigured, ownerEmail, refresh, status };
 }
+
+export type MissionCloudSyncController = ReturnType<typeof useMissionCloudSync>;

@@ -32,6 +32,8 @@ import { PersonalGrowthGalaxy } from "./galaxies/personal-growth/personal-growth
 import { PersonalGrowthInteriorField } from "./galaxies/personal-growth/personal-growth-interior-field";
 import { PersonalGrowthSystemGroup } from "./galaxies/personal-growth/personal-growth-system-group";
 import { ProceduralStarfield } from "./procedural-starfield";
+import { GlobalObservatory } from "./observatory/global-observatory";
+import { globalObservatoryDefinition } from "./observatory/observatory-definition";
 import {
   personalGrowthGalaxyId,
   universityGalaxyId,
@@ -123,6 +125,9 @@ export function UniverseScene({
   const isFrenchStationSurfaceSelected =
     navigationLevel === "planet" &&
     selectedPlanetId === frenchStationDefinition.id;
+  const isObservatorySelected =
+    navigationLevel === "planet" &&
+    selectedPlanetId === globalObservatoryDefinition.id;
   const selectedGenericPersonalGrowthSurface =
     navigationLevel === "planet"
       ? (genericPersonalGrowthSurfaces.find(
@@ -186,7 +191,11 @@ export function UniverseScene({
         emphasizedCourseId={universitySelected ? emphasizedSystemId : null}
         hoveredCourseId={universitySelected ? hoveredSystemId : null}
         isInteractive={universitySelected && navigationLevel === "galaxy"}
-        isVisible={universitySelected && navigationLevel !== "universe"}
+        isVisible={
+          universitySelected &&
+          navigationLevel !== "universe" &&
+          navigationLevel !== "planet"
+        }
         motionEnabled={motionEnabled}
         onActivate={onSystemActivate}
         onHoverChange={onSystemHoverChange}
@@ -266,6 +275,17 @@ export function UniverseScene({
         onActivate={() => onPlanetActivate(frenchStationDefinition.id)}
         onHoverChange={(isHovered) =>
           onPlanetHoverChange(isHovered ? frenchStationDefinition.id : null)
+        }
+      />
+      <GlobalObservatory
+        isEmphasized={emphasizedPlanetId === globalObservatoryDefinition.id}
+        isHovered={hoveredPlanetId === globalObservatoryDefinition.id}
+        isInteractive={navigationLevel === "universe"}
+        isVisible={navigationLevel === "universe" || isObservatorySelected}
+        motionEnabled={motionEnabled}
+        onActivate={() => onPlanetActivate(globalObservatoryDefinition.id)}
+        onHoverChange={(isHovered) =>
+          onPlanetHoverChange(isHovered ? globalObservatoryDefinition.id : null)
         }
       />
       {standardPersonalGrowthPlanets.map((planet) => (

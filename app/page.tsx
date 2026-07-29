@@ -18,7 +18,7 @@ export default async function HomePage() {
 
   return (
     <NavigationStoreProvider>
-      <UniverseViewport />
+      <UniverseViewport ownerEmail={authorization.owner.email} />
     </NavigationStoreProvider>
   );
 }

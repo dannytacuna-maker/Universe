@@ -1,325 +1,228 @@
 .station {
   position: absolute;
-  top: 54%;
+  top: 55%;
   left: 50%;
   z-index: 17;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  width: min(70rem, calc(100% - 2rem));
-  height: min(72vh, 42.5rem);
+  grid-template-columns: minmax(0, 1fr) minmax(13.5rem, 0.42fr);
+  width: min(49rem, calc(100% - 2rem));
   overflow: hidden;
   color: #edf6ff;
   background:
-    linear-gradient(135deg, rgb(5 13 27 / 94%), rgb(7 17 35 / 82%)),
-    radial-gradient(circle at 78% 12%, rgb(83 135 212 / 18%), transparent 36%);
+    linear-gradient(125deg, rgb(4 12 25 / 95%), rgb(7 18 37 / 86%)),
+    radial-gradient(circle at 80% 14%, rgb(99 158 221 / 18%), transparent 38%);
   border: 1px solid rgb(156 204 255 / 16%);
   border-radius: 1.1rem;
-  box-shadow: 0 1.5rem 6rem rgb(0 3 12 / 58%);
+  box-shadow:
+    0 1.5rem 6rem rgb(0 3 12 / 58%),
+    inset 0 1px 0 rgb(229 244 255 / 5%);
   backdrop-filter: blur(24px);
   transform: translate(-50%, -50%);
 }
 
-.header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1.5rem;
-  padding: 1.1rem 1.25rem;
-  border-bottom: 1px solid rgb(156 204 255 / 12%);
+.content {
+  position: relative;
+  z-index: 1;
+  padding: clamp(1.35rem, 4vw, 2.5rem);
 }
 
 .eyebrow,
-.status,
-.sectionLabel {
+.routeDetails dt {
   color: #8ebce6;
   font:
-    500 0.68rem/1.2 var(--font-geist-mono),
+    500 0.67rem/1.2 var(--font-geist-mono),
     monospace;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
-.header h1 {
-  margin: 0.28rem 0 0;
-  font-size: clamp(1.35rem, 2.6vw, 2.1rem);
+.content h1 {
+  margin: 0.42rem 0 0;
+  font-size: clamp(1.8rem, 5vw, 3rem);
   font-weight: 430;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.045em;
 }
 
-.header p,
-.empty,
-.note,
-.sessionMeta,
-.sessionReflection {
-  margin: 0;
-  color: rgb(220 235 249 / 68%);
-  font-size: 0.82rem;
-  line-height: 1.5;
+.introduction {
+  max-width: 34rem;
+  margin: 0.85rem 0 1.5rem;
+  color: rgb(220 235 249 / 70%);
+  font-size: clamp(0.86rem, 1.8vw, 0.98rem);
+  line-height: 1.65;
 }
 
-.headerActions {
+.launchButton {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.externalLink,
-.primaryButton,
-.secondaryButton,
-.textButton {
-  min-height: 2.7rem;
-  padding: 0.68rem 0.9rem;
-  color: #edf6ff;
-  font: inherit;
+  justify-content: space-between;
+  gap: 1rem;
+  width: min(100%, 25rem);
+  min-height: 4.25rem;
+  padding: 0.8rem 1rem 0.8rem 1.1rem;
+  color: #f4f9ff;
   text-decoration: none;
-  background: rgb(129 183 236 / 10%);
-  border: 1px solid rgb(156 204 255 / 16%);
-  border-radius: 0.65rem;
-  cursor: pointer;
-}
-
-.externalLink:hover,
-.externalLink:focus-visible,
-.secondaryButton:hover,
-.secondaryButton:focus-visible,
-.textButton:hover,
-.textButton:focus-visible {
-  background: rgb(129 183 236 / 17%);
-  border-color: rgb(156 204 255 / 30%);
-}
-
-.primaryButton {
-  color: #07101f;
-  font-weight: 650;
-  background: linear-gradient(135deg, #bce1ff, #85bff0);
-  border-color: transparent;
-}
-
-.primaryButton:hover,
-.primaryButton:focus-visible {
-  filter: brightness(1.06);
-}
-
-.body {
-  display: grid;
-  grid-template-columns: minmax(16rem, 0.78fr) minmax(22rem, 1.42fr);
-  min-height: 0;
-  overflow: auto;
-}
-
-.telemetry,
-.practice {
-  min-width: 0;
-  padding: 1.15rem 1.25rem 1.5rem;
-}
-
-.telemetry {
-  border-right: 1px solid rgb(156 204 255 / 11%);
-}
-
-.metrics {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.65rem;
-  margin: 0.85rem 0 1rem;
-}
-
-.metric {
-  min-height: 5.4rem;
-  padding: 0.8rem;
-  background: rgb(136 185 230 / 5%);
-  border: 1px solid rgb(156 204 255 / 10%);
+  background:
+    linear-gradient(120deg, rgb(126 188 240 / 18%), rgb(86 145 210 / 8%)),
+    rgb(7 19 37 / 72%);
+  border: 1px solid rgb(166 215 255 / 24%);
   border-radius: 0.8rem;
+  box-shadow: inset 0 1px 0 rgb(238 248 255 / 6%);
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    transform 180ms ease;
 }
 
-.metric span {
-  display: block;
-  color: rgb(210 230 246 / 56%);
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.launchButton:hover {
+  background-color: rgb(121 185 239 / 10%);
+  border-color: rgb(176 220 255 / 42%);
+  transform: translateY(-1px);
 }
 
-.metric strong {
-  display: block;
-  margin-top: 0.42rem;
-  font:
-    500 clamp(1.15rem, 2.5vw, 1.75rem)/1 var(--font-geist-mono),
-    monospace;
+.launchButton:focus-visible {
+  outline: 2px solid #b7ddff;
+  outline-offset: 4px;
 }
 
-.metric small {
-  display: block;
-  margin-top: 0.32rem;
-  color: #8ebce6;
-}
-
-.form,
-.sessionForm {
+.launchButton span:first-child {
   display: grid;
-  gap: 0.72rem;
-}
-
-.fieldGrid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.65rem;
-}
-
-.form label,
-.sessionForm label {
-  display: grid;
-  gap: 0.34rem;
-  color: rgb(220 235 249 / 72%);
-  font-size: 0.72rem;
-}
-
-.form input,
-.form select,
-.sessionForm input,
-.sessionForm select,
-.sessionForm textarea {
-  width: 100%;
-  min-height: 2.75rem;
-  padding: 0.7rem 0.75rem;
-  color: #edf6ff;
-  font: inherit;
-  background: rgb(2 8 18 / 54%);
-  border: 1px solid rgb(156 204 255 / 13%);
-  border-radius: 0.58rem;
-  outline: none;
-}
-
-.sessionForm textarea {
-  min-height: 5rem;
-  resize: vertical;
-}
-
-.form input:focus-visible,
-.form select:focus-visible,
-.sessionForm input:focus-visible,
-.sessionForm select:focus-visible,
-.sessionForm textarea:focus-visible {
-  border-color: #85bff0;
-  box-shadow: 0 0 0 3px rgb(133 191 240 / 13%);
-}
-
-.formActions,
-.sessionActions {
-  display: flex;
-  gap: 0.55rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.history {
-  display: grid;
-  gap: 0.55rem;
-  margin-top: 1.1rem;
-}
-
-.sessionList {
-  display: grid;
-  gap: 0.55rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.session {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.7rem;
-  padding: 0.75rem 0.8rem;
-  background: rgb(136 185 230 / 4%);
-  border: 1px solid rgb(156 204 255 / 9%);
-  border-radius: 0.7rem;
-}
-
-.session strong {
-  font-size: 0.84rem;
+  gap: 0.18rem;
+  font-size: 0.95rem;
   font-weight: 580;
 }
 
-.sessionControls {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.35rem;
+.launchButton small {
+  color: rgb(202 228 249 / 54%);
+  font:
+    500 0.61rem/1.2 var(--font-geist-mono),
+    monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
 }
 
-.textButton {
-  min-height: 2.2rem;
-  padding: 0.45rem 0.58rem;
-  color: rgb(220 235 249 / 74%);
-  font-size: 0.72rem;
+.launchArrow {
+  display: grid;
+  flex: 0 0 2.35rem;
+  place-items: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  color: #cbe7ff;
+  background: rgb(160 211 252 / 9%);
+  border: 1px solid rgb(174 219 255 / 14%);
+  border-radius: 50%;
 }
 
-.feedback {
-  min-height: 1.2rem;
+.launchNote {
+  max-width: 31rem;
+  margin: 0.75rem 0 0;
+  color: rgb(201 222 240 / 50%);
+  font-size: 0.71rem;
+  line-height: 1.5;
+}
+
+.routeDetails {
+  display: grid;
+  align-content: center;
+  gap: 1.05rem;
+  min-width: 0;
   margin: 0;
-  color: #9fcdf4;
-  font-size: 0.76rem;
+  padding: 2rem 1.5rem;
+  background: rgb(4 11 23 / 36%);
+  border-left: 1px solid rgb(156 204 255 / 10%);
 }
 
-@media (max-width: 860px) {
+.routeDetails div {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.routeDetails dd {
+  margin: 0;
+  color: rgb(230 241 251 / 76%);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
+.beacon {
+  position: absolute;
+  top: -5.5rem;
+  right: 5rem;
+  width: 12rem;
+  height: 12rem;
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+.beaconCore,
+.beaconOrbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.beaconCore {
+  width: 2.2rem;
+  height: 2.2rem;
+  background: radial-gradient(circle, #d7eeff 0, #79b9ee 24%, transparent 70%);
+}
+
+.beaconOrbit {
+  width: 9rem;
+  height: 9rem;
+  border: 1px solid rgb(148 204 248 / 28%);
+  box-shadow:
+    0 0 0 1.6rem rgb(135 194 239 / 4%),
+    0 0 0 3.2rem rgb(135 194 239 / 3%);
+}
+
+@media (max-width: 700px) {
   .station {
-    top: 5.3rem;
-    left: 0.65rem;
-    width: calc(100% - 1.3rem);
-    height: calc(100% - 5.95rem);
+    top: auto;
+    bottom: 1rem;
+    left: 0.75rem;
+    grid-template-columns: 1fr;
+    width: calc(100% - 1.5rem);
+    max-height: calc(100% - 6.5rem);
+    overflow: auto;
     transform: none;
   }
 
-  .header {
-    align-items: flex-start;
-    flex-direction: column;
+  .routeDetails {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    padding: 1rem;
+    border-top: 1px solid rgb(156 204 255 / 10%);
+    border-left: 0;
   }
 
-  .headerActions {
-    justify-content: flex-start;
-  }
-
-  .body {
-    display: block;
-  }
-
-  .telemetry {
-    border-right: 0;
-    border-bottom: 1px solid rgb(156 204 255 / 11%);
+  .routeDetails dd {
+    font-size: 0.72rem;
   }
 }
 
-@media (max-width: 520px) {
-  .station {
-    border-radius: 0.8rem;
+@media (max-width: 480px) {
+  .content {
+    padding: 1.2rem 1rem;
   }
 
-  .header,
-  .telemetry,
-  .practice {
-    padding-inline: 0.9rem;
+  .introduction {
+    margin-bottom: 1.1rem;
   }
 
-  .fieldGrid {
+  .routeDetails {
     grid-template-columns: 1fr;
-  }
-
-  .form input,
-  .form select,
-  .sessionForm input,
-  .sessionForm select,
-  .sessionForm textarea {
-    font-size: 1rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .primaryButton,
-  .externalLink,
-  .secondaryButton,
-  .textButton {
+  .launchButton {
     transition: none;
+  }
+
+  .launchButton:hover {
+    transform: none;
   }
 }

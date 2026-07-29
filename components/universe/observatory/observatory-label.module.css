@@ -1,0 +1,11 @@
+.label {
+  --spatial-label-offset-y: 3.5rem;
+  color: rgb(211 208 193 / 70%);
+}
+
+.label:hover,
+.label:focus-visible,
+.label[data-emphasized="true"] {
+  color: rgb(244 232 211 / 92%);
+  text-shadow: 0 0 1rem rgb(215 157 88 / 22%);
+}

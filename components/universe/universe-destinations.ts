@@ -4,6 +4,7 @@ import { frenchStationDefinition } from "./galaxies/personal-growth/french/frenc
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
 import { personalGrowthPlanets } from "./galaxies/personal-growth/personal-growth-planets";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
+import { globalObservatoryDefinition } from "./observatory/observatory-definition";
 
 export const universityGalaxyId = "university";
 export const personalGrowthGalaxyId = "personal-growth";
@@ -76,8 +77,14 @@ export function findGalaxyStation(
   galaxyId: string | null,
   stationId: string | null,
 ) {
-  return galaxyId === frenchStationDefinition.galaxyId &&
+  if (
+    galaxyId === frenchStationDefinition.galaxyId &&
     stationId === frenchStationDefinition.id
-    ? frenchStationDefinition
+  ) {
+    return frenchStationDefinition;
+  }
+
+  return stationId === globalObservatoryDefinition.id && galaxyId === null
+    ? globalObservatoryDefinition
     : null;
 }
