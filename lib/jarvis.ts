@@ -4,6 +4,18 @@ export const jarvisModes = ["quick", "analyze", "deep-review"] as const;
 
 export type JarvisMode = (typeof jarvisModes)[number];
 
+export const jarvisModeLabels: Record<JarvisMode, string> = {
+  quick: "Quick",
+  analyze: "Analyze",
+  "deep-review": "Deep review",
+};
+
+export const jarvisModeDescriptions: Record<JarvisMode, string> = {
+  quick: "Direct answer. Minimal ceremony.",
+  analyze: "Tradeoffs and a clear recommendation.",
+  "deep-review": "Patterns, risks, and ranked judgment.",
+};
+
 export type JarvisNavigationContext = Readonly<{
   galaxyId: string | null;
   level: "galaxy" | "planet" | "system" | "universe";

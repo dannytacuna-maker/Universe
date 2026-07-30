@@ -235,23 +235,23 @@ export function JarvisVoiceMode({
   }
 
   const statusLabel = errorMessage
-    ? "Voice unavailable"
+    ? "Channel unavailable"
     : isSpeaking
       ? "Speaking"
       : isListening
         ? "Listening"
         : disabled
-          ? "Thinking"
-          : "Standing by";
+          ? "Working"
+          : "Ready";
 
   const statusDetail =
     errorMessage ??
     (transcript ||
       (isSpeaking
-        ? "Jarvis is responding…"
+        ? "Responding…"
         : isListening
           ? "Go ahead."
-          : "Speak anytime"));
+          : "Voice channel open"));
 
   const orbState = isSpeaking ? "speaking" : isListening ? "listening" : "idle";
 
@@ -292,11 +292,11 @@ export function JarvisVoiceMode({
         <input
           aria-label="Type to Jarvis"
           onChange={(event) => setTypedDraft(event.target.value)}
-          placeholder="Type"
+          placeholder="Or type here"
           value={typedDraft}
         />
         <button
-          aria-label="Close voice mode"
+          aria-label="End voice channel"
           className={styles.voiceModeClose}
           onClick={onClose}
           type="button"

@@ -12,6 +12,8 @@ import {
 } from "react";
 
 import {
+  jarvisModeDescriptions,
+  jarvisModeLabels,
   jarvisModes,
   type JarvisMode,
   type JarvisNavigationContext,
@@ -22,12 +24,6 @@ import styles from "./jarvis.module.css";
 import { JarvisMarkdown } from "./jarvis-markdown";
 import { cancelJarvisSpeech, speakAsJarvis } from "./jarvis-speech";
 import { JarvisVoiceMode } from "./jarvis-voice-mode";
-
-const modeLabels: Record<JarvisMode, string> = {
-  quick: "Quick",
-  analyze: "Analyze",
-  "deep-review": "Deep review",
-};
 
 type JarvisConversationProps = Readonly<{
   context: JarvisNavigationContext;
@@ -186,7 +182,7 @@ export function JarvisConversation({
 
   return (
     <div className={styles.conversation}>
-      <div className={styles.modeBar} aria-label="Jarvis response depth">
+      <div className={styles.modeBar} aria-label="Response depth">
         {jarvisModes.map((modeId) => (
           <button
             aria-pressed={mode === modeId}
@@ -194,9 +190,10 @@ export function JarvisConversation({
             disabled={isBusy}
             key={modeId}
             onClick={() => void changeMode(modeId)}
+            title={jarvisModeDescriptions[modeId]}
             type="button"
           >
-            {modeLabels[modeId]}
+            {jarvisModeLabels[modeId]}
           </button>
         ))}
       </div>
@@ -212,11 +209,10 @@ export function JarvisConversation({
             <span aria-hidden="true" className={styles.emptyMark}>
               J
             </span>
-            <h2>At your service</h2>
+            <h2>What are we working on?</h2>
             <p>
-              Ask anything — planning, writing, study, decisions — or open voice
-              mode and speak naturally. I can also review your Mission Control
-              records when useful.
+              Decisions, planning, study, training, or a clear read on your
+              Mission Control records. Speak or type — I’ll stay precise.
             </p>
           </div>
         ) : null}
@@ -245,13 +241,11 @@ export function JarvisConversation({
               <div className={styles.messageBody}>
                 {text.length > 0 ? <JarvisMarkdown text={text} /> : null}
                 {waitingOnTools ? (
-                  <p className={styles.toolStatus}>
-                    Reviewing trusted context…
-                  </p>
+                  <p className={styles.toolStatus}>Reviewing records…</p>
                 ) : null}
                 {emptyFinished ? (
                   <p className={styles.messageEmpty}>
-                    No reply came through. Try asking again.
+                    No reply came through. Ask again.
                   </p>
                 ) : null}
               </div>
@@ -279,7 +273,7 @@ export function JarvisConversation({
             <span />
             <span />
             <span />
-            <span className="sr-only">Jarvis is thinking</span>
+            <span className="sr-only">Working</span>
           </div>
         ) : null}
       </div>
@@ -293,13 +287,13 @@ export function JarvisConversation({
           maxLength={8_000}
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={handleInputKeyDown}
-          placeholder="Ask Jarvis anything…"
+          placeholder="What do you need?"
           rows={1}
           value={input}
         />
         <div className={styles.composerActions}>
           <button
-            aria-label="Start Jarvis voice mode"
+            aria-label="Start voice channel"
             className={styles.iconButton}
             disabled={isBusy && !voiceSessionActive}
             onClick={() => setVoiceSessionActive(true)}
@@ -334,7 +328,7 @@ export function JarvisConversation({
         </div>
       </form>
       <p className={styles.disclaimer}>
-        Jarvis can make mistakes. Verify consequential decisions.
+        Verify consequential decisions against the source records.
       </p>
 
       <JarvisVoiceMode

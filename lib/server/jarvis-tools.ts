@@ -79,7 +79,7 @@ export function createJarvisTools(ownerId: string) {
   return {
     getCurrentTime: tool({
       description:
-        "Get the current date and local clock time in UTC and Europe/Madrid. Use for any question about the current time, date, day of week, or 'what time is it'.",
+        "Get the current date and local clock time in UTC and Europe/Madrid. Use for clock time, date, day of week, or 'what time is it'.",
       inputSchema: z.object({}),
       execute: async () => {
         const now = new Date();

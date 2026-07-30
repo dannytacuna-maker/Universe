@@ -48,9 +48,7 @@ function BodyMetal({
   );
 }
 
-function EdgeCatch({
-  color = EDGE,
-}: Readonly<{ color?: string }>) {
+function EdgeCatch({ color = EDGE }: Readonly<{ color?: string }>) {
   return (
     <meshStandardMaterial
       color={color}

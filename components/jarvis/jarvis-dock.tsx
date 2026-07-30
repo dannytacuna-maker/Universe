@@ -57,10 +57,11 @@ export function JarvisDock({ context }: JarvisDockProps) {
 
   const loadThreads = useCallback(async () => {
     const response = await fetch("/api/jarvis/threads", { cache: "no-store" });
-    if (!response.ok) throw new Error("Jarvis history could not be loaded.");
+    if (!response.ok)
+      throw new Error("Conversation history could not be loaded.");
     const payload: unknown = await response.json();
     if (typeof payload !== "object" || payload === null) {
-      throw new Error("Jarvis returned an invalid response.");
+      throw new Error("Unexpected response from Mission Control.");
     }
 
     const candidate = payload as Readonly<{
@@ -84,14 +85,14 @@ export function JarvisDock({ context }: JarvisDockProps) {
         method: "POST",
       });
       if (!response.ok)
-        throw new Error("Jarvis could not start a conversation.");
+        throw new Error("A new conversation could not be started.");
       const payload: unknown = await response.json();
       if (
         typeof payload !== "object" ||
         payload === null ||
         !("thread" in payload)
       ) {
-        throw new Error("Jarvis returned an invalid conversation.");
+        throw new Error("Unexpected conversation response.");
       }
 
       const thread = (payload as Readonly<{ thread: JarvisThread }>).thread;
@@ -114,7 +115,7 @@ export function JarvisDock({ context }: JarvisDockProps) {
       payload === null ||
       !("thread" in payload)
     ) {
-      throw new Error("Jarvis returned an invalid conversation.");
+      throw new Error("Unexpected conversation response.");
     }
 
     setActiveThread((payload as Readonly<{ thread: JarvisThread }>).thread);
@@ -135,7 +136,7 @@ export function JarvisDock({ context }: JarvisDockProps) {
       else await createThread();
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Jarvis is unavailable.",
+        error instanceof Error ? error.message : "Jarvis is offline right now.",
       );
     } finally {
       setIsLoading(false);
@@ -206,7 +207,7 @@ export function JarvisDock({ context }: JarvisDockProps) {
     isOpen && hasMounted
       ? createPortal(
           <aside
-            aria-label="Jarvis assistant"
+            aria-label="Jarvis"
             aria-modal="true"
             className={styles.panel}
             ref={panelRef}
@@ -219,7 +220,7 @@ export function JarvisDock({ context }: JarvisDockProps) {
                 </span>
                 <div>
                   <strong>Jarvis</strong>
-                  <span>At your service</span>
+                  <span>Operating intelligence</span>
                 </div>
               </div>
               <div className={styles.headerActions}>
@@ -296,21 +297,22 @@ export function JarvisDock({ context }: JarvisDockProps) {
               {isLoading ? (
                 <div className={styles.loadingState}>
                   <span aria-hidden="true" />
-                  Connecting Jarvis
+                  Establishing link
                 </div>
               ) : !isConfigured ? (
                 <div className={styles.unavailableState}>
-                  <strong>Jarvis is awaiting connection</strong>
+                  <strong>Records are offline</strong>
                   <p>
-                    Mission Control could not reach its synchronized records.
+                    Synchronized Mission Control storage is unreachable right
+                    now.
                   </p>
                 </div>
               ) : errorMessage ? (
                 <div className={styles.unavailableState}>
-                  <strong>Jarvis is temporarily unavailable</strong>
+                  <strong>Temporarily offline</strong>
                   <p>{errorMessage}</p>
                   <button onClick={() => void prepareJarvis()} type="button">
-                    Try again
+                    Retry
                   </button>
                 </div>
               ) : activeThread ? (
@@ -332,11 +334,11 @@ export function JarvisDock({ context }: JarvisDockProps) {
       <button
         aria-expanded={isOpen}
         aria-haspopup="dialog"
-        aria-label="Open Jarvis. Ask anything or start a voice session."
+        aria-label="Open Jarvis, Mission Control operating intelligence"
         className={`${styles.launcher} jarvis-dock-launcher`}
         onClick={openJarvis}
         ref={launcherRef}
-        title="Ask Jarvis anything"
+        title="Open Jarvis"
         type="button"
       >
         <span aria-hidden="true" className={styles.launcherCore}>
