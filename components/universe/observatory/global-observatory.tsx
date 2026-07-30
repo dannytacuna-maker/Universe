@@ -17,22 +17,22 @@ import {
   type ObservatoryDefinition,
 } from "./observatory-definition";
 
-const TITANIUM = "#1c222a";
-const TITANIUM_LIGHT = "#2c343f";
-const GRAPHITE = "#0d1014";
-const GRAPHITE_SOFT = "#14181e";
-const WINDOW_WARM = "#d8b57a";
-const WINDOW_WARM_SOFT = "#c49a5c";
-const SOLAR_FACE = "#1a2433";
-const SOLAR_CELL = "#243044";
-const BEACON = "#f3f6fa";
+const TITANIUM = "#2a323c";
+const TITANIUM_LIGHT = "#3d4856";
+const GRAPHITE = "#161b22";
+const GRAPHITE_SOFT = "#1e252e";
+const WINDOW_WARM = "#e8c78a";
+const WINDOW_WARM_SOFT = "#d4b06a";
+const SOLAR_FACE = "#243044";
+const SOLAR_CELL = "#31425a";
+const BEACON = "#f5f8fc";
 
 function Metal({
   color = TITANIUM,
-  roughness = 0.42,
-  metalness = 0.94,
-  emissive = "#05070a",
-  emissiveIntensity = 0.12,
+  roughness = 0.38,
+  metalness = 0.92,
+  emissive = "#0a0e14",
+  emissiveIntensity = 0.22,
 }: Readonly<{
   color?: string;
   emissive?: string;
@@ -125,37 +125,36 @@ function SolarWing({
 }>) {
   return (
     <group position={position}>
-      <mesh position={[side * 0.18, 0, 0]}>
-        <boxGeometry args={[0.36, 0.03, 0.04]} />
-        <Metal color={TITANIUM} roughness={0.4} />
+      <mesh position={[side * 0.22, 0, 0]}>
+        <boxGeometry args={[0.44, 0.04, 0.05]} />
+        <Metal color={TITANIUM} roughness={0.36} />
       </mesh>
-      {[0.42, 0.78, 1.14].map((x, index) => (
+      {[0.5, 0.96, 1.42].map((x, index) => (
         <group key={x} position={[side * x, 0, 0]}>
           <mesh>
-            <boxGeometry args={[0.32, 0.012, 0.58]} />
+            <boxGeometry args={[0.4, 0.014, 0.72]} />
             <meshStandardMaterial
               color={index % 2 === 0 ? SOLAR_FACE : SOLAR_CELL}
-              emissive="#0a121c"
-              emissiveIntensity={0.08}
-              metalness={0.55}
-              roughness={0.62}
+              emissive="#101828"
+              emissiveIntensity={0.16}
+              metalness={0.58}
+              roughness={0.55}
               side={DoubleSide}
             />
           </mesh>
-          <mesh position={[0, 0.008, 0]}>
-            <boxGeometry args={[0.3, 0.002, 0.56]} />
+          <mesh position={[0, 0.009, 0]}>
+            <boxGeometry args={[0.37, 0.002, 0.68]} />
             <meshStandardMaterial
-              color="#2a3a52"
-              metalness={0.7}
-              roughness={0.35}
+              color="#3a4e6a"
+              metalness={0.72}
+              roughness={0.32}
               side={DoubleSide}
             />
           </mesh>
-          {/* cell seams */}
-          {[-0.14, 0, 0.14].map((z) => (
-            <mesh key={z} position={[0, 0.009, z]}>
-              <boxGeometry args={[0.3, 0.0015, 0.008]} />
-              <Metal color={GRAPHITE} roughness={0.55} />
+          {[-0.18, 0, 0.18].map((z) => (
+            <mesh key={z} position={[0, 0.01, z]}>
+              <boxGeometry args={[0.37, 0.0015, 0.01]} />
+              <Metal color={GRAPHITE} roughness={0.5} />
             </mesh>
           ))}
         </group>
@@ -290,17 +289,17 @@ export function GlobalObservatory({
     }
 
     if (rimLight.current !== null) {
-      rimLight.current.intensity = 1.05 + emphasis * 0.28 + pulse * 0.25;
+      rimLight.current.intensity = 2.4 + emphasis * 0.45 + pulse * 0.35;
     }
 
     if (cabinLight.current !== null) {
-      cabinLight.current.intensity = 0.55 + emphasis * 0.12 + pulse * 0.2;
+      cabinLight.current.intensity = 1.35 + emphasis * 0.25 + pulse * 0.3;
     }
 
     if (beacon.current !== null) {
       const material = beacon.current.material;
       if (!Array.isArray(material) && "opacity" in material) {
-        material.opacity = 0.28 + pulse * 0.32 + emphasis * 0.08;
+        material.opacity = 0.45 + pulse * 0.35 + emphasis * 0.1;
       }
     }
   });
@@ -319,83 +318,89 @@ export function GlobalObservatory({
       />
 
       <pointLight
-        color="#c5d0de"
+        color="#d7e0ec"
         decay={2}
-        distance={7.2}
-        intensity={1.05 + emphasis * 0.28}
-        position={[-2.1, 1.8, 2.4]}
+        distance={12}
+        intensity={2.4 + emphasis * 0.45}
+        position={[-2.4, 2.2, 3.2]}
         ref={rimLight}
       />
       <pointLight
-        color="#e8c898"
+        color="#f0d4a0"
         decay={2}
-        distance={3.2}
-        intensity={0.55}
-        position={[0.15, 0.05, 0.55]}
+        distance={5.5}
+        intensity={1.35}
+        position={[0.2, 0.1, 0.7]}
         ref={cabinLight}
+      />
+      <pointLight
+        color="#a8b8cc"
+        decay={2}
+        distance={9}
+        intensity={1.1}
+        position={[2.6, -1.2, -1.8]}
       />
 
       <group ref={station}>
         {/* Central command module — spine along X */}
         <mesh rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.16, 0.16, 0.72, 28]} />
-          <Metal color={TITANIUM} roughness={0.44} />
+          <cylinderGeometry args={[0.22, 0.22, 0.92, 28]} />
+          <Metal color={TITANIUM} roughness={0.4} />
         </mesh>
         <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.165, 0.165, 0.08, 28]} />
-          <Metal color={GRAPHITE_SOFT} roughness={0.5} />
-        </mesh>
-
-        {/* Forward habitation module */}
-        <mesh position={[0.52, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.145, 0.145, 0.42, 26]} />
-          <Metal color={TITANIUM} roughness={0.43} />
-        </mesh>
-        <mesh position={[0.52, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.15, 0.15, 0.05, 26]} />
-          <Metal color={GRAPHITE} roughness={0.5} />
-        </mesh>
-
-        {/* Aft service module */}
-        <mesh position={[-0.5, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.135, 0.15, 0.38, 26]} />
+          <cylinderGeometry args={[0.228, 0.228, 0.1, 28]} />
           <Metal color={GRAPHITE_SOFT} roughness={0.46} />
         </mesh>
 
+        {/* Forward habitation module */}
+        <mesh position={[0.68, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.2, 0.2, 0.52, 26]} />
+          <Metal color={TITANIUM} roughness={0.39} />
+        </mesh>
+        <mesh position={[0.68, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.208, 0.208, 0.06, 26]} />
+          <Metal color={GRAPHITE} roughness={0.46} />
+        </mesh>
+
+        {/* Aft service module */}
+        <mesh position={[-0.64, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.18, 0.2, 0.48, 26]} />
+          <Metal color={GRAPHITE_SOFT} roughness={0.42} />
+        </mesh>
+
         {/* Observation gallery — flat panoramic bay, not a dome */}
-        <group position={[0.08, 0.02, 0.22]}>
+        <group position={[0.1, 0.04, 0.3]}>
           <mesh>
-            <boxGeometry args={[0.42, 0.22, 0.16]} />
-            <Metal color={TITANIUM} roughness={0.4} />
+            <boxGeometry args={[0.55, 0.3, 0.2]} />
+            <Metal color={TITANIUM} roughness={0.36} />
           </mesh>
-          <mesh position={[0, 0.02, 0.085]}>
-            <boxGeometry args={[0.36, 0.14, 0.012]} />
-            <Metal color={GRAPHITE} roughness={0.5} />
+          <mesh position={[0, 0.02, 0.11]}>
+            <boxGeometry args={[0.48, 0.2, 0.014]} />
+            <Metal color={GRAPHITE} roughness={0.46} />
           </mesh>
           {(
             [
-              [-0.12, 0.03, 0.092],
-              [0, 0.03, 0.092],
-              [0.12, 0.03, 0.092],
-              [-0.12, -0.04, 0.092],
-              [0, -0.04, 0.092],
-              [0.12, -0.04, 0.092],
+              [-0.15, 0.05, 0.12],
+              [0, 0.05, 0.12],
+              [0.15, 0.05, 0.12],
+              [-0.15, -0.05, 0.12],
+              [0, -0.05, 0.12],
+              [0.15, -0.05, 0.12],
             ] as const
           ).map((pos) => (
             <WindowPane
-              args={[0.09, 0.055, 0.006]}
+              args={[0.12, 0.075, 0.008]}
               key={`${pos[0]}-${pos[1]}`}
               position={pos}
             />
           ))}
-          {/* soft cabin spill */}
-          <mesh position={[0, 0.01, 0.1]}>
-            <planeGeometry args={[0.34, 0.13]} />
+          <mesh position={[0, 0.01, 0.13]}>
+            <planeGeometry args={[0.46, 0.18]} />
             <meshBasicMaterial
               blending={AdditiveBlending}
               color={WINDOW_WARM}
               depthWrite={false}
-              opacity={0.08 + emphasis * 0.04}
+              opacity={0.16 + emphasis * 0.06}
               side={DoubleSide}
               toneMapped={false}
               transparent
@@ -406,17 +411,17 @@ export function GlobalObservatory({
         {/* Module window bands */}
         {(
           [
-            [0.52, 0.06, 0.14],
-            [0.52, -0.05, 0.14],
-            [0.52, 0.06, -0.14],
-            [-0.38, 0.05, 0.13],
-            [-0.38, -0.04, 0.13],
-            [0.12, 0.14, 0.08],
-            [-0.12, 0.14, -0.08],
+            [0.68, 0.08, 0.19],
+            [0.68, -0.06, 0.19],
+            [0.68, 0.08, -0.19],
+            [-0.5, 0.07, 0.17],
+            [-0.5, -0.05, 0.17],
+            [0.16, 0.2, 0.1],
+            [-0.16, 0.2, -0.1],
           ] as const
         ).map((pos, index) => (
           <WindowPane
-            args={[0.08, 0.04, 0.005]}
+            args={[0.11, 0.055, 0.007]}
             key={`band-${index}`}
             position={pos}
             soft={index % 2 === 1}
@@ -424,93 +429,94 @@ export function GlobalObservatory({
         ))}
 
         {/* Connecting adapters */}
-        <mesh position={[0.28, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.1, 0.1, 0.08, 18]} />
-          <Metal color={GRAPHITE} roughness={0.48} />
+        <mesh position={[0.36, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.13, 0.13, 0.1, 18]} />
+          <Metal color={GRAPHITE} roughness={0.44} />
         </mesh>
-        <mesh position={[-0.28, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <cylinderGeometry args={[0.1, 0.1, 0.08, 18]} />
-          <Metal color={GRAPHITE} roughness={0.48} />
+        <mesh position={[-0.36, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.13, 0.13, 0.1, 18]} />
+          <Metal color={GRAPHITE} roughness={0.44} />
         </mesh>
 
         {/* Main cross truss */}
-        <TrussBay length={1.55} position={[0, 0, 0]} />
+        <TrussBay length={2.05} position={[0, 0, 0]} />
         <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <boxGeometry args={[0.04, 1.55, 0.04]} />
-          <Metal color={TITANIUM_LIGHT} roughness={0.38} />
+          <boxGeometry args={[0.055, 2.05, 0.055]} />
+          <Metal color={TITANIUM_LIGHT} roughness={0.34} />
         </mesh>
 
         {/* Vertical utility mast */}
-        <mesh position={[-0.12, 0.28, -0.08]}>
-          <cylinderGeometry args={[0.015, 0.018, 0.48, 10]} />
-          <Metal color={TITANIUM_LIGHT} roughness={0.34} />
+        <mesh position={[-0.16, 0.36, -0.1]}>
+          <cylinderGeometry args={[0.02, 0.024, 0.62, 10]} />
+          <Metal color={TITANIUM_LIGHT} roughness={0.3} />
         </mesh>
-        <mesh position={[-0.12, 0.52, -0.08]}>
-          <boxGeometry args={[0.06, 0.03, 0.06]} />
-          <Metal color={GRAPHITE_SOFT} roughness={0.4} />
+        <mesh position={[-0.16, 0.68, -0.1]}>
+          <boxGeometry args={[0.08, 0.04, 0.08]} />
+          <Metal color={GRAPHITE_SOFT} roughness={0.36} />
         </mesh>
-        <mesh position={[-0.12, 0.58, -0.08]}>
-          <sphereGeometry args={[0.016, 10, 8]} />
+        <mesh position={[-0.16, 0.76, -0.1]}>
+          <sphereGeometry args={[0.022, 10, 8]} />
           <meshBasicMaterial color={BEACON} toneMapped={false} />
         </mesh>
-        <mesh position={[-0.12, 0.58, -0.08]} ref={beacon}>
-          <sphereGeometry args={[0.04, 10, 8]} />
+        <mesh position={[-0.16, 0.76, -0.1]} ref={beacon}>
+          <sphereGeometry args={[0.055, 10, 8]} />
           <meshBasicMaterial
             blending={AdditiveBlending}
             color={BEACON}
             depthWrite={false}
-            opacity={0.28}
+            opacity={0.45}
             toneMapped={false}
             transparent
           />
         </mesh>
 
         {/* Subtle whip antennas */}
-        <mesh position={[0.22, 0.2, -0.12]} rotation={[0.35, 0.2, 0.15]}>
-          <cylinderGeometry args={[0.004, 0.004, 0.32, 6]} />
-          <Metal color={TITANIUM_LIGHT} roughness={0.3} />
+        <mesh position={[0.28, 0.26, -0.16]} rotation={[0.35, 0.2, 0.15]}>
+          <cylinderGeometry args={[0.005, 0.005, 0.4, 6]} />
+          <Metal color={TITANIUM_LIGHT} roughness={0.28} />
         </mesh>
-        <mesh position={[-0.55, 0.12, 0.1]} rotation={[-0.4, 0, 0.25]}>
-          <cylinderGeometry args={[0.0035, 0.0035, 0.26, 6]} />
-          <Metal color={TITANIUM_LIGHT} roughness={0.3} />
+        <mesh position={[-0.7, 0.16, 0.12]} rotation={[-0.4, 0, 0.25]}>
+          <cylinderGeometry args={[0.0045, 0.0045, 0.34, 6]} />
+          <Metal color={TITANIUM_LIGHT} roughness={0.28} />
         </mesh>
 
         <CommDish
-          position={[0.35, 0.22, -0.18]}
+          position={[0.45, 0.28, -0.24]}
           rotation={[-0.55, 0.4, 0.1]}
-          size={0.13}
+          size={0.18}
         />
         <CommDish
-          position={[-0.42, -0.18, -0.16]}
+          position={[-0.55, -0.24, -0.2]}
           rotation={[0.85, -0.35, 0.2]}
-          size={0.1}
+          size={0.14}
         />
 
-        <DockingPort position={[0.78, 0, 0]} rotation={[0, 0, -Math.PI / 2]} />
-        <DockingPort position={[-0.74, 0, 0]} rotation={[0, 0, Math.PI / 2]} />
+        <DockingPort position={[1.0, 0, 0]} rotation={[0, 0, -Math.PI / 2]} />
+        <DockingPort position={[-0.94, 0, 0]} rotation={[0, 0, Math.PI / 2]} />
 
         {/* Radiator panel */}
-        <mesh position={[0.05, -0.28, -0.05]} rotation={[0.15, 0.4, 0.05]}>
-          <boxGeometry args={[0.55, 0.01, 0.22]} />
+        <mesh position={[0.06, -0.36, -0.06]} rotation={[0.15, 0.4, 0.05]}>
+          <boxGeometry args={[0.72, 0.014, 0.3]} />
           <meshStandardMaterial
-            color="#1e242c"
+            color="#2a323c"
+            emissive="#0c1016"
+            emissiveIntensity={0.14}
             metalness={0.88}
-            roughness={0.48}
+            roughness={0.44}
             side={DoubleSide}
           />
         </mesh>
 
-        <SolarWing position={[0.82, 0, 0]} side={1} />
-        <SolarWing position={[-0.82, 0, 0]} side={-1} />
+        <SolarWing position={[1.05, 0, 0]} side={1} />
+        <SolarWing position={[-1.05, 0, 0]} side={-1} />
 
-        {/* Truss-end solar mounts */}
-        <mesh position={[0.72, 0, 0]}>
-          <boxGeometry args={[0.08, 0.06, 0.06]} />
-          <Metal color={GRAPHITE} roughness={0.45} />
+        <mesh position={[0.92, 0, 0]}>
+          <boxGeometry args={[0.1, 0.08, 0.08]} />
+          <Metal color={GRAPHITE} roughness={0.42} />
         </mesh>
-        <mesh position={[-0.72, 0, 0]}>
-          <boxGeometry args={[0.08, 0.06, 0.06]} />
-          <Metal color={GRAPHITE} roughness={0.45} />
+        <mesh position={[-0.92, 0, 0]}>
+          <boxGeometry args={[0.1, 0.08, 0.08]} />
+          <Metal color={GRAPHITE} roughness={0.42} />
         </mesh>
       </group>
 
@@ -529,7 +535,7 @@ export function GlobalObservatory({
             onHoverChange(true);
           }}
         >
-          <boxGeometry args={[3.2, 1.4, 1.5]} />
+          <boxGeometry args={[4.4, 1.8, 2]} />
           <meshBasicMaterial
             colorWrite={false}
             depthWrite={false}

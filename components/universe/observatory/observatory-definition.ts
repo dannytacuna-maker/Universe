@@ -25,22 +25,22 @@ export type ObservatoryDefinition = Readonly<{
 
 export const globalObservatoryDefinition: ObservatoryDefinition = {
   cameraLookTarget: [0.9, -3.35, -12.2],
-  cameraPosition: [2.35, -2.55, -9.35],
+  cameraPosition: [3.15, -2.35, -8.55],
   description:
     "A weekly intelligence station translating verified world developments into a concise, source-grounded briefing.",
   descriptor: "Global insight. Clear mind.",
   galaxyId: null,
   id: "global-observatory",
   name: "The Observatory",
-  orientation: [0.18, -0.72, -0.08],
+  orientation: [0.22, -0.78, -0.1],
   palette: {
-    aperture: "#d8b57a",
-    beacon: "#f3f6fa",
-    core: "#1c222a",
-    metalDark: "#0d1014",
-    metalLight: "#2c343f",
+    aperture: "#e8c78a",
+    beacon: "#f5f8fc",
+    core: "#2a323c",
+    metalDark: "#161b22",
+    metalLight: "#3d4856",
     signal: "#8a96a8",
   },
   position: [0.9, -3.35, -12.2],
-  scale: 1.15,
+  scale: 2.85,
 };
