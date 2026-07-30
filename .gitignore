@@ -35,3 +35,6 @@ next-env.d.ts
 # local agent workspace metadata
 /.agents
 /.codex
+
+output/
+

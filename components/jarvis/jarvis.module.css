@@ -664,14 +664,29 @@
 }
 
 .voiceMode {
+  --jarvis-cyan: #5ce1ff;
+  --jarvis-cyan-bright: #b8f4ff;
+  --jarvis-cyan-dim: rgb(92 225 255 / 28%);
+  --jarvis-cyan-glow: rgb(64 196 255 / 45%);
+  --jarvis-amber: #ffb347;
+  --jarvis-panel: rgb(4 10 18 / 94%);
+  --jarvis-line: rgb(92 225 255 / 42%);
   position: fixed;
   inset: 0;
   z-index: 220;
   display: grid;
-  grid-template-rows: 1fr auto;
-  background: #000;
-  color: rgb(236 242 255 / 92%);
-  animation: voice-mode-enter 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  grid-template-rows: auto 1fr auto;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      ellipse 70% 55% at 50% 42%,
+      rgb(8 36 58 / 70%) 0%,
+      transparent 62%
+    ),
+    linear-gradient(180deg, #02060c 0%, #000407 55%, #010308 100%);
+  color: rgb(214 236 248 / 92%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  animation: voice-mode-enter 380ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes voice-mode-enter {
@@ -680,166 +695,455 @@
   }
 }
 
-.voiceModeStage {
-  display: grid;
-  place-items: center;
-  align-content: center;
-  gap: 2.4rem;
-  padding: 2rem;
-}
-
-.voiceModeOrb {
-  position: relative;
-  width: min(18rem, 54vw);
-  height: min(18rem, 54vw);
-}
-
-.voiceModeOrbCore,
-.voiceModeOrbHalo,
-.voiceModeOrbBloom {
+.voiceModeGrid {
   position: absolute;
   inset: 0;
-  border-radius: 50%;
-}
-
-.voiceModeOrbCore {
-  inset: 18%;
-  background: radial-gradient(
-    circle at 42% 38%,
-    rgb(255 255 255 / 96%) 0%,
-    rgb(210 228 255 / 78%) 18%,
-    rgb(148 176 255 / 42%) 42%,
-    rgb(118 96 210 / 28%) 68%,
-    transparent 100%
+  background-image:
+    linear-gradient(rgb(92 225 255 / 4%) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(92 225 255 / 4%) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(
+    ellipse 55% 50% at 50% 45%,
+    #000 20%,
+    transparent 75%
   );
-  filter: blur(0.8rem);
-  animation: voice-orb-drift 7s ease-in-out infinite;
+  pointer-events: none;
+  opacity: 0.55;
 }
 
-.voiceModeOrbHalo {
-  inset: 4%;
-  background: radial-gradient(
-    circle at 55% 48%,
-    rgb(186 210 255 / 34%) 0%,
-    rgb(132 112 220 / 18%) 42%,
-    transparent 72%
-  );
-  filter: blur(1.6rem);
-  animation: voice-orb-drift 9s ease-in-out infinite reverse;
+.voiceModeScan {
+  position: absolute;
+  inset: 12% 18%;
+  border: 1px solid rgb(92 225 255 / 8%);
+  pointer-events: none;
+  opacity: 0.35;
+  animation: voice-scan-pulse 4.5s ease-in-out infinite;
 }
 
-.voiceModeOrbBloom {
-  background: radial-gradient(
-    circle,
-    rgb(255 255 255 / 12%) 0%,
-    rgb(150 170 255 / 8%) 35%,
-    transparent 68%
-  );
-  filter: blur(2.4rem);
-  opacity: 0.85;
-}
-
-.voiceModeOrb[data-state="listening"] .voiceModeOrbCore {
-  animation-duration: 3.6s;
-  transform: scale(1.04);
-}
-
-.voiceModeOrb[data-state="speaking"] .voiceModeOrbCore {
-  animation: voice-orb-speak 1.8s ease-in-out infinite;
-}
-
-.voiceModeOrb[data-state="speaking"] .voiceModeOrbBloom {
-  opacity: 1;
-  transform: scale(1.08);
-}
-
-@keyframes voice-orb-drift {
+@keyframes voice-scan-pulse {
   0%,
   100% {
-    transform: scale(1) translate(0, 0);
+    opacity: 0.22;
+    transform: scale(0.985);
   }
 
   50% {
-    transform: scale(1.06) translate(1.5%, -1.5%);
+    opacity: 0.42;
+    transform: scale(1);
   }
 }
 
-@keyframes voice-orb-speak {
+.voiceModeFrame {
+  position: absolute;
+  inset: 0.85rem;
+  pointer-events: none;
+}
+
+.voiceModeCorner {
+  position: absolute;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-color: var(--jarvis-line);
+  border-style: solid;
+  border-width: 0;
+}
+
+.voiceModeCorner[data-pos="tl"] {
+  top: 0;
+  left: 0;
+  border-top-width: 2px;
+  border-left-width: 2px;
+}
+
+.voiceModeCorner[data-pos="tr"] {
+  top: 0;
+  right: 0;
+  border-top-width: 2px;
+  border-right-width: 2px;
+}
+
+.voiceModeCorner[data-pos="bl"] {
+  bottom: 0;
+  left: 0;
+  border-bottom-width: 2px;
+  border-left-width: 2px;
+}
+
+.voiceModeCorner[data-pos="br"] {
+  right: 0;
+  bottom: 0;
+  border-right-width: 2px;
+  border-bottom-width: 2px;
+}
+
+.voiceModeHudTop {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: max(1.15rem, env(safe-area-inset-top)) 1.6rem 0.4rem;
+  color: var(--jarvis-cyan);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.voiceModeBrand {
+  color: var(--jarvis-cyan-bright);
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-shadow: 0 0 18px var(--jarvis-cyan-glow);
+}
+
+.voiceModeHudMeta {
+  color: rgb(140 190 210 / 62%);
+}
+
+.voiceModeHudMeta[data-tone="ok"] {
+  color: var(--jarvis-cyan);
+}
+
+.voiceModeStage {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 1.6rem;
+  padding: 1rem 1.25rem 0.5rem;
+}
+
+.voiceModeReactor {
+  position: relative;
+  width: min(17.5rem, 58vw);
+  height: min(17.5rem, 58vw);
+  color: var(--jarvis-cyan);
+  filter: drop-shadow(0 0 18px rgb(40 170 220 / 28%));
+}
+
+.voiceModeRing,
+.voiceModeCore,
+.voiceModeSpokes,
+.voiceModeWave {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+}
+
+.voiceModeRing {
+  border: 1px solid var(--jarvis-cyan-dim);
+  border-radius: 50%;
+  box-shadow: inset 0 0 24px rgb(40 160 210 / 12%);
+}
+
+.voiceModeRing[data-ring="outer"] {
+  inset: 0;
+  border-color: rgb(92 225 255 / 22%);
+  animation: voice-ring-spin 18s linear infinite;
+}
+
+.voiceModeRing[data-ring="mid"] {
+  inset: 12%;
+  border-style: dashed;
+  border-color: rgb(92 225 255 / 38%);
+  animation: voice-ring-spin 11s linear infinite reverse;
+}
+
+.voiceModeRing[data-ring="inner"] {
+  inset: 26%;
+  border-color: rgb(92 225 255 / 55%);
+  box-shadow:
+    0 0 20px rgb(64 196 255 / 18%),
+    inset 0 0 16px rgb(64 196 255 / 12%);
+  animation: voice-ring-pulse 2.8s ease-in-out infinite;
+}
+
+.voiceModeCore {
+  inset: 36%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 40% 35%,
+    #fff 0%,
+    var(--jarvis-cyan-bright) 18%,
+    var(--jarvis-cyan) 42%,
+    rgb(18 90 130 / 70%) 72%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 28px rgb(92 225 255 / 55%),
+    0 0 60px rgb(40 160 220 / 35%);
+  animation: voice-core-idle 3.6s ease-in-out infinite;
+}
+
+.voiceModeSpokes {
+  inset: 8%;
+  width: 84%;
+  height: 84%;
+  opacity: 0.55;
+  animation: voice-ring-spin 22s linear infinite;
+}
+
+.voiceModeWave {
+  display: flex;
+  gap: 0.28rem;
+  align-items: center;
+  justify-content: center;
+  inset: auto 18% 18%;
+  height: 2.2rem;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.voiceModeWave span {
+  display: block;
+  width: 0.18rem;
+  height: calc(0.45rem + 1.4rem * var(--bar-scale, 0.5));
+  border-radius: 999px;
+  background: linear-gradient(180deg, #fff, var(--jarvis-cyan));
+  box-shadow: 0 0 8px var(--jarvis-cyan-glow);
+  transform-origin: center bottom;
+  animation: voice-wave-idle 1.4s ease-in-out infinite;
+  animation-delay: var(--bar-delay, 0ms);
+}
+
+.voiceModeReactor[data-state="listening"] .voiceModeCore {
+  animation: voice-core-listen 1.1s ease-in-out infinite;
+}
+
+.voiceModeReactor[data-state="listening"] .voiceModeRing[data-ring="inner"] {
+  animation-duration: 1.2s;
+  border-color: var(--jarvis-cyan-bright);
+}
+
+.voiceModeReactor[data-state="listening"] .voiceModeRing[data-ring="outer"] {
+  animation-duration: 8s;
+  box-shadow: 0 0 30px rgb(64 196 255 / 25%);
+}
+
+.voiceModeReactor[data-state="speaking"] .voiceModeCore {
+  animation: voice-core-speak 0.7s ease-in-out infinite;
+  filter: brightness(1.15);
+}
+
+.voiceModeReactor[data-state="speaking"] .voiceModeRing[data-ring="mid"] {
+  animation-duration: 4s;
+  border-color: var(--jarvis-cyan-bright);
+}
+
+.voiceModeReactor[data-state="speaking"] .voiceModeWave {
+  opacity: 1;
+}
+
+.voiceModeReactor[data-state="speaking"] .voiceModeWave span {
+  animation-name: voice-wave-speak;
+  animation-duration: 0.55s;
+}
+
+.voiceMode[data-state="listening"] .voiceModeScan {
+  animation-duration: 2.2s;
+  border-color: rgb(92 225 255 / 18%);
+}
+
+.voiceMode[data-state="speaking"] .voiceModeScan {
+  animation-duration: 1.4s;
+  border-color: rgb(92 225 255 / 28%);
+}
+
+@keyframes voice-ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes voice-ring-pulse {
   0%,
   100% {
     transform: scale(1);
-    filter: blur(0.7rem);
+    opacity: 0.75;
+  }
+
+  50% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+}
+
+@keyframes voice-core-idle {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes voice-core-listen {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 24px rgb(92 225 255 / 45%),
+      0 0 48px rgb(40 160 220 / 28%);
   }
 
   50% {
     transform: scale(1.12);
-    filter: blur(1.1rem);
+    box-shadow:
+      0 0 36px rgb(92 225 255 / 70%),
+      0 0 72px rgb(40 160 220 / 45%);
+  }
+}
+
+@keyframes voice-core-speak {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.18);
+  }
+}
+
+@keyframes voice-wave-idle {
+  0%,
+  100% {
+    transform: scaleY(0.45);
+  }
+
+  50% {
+    transform: scaleY(0.85);
+  }
+}
+
+@keyframes voice-wave-speak {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+
+  50% {
+    transform: scaleY(1.15);
   }
 }
 
 .voiceModeCopy {
   display: grid;
-  gap: 0.45rem;
+  gap: 0.4rem;
   justify-items: center;
+  max-width: 28rem;
   text-align: center;
 }
 
 .voiceModeCopy strong {
-  font-size: 0.92rem;
-  font-weight: 480;
-  letter-spacing: 0.02em;
+  color: var(--jarvis-cyan-bright);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.28em;
+  text-shadow: 0 0 16px var(--jarvis-cyan-glow);
 }
 
 .voiceModeCopy span {
-  max-width: 28rem;
-  color: rgb(180 192 214 / 58%);
-  font-size: 0.78rem;
+  color: rgb(160 198 216 / 68%);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
   line-height: 1.55;
 }
 
+.voiceModeReadout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 1rem;
+  justify-content: center;
+  color: rgb(110 170 195 / 55%);
+  font-size: 0.58rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.voiceModeReadout span {
+  padding: 0.18rem 0.45rem;
+  border: 1px solid rgb(92 225 255 / 14%);
+  background: rgb(8 22 34 / 55%);
+}
+
 .voiceModeBar {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.4rem;
+  width: min(36rem, calc(100vw - 2rem));
+  margin: 0 auto;
+  padding: 0 0 max(1.25rem, env(safe-area-inset-bottom));
+}
+
+.voiceModeBarLabel {
+  color: rgb(110 170 195 / 55%);
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+}
+
+.voiceModeBarRow {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 0.65rem;
+  gap: 0.55rem;
   align-items: center;
-  width: min(34rem, calc(100vw - 2rem));
-  margin: 0 auto;
-  padding: 0 0 max(1.4rem, env(safe-area-inset-bottom));
 }
 
 .voiceModeBar input {
-  min-height: 3rem;
-  padding: 0 1.1rem;
-  border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: 999px;
-  background: rgb(28 28 30 / 92%);
-  color: rgb(236 240 248 / 90%);
+  min-height: 2.85rem;
+  padding: 0 0.95rem;
+  border: 1px solid rgb(92 225 255 / 22%);
+  border-radius: 0.15rem;
+  background: rgb(4 14 24 / 88%);
+  box-shadow: inset 0 0 0 1px rgb(92 225 255 / 6%);
+  color: rgb(220 240 248 / 92%);
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+
+.voiceModeBar input:focus {
+  outline: none;
+  border-color: rgb(92 225 255 / 55%);
+  box-shadow:
+    inset 0 0 0 1px rgb(92 225 255 / 12%),
+    0 0 18px rgb(40 160 220 / 18%);
 }
 
 .voiceModeBar input::placeholder {
-  color: rgb(160 160 168 / 55%);
+  color: rgb(120 160 180 / 42%);
 }
 
 .voiceModeClose {
   display: grid;
   place-items: center;
-  width: 3rem;
-  height: 3rem;
-  border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: 50%;
-  background: rgb(28 28 30 / 92%);
-  color: rgb(220 224 234 / 78%);
+  width: 2.85rem;
+  height: 2.85rem;
+  border: 1px solid rgb(92 225 255 / 22%);
+  border-radius: 0.15rem;
+  background: rgb(4 14 24 / 88%);
+  color: rgb(180 220 236 / 78%);
   cursor: pointer;
 }
 
+.voiceModeClose:hover {
+  border-color: var(--jarvis-amber);
+  color: var(--jarvis-amber);
+}
+
 .voiceModeClose svg {
-  width: 1.05rem;
+  width: 1rem;
   fill: none;
   stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
   stroke-width: 1.5;
 }
 
@@ -910,8 +1214,12 @@
   .thinking > span:not(.sr-only),
   .voiceOrb,
   .voiceMode,
-  .voiceModeOrbCore,
-  .voiceModeOrbHalo,
+  .voiceModeRing,
+  .voiceModeCore,
+  .voiceModeSpokes,
+  .voiceModeWave span,
+  .voiceModeScan,
+  .voiceOrb,
   .loadingState span {
     animation: none;
   }

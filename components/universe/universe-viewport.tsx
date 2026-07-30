@@ -10,11 +10,7 @@ import { createMissionDestinationState } from "@/components/mission-control/miss
 import { buildMissionIntelligence } from "@/components/mission-control/mission-intelligence";
 import type { MissionDestinationId } from "@/components/mission-control/mission-operating-record";
 import { getLocalDateKey } from "@/components/mission-control/mission-operating-record";
-import {
-  MissionOperatingDeck,
-  requestOpenMissionDeck,
-} from "@/components/mission-control/mission-operating-deck";
-import { TodayStrip } from "@/components/mission-control/today-strip";
+import { MissionOperatingDeck } from "@/components/mission-control/mission-operating-deck";
 import { useMissionCloudSync } from "@/components/mission-control/use-mission-cloud-sync";
 import { CommandDock } from "@/components/ui/command-dock";
 import { rememberMissionDestination } from "@/lib/living-universe";
@@ -30,7 +26,6 @@ import {
 } from "./galaxies/university/course-schedule";
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
 import { UniversityOperationsDashboard } from "./galaxies/university/university-operations-dashboard";
-import { deriveUniversityOperationsSummary } from "./galaxies/university/university-operations-summary";
 import { useUniversityRecords } from "./galaxies/university/use-university-records";
 import { hyperbolicTimeChamberDefinition } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-planets";
 import { JiuJitsuReviewDashboard } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-review-dashboard";
@@ -121,7 +116,6 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
   const [focusedSystemId, setFocusedSystemId] = useState<string | null>(null);
   const [hoveredPlanetId, setHoveredPlanetId] = useState<string | null>(null);
   const [focusedPlanetId, setFocusedPlanetId] = useState<string | null>(null);
-  const [incompleteEvidenceRatio, setIncompleteEvidenceRatio] = useState(0);
   const [announcement, setAnnouncement] = useState("");
   const [cameraResetToken, setCameraResetToken] = useState(0);
   const [isCameraSettled, setIsCameraSettled] = useState(true);
@@ -173,9 +167,6 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
   const cloudSync = useMissionCloudSync();
   const { attention: observatoryAttention, markBriefingSeen } =
     useObservatoryAttention(navigationLevel === "universe");
-  const handleVectorStateChange = useCallback((ratio: number) => {
-    setIncompleteEvidenceRatio(ratio);
-  }, []);
   const missionIntelligence = useMemo(
     () =>
       buildMissionIntelligence({
@@ -203,7 +194,6 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
           loading: frenchLearning.isLoading,
           summary: frenchLearning.summary,
         },
-        incompleteEvidenceRatio,
         jiuJitsu: {
           error: trainingStorageError,
           loading: isTrainingLogLoading,
@@ -233,7 +223,6 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
       frenchLearning.isLoading,
       frenchLearning.storageError,
       frenchLearning.summary,
-      incompleteEvidenceRatio,
       isReadingLoading,
       isStrengthLoading,
       isTrainingLogLoading,
@@ -252,30 +241,6 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
       universityRecords.storageError,
     ],
   );
-  const nextDeadlineLabel = useMemo(() => {
-    const summary = deriveUniversityOperationsSummary(
-      universityRecords.assignments,
-    );
-    const next = summary.deadlines[0];
-    if (next === undefined) {
-      return null;
-    }
-
-    const title = next.assignment.title;
-    if (next.urgency === "overdue") {
-      return `Overdue · ${title}`;
-    }
-
-    if (next.daysFromNow <= 0) {
-      return `Due today · ${title}`;
-    }
-
-    if (next.daysFromNow === 1) {
-      return `Due tomorrow · ${title}`;
-    }
-
-    return `Due in ${next.daysFromNow}d · ${title}`;
-  }, [universityRecords.assignments]);
   const emphasizedGalaxyId = hoveredGalaxyId ?? focusedGalaxyId;
   const emphasizedSystemId = hoveredSystemId ?? focusedSystemId;
   const emphasizedPlanetId = hoveredPlanetId ?? focusedPlanetId;
@@ -1066,15 +1031,6 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
           isObservatoryActive ? "Universe" : (selectedGalaxy?.name ?? null)
         }
         selectedSystemId={activeSystemId}
-      />
-
-      <TodayStrip
-        intelligence={missionIntelligence}
-        isVisible={navigationLevel === "universe" && isViewSettled}
-        nextDeadlineLabel={nextDeadlineLabel}
-        onOpenMission={requestOpenMissionDeck}
-        onResumeDestination={handleMissionDestinationNavigate}
-        onVectorStateChange={handleVectorStateChange}
       />
 
       <CommandDock>

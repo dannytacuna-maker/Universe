@@ -6,7 +6,6 @@ export type InterfaceSurfaceId =
   | "observatory"
   | "reading-library"
   | "strength-whis"
-  | "today-orbit"
   | "university-operations"
   | "university-schedule";
 
