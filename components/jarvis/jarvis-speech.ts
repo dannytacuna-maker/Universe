@@ -1,6 +1,6 @@
 "use client";
 
-/** Prefer calm British / formal male voices for an MCU Jarvis feel. */
+/** Prefer calm British / formal male voices for browser fallback. */
 const preferredVoicePatterns = [
   /google uk english male/i,
   /microsoft george/i,
@@ -13,7 +13,10 @@ const preferredVoicePatterns = [
   /uk english/i,
 ] as const;
 
-export function pickJarvisVoice(): SpeechSynthesisVoice | null {
+let activeAudio: HTMLAudioElement | null = null;
+let activeObjectUrl: string | null = null;
+
+function pickJarvisVoice(): SpeechSynthesisVoice | null {
   if (!("speechSynthesis" in window)) return null;
 
   const voices = window.speechSynthesis.getVoices();
@@ -34,7 +37,7 @@ export function pickJarvisVoice(): SpeechSynthesisVoice | null {
   );
 }
 
-export function speakAsJarvis(
+function speakWithBrowser(
   text: string,
   options?: Readonly<{
     onEnd?: () => void;
@@ -58,7 +61,6 @@ export function speakAsJarvis(
   utterance.onend = () => options?.onEnd?.();
   utterance.onerror = () => options?.onEnd?.();
 
-  // Voices can load async in Chromium; retry once if empty.
   if (window.speechSynthesis.getVoices().length === 0) {
     window.speechSynthesis.onvoiceschanged = () => {
       const lateVoice = pickJarvisVoice();
@@ -72,7 +74,92 @@ export function speakAsJarvis(
   window.speechSynthesis.speak(utterance);
 }
 
+async function speakWithElevenLabs(
+  text: string,
+  options?: Readonly<{
+    onEnd?: () => void;
+    onStart?: () => void;
+  }>,
+) {
+  const response = await fetch("/api/jarvis/speech", {
+    body: JSON.stringify({ text }),
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+  });
+
+  if (response.status === 503) {
+    return false;
+  }
+
+  if (!response.ok) {
+    throw new Error("ElevenLabs speech request failed.");
+  }
+
+  const blob = await response.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  const audio = new Audio(objectUrl);
+  activeAudio = audio;
+  activeObjectUrl = objectUrl;
+
+  const cleanup = () => {
+    if (activeObjectUrl === objectUrl) {
+      URL.revokeObjectURL(objectUrl);
+      activeObjectUrl = null;
+    }
+    if (activeAudio === audio) {
+      activeAudio = null;
+    }
+  };
+
+  audio.onplay = () => options?.onStart?.();
+  audio.onended = () => {
+    cleanup();
+    options?.onEnd?.();
+  };
+  audio.onerror = () => {
+    cleanup();
+    options?.onEnd?.();
+  };
+
+  await audio.play();
+  return true;
+}
+
+export async function speakAsJarvis(
+  text: string,
+  options?: Readonly<{
+    onEnd?: () => void;
+    onStart?: () => void;
+  }>,
+) {
+  const trimmed = text.trim();
+  if (trimmed.length === 0) {
+    options?.onEnd?.();
+    return;
+  }
+
+  cancelJarvisSpeech();
+
+  try {
+    const usedElevenLabs = await speakWithElevenLabs(trimmed, options);
+    if (usedElevenLabs) return;
+  } catch (error) {
+    console.error("Jarvis ElevenLabs speech fell back to browser TTS", error);
+  }
+
+  speakWithBrowser(trimmed, options);
+}
+
 export function cancelJarvisSpeech() {
+  if (activeAudio !== null) {
+    activeAudio.pause();
+    activeAudio.src = "";
+    activeAudio = null;
+  }
+  if (activeObjectUrl !== null) {
+    URL.revokeObjectURL(activeObjectUrl);
+    activeObjectUrl = null;
+  }
   if ("speechSynthesis" in window) {
     window.speechSynthesis.cancel();
   }

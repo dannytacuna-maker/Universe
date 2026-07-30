@@ -498,9 +498,11 @@ rather than inventing an answer or silently invoking a paid search provider.
 
 Voice is explicitly activated from the Jarvis composer and never listens passively. It uses
 the browser's speech-recognition capability to submit a transcript through the standard
-authenticated text route, then uses device speech synthesis for the reply. No separate
-audio model, client secret, or paid realtime session exists. Unsupported browsers simply
-omit the microphone control; text chat remains the canonical path.
+authenticated text route. Spoken replies prefer an optional server-side ElevenLabs TTS
+route (`ELEVENLABS_API_KEY`, optional `ELEVENLABS_VOICE_ID`) and fall back to device
+speech synthesis when that key is absent or the request fails. The API key never ships to
+the client. Unsupported browsers simply omit the microphone control; text chat remains the
+canonical path.
 
 Jarvis, University operations, the Jiu-Jitsu logger, and the Time Chamber review participate
 in one typed exclusive-surface event contract. Opening one dismisses the previously open

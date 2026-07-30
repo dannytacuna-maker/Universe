@@ -157,7 +157,7 @@ export function JarvisConversation({
     speakAsJarvis(responseText, {
       onEnd: () => setIsSpeaking(false),
       onStart: () => setIsSpeaking(true),
-    });
+    }).catch(() => setIsSpeaking(false));
   }, [messages, status]);
 
   useEffect(
