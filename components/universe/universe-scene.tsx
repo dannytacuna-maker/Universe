@@ -13,6 +13,7 @@ import { CosmicGuardian } from "./cosmic-guardian";
 import { DeepSpaceBackdrop } from "./deep-space-backdrop";
 import { DistantCelestialStructures } from "./distant-celestial-structures";
 import { EvidenceComet } from "./evidence-comet";
+import { LivingAtmosphere } from "./living-atmosphere";
 import { UniversityGalaxy } from "./galaxies/university-galaxy";
 import { UniversityCourseSystemGroup } from "./galaxies/university/university-course-system-group";
 import { UniversityInteriorField } from "./galaxies/university/university-interior-field";
@@ -144,6 +145,7 @@ export function UniverseScene({
       <fog attach="fog" args={["#01030a", 72, 168]} />
 
       <DeepSpaceBackdrop />
+      <LivingAtmosphere motionEnabled={motionEnabled} />
       <CosmicFilamentField
         insightIntensity={constellationIntensity}
         motionEnabled={motionEnabled}

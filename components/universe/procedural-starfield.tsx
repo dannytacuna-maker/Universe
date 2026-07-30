@@ -3,7 +3,7 @@
 import { PointMaterial, Points } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
-import type { PointsMaterial } from "three";
+import type { Group, PointsMaterial } from "three";
 
 import { createGaussianRandom, createSeededRandom } from "./procedural-random";
 
@@ -182,39 +182,50 @@ function StarLayer({
 }) {
   const data = useMemo(() => createStarLayer(configuration), [configuration]);
   const material = useRef<PointsMaterial>(null);
+  const layer = useRef<Group>(null);
   const sizeScale = 0.15 + presence * 0.85;
   const targetOpacity = configuration.opacity * presence;
   const targetSize = configuration.size * sizeScale;
+  const parallaxRate = 0.0018 + configuration.innerRadius * 0.000012;
 
   useFrame((_, delta) => {
-    if (!motionEnabled || material.current === null) {
+    if (!motionEnabled) {
       return;
     }
 
-    const damping = 1 - Math.exp(-Math.min(delta, 0.075) * 1.35);
+    const safeDelta = Math.min(delta, 0.075);
+
+    if (layer.current !== null) {
+      layer.current.rotation.y += safeDelta * parallaxRate;
+      layer.current.rotation.x += safeDelta * parallaxRate * 0.28;
+    }
+
+    if (material.current === null) {
+      return;
+    }
+
+    const damping = 1 - Math.exp(-safeDelta * 1.35);
     material.current.opacity +=
       (targetOpacity - material.current.opacity) * damping;
     material.current.size += (targetSize - material.current.size) * damping;
   });
 
   return (
-    <Points
-      colors={data.colors}
-      positions={data.positions}
-      rotation={configuration.rotation}
-    >
-      <PointMaterial
-        depthWrite={false}
-        fog
-        opacity={motionEnabled ? configuration.opacity : targetOpacity}
-        ref={material}
-        size={motionEnabled ? configuration.size : targetSize}
-        sizeAttenuation
-        toneMapped={false}
-        transparent
-        vertexColors
-      />
-    </Points>
+    <group ref={layer} rotation={configuration.rotation}>
+      <Points colors={data.colors} positions={data.positions}>
+        <PointMaterial
+          depthWrite={false}
+          fog
+          opacity={motionEnabled ? configuration.opacity : targetOpacity}
+          ref={material}
+          size={motionEnabled ? configuration.size : targetSize}
+          sizeAttenuation
+          toneMapped={false}
+          transparent
+          vertexColors
+        />
+      </Points>
+    </group>
   );
 }
 

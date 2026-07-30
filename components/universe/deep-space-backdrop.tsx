@@ -50,11 +50,16 @@ const fragmentShader = /* glsl */ `
     );
 
     vec3 base = vec3(0.0020, 0.0040, 0.0100);
-    vec3 coolVariation = vec3(0.0120, 0.0250, 0.0550) * upperField;
-    vec3 deepVariation = vec3(0.0080, 0.0160, 0.0340) * lowerField;
-    vec3 planeVariation = vec3(0.0040, 0.0080, 0.0170) * distantPlane;
-    vec3 blueCurrentColor = vec3(0.0120, 0.0350, 0.0750) * blueCurrent;
-    vec3 violetCurrentColor = vec3(0.0180, 0.0180, 0.0520) * violetCurrent;
+    vec3 coolVariation = vec3(0.0140, 0.0280, 0.0600) * upperField;
+    vec3 deepVariation = vec3(0.0100, 0.0180, 0.0380) * lowerField;
+    vec3 planeVariation = vec3(0.0050, 0.0100, 0.0200) * distantPlane;
+    vec3 blueCurrentColor = vec3(0.0140, 0.0400, 0.0820) * blueCurrent;
+    vec3 violetCurrentColor = vec3(0.0220, 0.0200, 0.0580) * violetCurrent;
+    float roseVeil = pow(
+      max(dot(direction, normalize(vec3(0.42, 0.12, -0.9))), 0.0),
+      6.2
+    );
+    vec3 roseCurrentColor = vec3(0.0280, 0.0140, 0.0360) * roseVeil;
 
     vec3 background =
       base +
@@ -62,7 +67,8 @@ const fragmentShader = /* glsl */ `
       deepVariation +
       planeVariation +
       blueCurrentColor +
-      violetCurrentColor;
+      violetCurrentColor +
+      roseCurrentColor;
 
     gl_FragColor = vec4(max(background, vec3(0.0007, 0.0013, 0.0031)), 1.0);
   }
