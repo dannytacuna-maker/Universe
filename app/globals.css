@@ -635,6 +635,10 @@ body {
   animation: university-schedule-arrival 640ms var(--universe-ease) both;
 }
 
+.university-weekly-schedule[data-expanded="false"] {
+  width: min(22rem, calc(100vw - 12rem));
+}
+
 @keyframes university-schedule-arrival {
   from {
     transform: translate(-50%, -0.4rem);
@@ -657,10 +661,47 @@ body {
   border-bottom: 1px solid rgb(133 167 197 / 8%);
 }
 
+.university-weekly-schedule[data-expanded="false"] > header {
+  border-bottom-color: transparent;
+}
+
 .university-weekly-schedule > header div {
   display: flex;
   align-items: baseline;
   gap: 0.7rem;
+}
+
+.university-weekly-schedule__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.university-weekly-schedule__toggle {
+  appearance: none;
+  min-height: 2rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid rgb(133 167 197 / 14%);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: rgb(189 210 226 / 78%);
+  font: inherit;
+  font-size: 0.5rem;
+  font-weight: 540;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.university-weekly-schedule__toggle:hover,
+.university-weekly-schedule__toggle:focus-visible {
+  border-color: rgb(139 180 212 / 32%);
+  background: rgb(87 153 202 / 8%);
+}
+
+.university-weekly-schedule__toggle:focus-visible {
+  outline: 1px solid rgb(139 180 212 / 52%);
+  outline-offset: 0.12rem;
 }
 
 .university-weekly-schedule > header span,

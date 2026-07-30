@@ -28,7 +28,7 @@ export const globalObservatoryDefinition: ObservatoryDefinition = {
   cameraPosition: [0.9, -3.02, -9.05],
   description:
     "A weekly intelligence station translating verified world developments into a concise, source-grounded briefing.",
-  descriptor: "Weekly World Intelligence",
+  descriptor: "Global insight. Clear mind.",
   galaxyId: null,
   id: "global-observatory",
   name: "The Observatory",

@@ -41,7 +41,7 @@ export function ObservatoryLabel({
         {globalObservatoryDefinition.name}
       </span>
       <span aria-hidden="true" className="course-system-label__preview">
-        Weekly world intelligence
+        {globalObservatoryDefinition.descriptor}
       </span>
       <span className="sr-only" id={descriptionId}>
         {globalObservatoryDefinition.description} Activate to enter the station.

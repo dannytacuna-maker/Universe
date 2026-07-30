@@ -19,6 +19,7 @@ import {
 } from "@/lib/jarvis";
 
 import styles from "./jarvis.module.css";
+import { cancelJarvisSpeech, speakAsJarvis } from "./jarvis-speech";
 import { JarvisVoiceSession } from "./jarvis-voice-session";
 
 const modeLabels: Record<JarvisMode, string> = {
@@ -64,6 +65,8 @@ export function JarvisConversation({
 }: JarvisConversationProps) {
   const [input, setInput] = useState("");
   const [mode, setMode] = useState(thread.mode);
+  const [voiceSessionActive, setVoiceSessionActive] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const messageListRef = useRef<HTMLDivElement>(null);
   const shouldSpeakResponseRef = useRef(false);
   const transport = useMemo(
@@ -89,6 +92,7 @@ export function JarvisConversation({
     transport,
   });
   const isBusy = status === "streaming" || status === "submitted";
+  const voiceBusy = isBusy || isSpeaking;
 
   useEffect(() => {
     const messageList = messageListRef.current;
@@ -114,11 +118,14 @@ export function JarvisConversation({
     const text = input.trim();
     if (!text || isBusy) return;
     setInput("");
+    if (voiceSessionActive) {
+      shouldSpeakResponseRef.current = true;
+    }
     void sendMessage({ text });
   };
 
   const submitVoiceMessage = (transcript: string) => {
-    if (!transcript.trim() || isBusy) return;
+    if (!transcript.trim() || voiceBusy) return;
     shouldSpeakResponseRef.current = true;
     void sendMessage({ text: transcript.trim() });
   };
@@ -144,14 +151,17 @@ export function JarvisConversation({
       .trim();
 
     shouldSpeakResponseRef.current = false;
-    if (!responseText || !("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(new SpeechSynthesisUtterance(responseText));
+    if (!responseText) return;
+
+    speakAsJarvis(responseText, {
+      onEnd: () => setIsSpeaking(false),
+      onStart: () => setIsSpeaking(true),
+    });
   }, [messages, status]);
 
   useEffect(
     () => () => {
-      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+      cancelJarvisSpeech();
     },
     [],
   );
@@ -191,10 +201,11 @@ export function JarvisConversation({
             <span aria-hidden="true" className={styles.emptyMark}>
               J
             </span>
-            <h2>How can I help?</h2>
+            <h2>At your service</h2>
             <p>
-              Ask a quick question, think through a decision, or review your
-              synchronized Mission Control records.
+              Ask anything — planning, writing, study, decisions — or open a
+              voice channel and speak naturally. I can also review your Mission
+              Control records when useful.
             </p>
           </div>
         ) : null}
@@ -261,14 +272,16 @@ export function JarvisConversation({
           maxLength={8_000}
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={handleInputKeyDown}
-          placeholder="Ask Jarvis"
+          placeholder="Ask Jarvis anything…"
           rows={1}
           value={input}
         />
         <div className={styles.composerActions}>
           <JarvisVoiceSession
-            disabled={isBusy}
+            disabled={voiceBusy}
+            onSessionActiveChange={setVoiceSessionActive}
             onTranscript={submitVoiceMessage}
+            sessionActive={voiceSessionActive}
           />
           {isBusy ? (
             <button

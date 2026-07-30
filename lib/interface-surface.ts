@@ -6,7 +6,9 @@ export type InterfaceSurfaceId =
   | "observatory"
   | "reading-library"
   | "strength-whis"
-  | "university-operations";
+  | "today-orbit"
+  | "university-operations"
+  | "university-schedule";
 
 const interfaceSurfaceEvent = "mission-control:interface-surface";
 

@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import { createPortal } from "react-dom";
 
 import type {
   JarvisMode,
@@ -17,6 +24,7 @@ import { useModifierKeyLabel } from "@/lib/modifier-key-label";
 
 import { JarvisConversation } from "./jarvis-conversation";
 import styles from "./jarvis.module.css";
+import { cancelJarvisSpeech } from "./jarvis-speech";
 
 type JarvisDockProps = Readonly<{
   context: JarvisNavigationContext;
@@ -37,6 +45,11 @@ export function JarvisDock({ context }: JarvisDockProps) {
   const [threads, setThreads] = useState<JarvisThreadSummary[]>([]);
   const [activeThread, setActiveThread] = useState<JarvisThread | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const hasMounted = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  );
   const launcherRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
@@ -138,6 +151,7 @@ export function JarvisDock({ context }: JarvisDockProps) {
   const closeJarvis = useCallback(() => {
     setIsOpen(false);
     setShowHistory(false);
+    cancelJarvisSpeech();
     window.setTimeout(() => launcherRef.current?.focus(), 0);
   }, []);
 
@@ -147,6 +161,7 @@ export function JarvisDock({ context }: JarvisDockProps) {
         if (surfaceId === "jarvis") return;
         setIsOpen(false);
         setShowHistory(false);
+        cancelJarvisSpeech();
       }),
     [],
   );
@@ -187,16 +202,141 @@ export function JarvisDock({ context }: JarvisDockProps) {
     else await createThread();
   };
 
+  const panel =
+    isOpen && hasMounted
+      ? createPortal(
+          <aside
+            aria-label="Jarvis assistant"
+            aria-modal="true"
+            className={styles.panel}
+            ref={panelRef}
+            role="dialog"
+          >
+            <header className={styles.header}>
+              <div className={styles.identity}>
+                <span aria-hidden="true" className={styles.identityMark}>
+                  J
+                </span>
+                <div>
+                  <strong>Jarvis</strong>
+                  <span>At your service</span>
+                </div>
+              </div>
+              <div className={styles.headerActions}>
+                <button
+                  aria-expanded={showHistory}
+                  aria-label="Conversation history"
+                  className={styles.iconButton}
+                  onClick={() => setShowHistory((current) => !current)}
+                  type="button"
+                >
+                  <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2" />
+                  </svg>
+                </button>
+                <button
+                  aria-label="New conversation"
+                  className={styles.iconButton}
+                  onClick={() =>
+                    void createThread(activeThread?.mode ?? "quick")
+                  }
+                  type="button"
+                >
+                  <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                </button>
+                <button
+                  aria-label="Close Jarvis"
+                  className={styles.iconButton}
+                  onClick={closeJarvis}
+                  ref={closeButtonRef}
+                  type="button"
+                >
+                  <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="m6 6 12 12M18 6 6 18" />
+                  </svg>
+                </button>
+              </div>
+            </header>
+
+            {showHistory ? (
+              <div className={styles.historyPanel}>
+                <div className={styles.historyHeading}>
+                  <strong>Conversations</strong>
+                  {activeThread ? (
+                    <button
+                      onClick={() => void archiveActiveThread()}
+                      type="button"
+                    >
+                      Archive current
+                    </button>
+                  ) : null}
+                </div>
+                <div className={styles.threadList}>
+                  {threads.map((thread) => (
+                    <button
+                      aria-current={activeThread?.id === thread.id}
+                      key={thread.id}
+                      onClick={() => void selectThread(thread.id)}
+                      type="button"
+                    >
+                      <span>{thread.title}</span>
+                      <small>
+                        {formatThreadDate(thread.updatedAt)} ·{" "}
+                        {thread.messageCount}
+                      </small>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <div className={styles.panelBody}>
+              {isLoading ? (
+                <div className={styles.loadingState}>
+                  <span aria-hidden="true" />
+                  Connecting Jarvis
+                </div>
+              ) : !isConfigured ? (
+                <div className={styles.unavailableState}>
+                  <strong>Jarvis is awaiting connection</strong>
+                  <p>
+                    Mission Control could not reach its synchronized records.
+                  </p>
+                </div>
+              ) : errorMessage ? (
+                <div className={styles.unavailableState}>
+                  <strong>Jarvis is temporarily unavailable</strong>
+                  <p>{errorMessage}</p>
+                  <button onClick={() => void prepareJarvis()} type="button">
+                    Try again
+                  </button>
+                </div>
+              ) : activeThread ? (
+                <JarvisConversation
+                  context={context}
+                  key={activeThread.id}
+                  onThreadUpdated={() => void loadThreads()}
+                  thread={activeThread}
+                />
+              ) : null}
+            </div>
+          </aside>,
+          document.body,
+        )
+      : null;
+
   return (
     <>
       <button
         aria-expanded={isOpen}
         aria-haspopup="dialog"
-        aria-label="Open Jarvis. Ask about Mission Control and the weekly briefing."
+        aria-label="Open Jarvis. Ask anything or start a voice session."
         className={`${styles.launcher} jarvis-dock-launcher`}
         onClick={openJarvis}
         ref={launcherRef}
-        title="Ask about Mission Control and the weekly briefing"
+        title="Ask Jarvis anything"
         type="button"
       >
         <span aria-hidden="true" className={styles.launcherCore}>
@@ -209,122 +349,7 @@ export function JarvisDock({ context }: JarvisDockProps) {
         </kbd>
       </button>
 
-      {isOpen ? (
-        <aside
-          aria-label="Jarvis assistant"
-          aria-modal="true"
-          className={styles.panel}
-          ref={panelRef}
-          role="dialog"
-        >
-          <header className={styles.header}>
-            <div className={styles.identity}>
-              <span aria-hidden="true" className={styles.identityMark}>
-                J
-              </span>
-              <div>
-                <strong>Jarvis</strong>
-                <span>Mission intelligence</span>
-              </div>
-            </div>
-            <div className={styles.headerActions}>
-              <button
-                aria-expanded={showHistory}
-                aria-label="Conversation history"
-                className={styles.iconButton}
-                onClick={() => setShowHistory((current) => !current)}
-                type="button"
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24">
-                  <path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2" />
-                </svg>
-              </button>
-              <button
-                aria-label="New conversation"
-                className={styles.iconButton}
-                onClick={() => void createThread(activeThread?.mode ?? "quick")}
-                type="button"
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
-              </button>
-              <button
-                aria-label="Close Jarvis"
-                className={styles.iconButton}
-                onClick={closeJarvis}
-                ref={closeButtonRef}
-                type="button"
-              >
-                <svg aria-hidden="true" viewBox="0 0 24 24">
-                  <path d="m6 6 12 12M18 6 6 18" />
-                </svg>
-              </button>
-            </div>
-          </header>
-
-          {showHistory ? (
-            <div className={styles.historyPanel}>
-              <div className={styles.historyHeading}>
-                <strong>Conversations</strong>
-                {activeThread ? (
-                  <button
-                    onClick={() => void archiveActiveThread()}
-                    type="button"
-                  >
-                    Archive current
-                  </button>
-                ) : null}
-              </div>
-              <div className={styles.threadList}>
-                {threads.map((thread) => (
-                  <button
-                    aria-current={activeThread?.id === thread.id}
-                    key={thread.id}
-                    onClick={() => void selectThread(thread.id)}
-                    type="button"
-                  >
-                    <span>{thread.title}</span>
-                    <small>
-                      {formatThreadDate(thread.updatedAt)} ·{" "}
-                      {thread.messageCount}
-                    </small>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
-          <div className={styles.panelBody}>
-            {isLoading ? (
-              <div className={styles.loadingState}>
-                <span aria-hidden="true" />
-                Connecting Jarvis
-              </div>
-            ) : !isConfigured ? (
-              <div className={styles.unavailableState}>
-                <strong>Jarvis is awaiting connection</strong>
-                <p>Mission Control could not reach its synchronized records.</p>
-              </div>
-            ) : errorMessage ? (
-              <div className={styles.unavailableState}>
-                <strong>Jarvis is temporarily unavailable</strong>
-                <p>{errorMessage}</p>
-                <button onClick={() => void prepareJarvis()} type="button">
-                  Try again
-                </button>
-              </div>
-            ) : activeThread ? (
-              <JarvisConversation
-                context={context}
-                key={activeThread.id}
-                onThreadUpdated={() => void loadThreads()}
-                thread={activeThread}
-              />
-            ) : null}
-          </div>
-        </aside>
-      ) : null}
+      {panel}
     </>
   );
 }

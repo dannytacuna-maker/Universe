@@ -16,6 +16,10 @@ import {
 } from "@/components/mission-control/mission-operating-record";
 import { useMissionOperatingSystem } from "@/components/mission-control/use-mission-operating-system";
 import {
+  activateInterfaceSurface,
+  subscribeToInterfaceSurfaces,
+} from "@/lib/interface-surface";
+import {
   getLastMissionDestination,
   getSeenWeeklyCeremonyWeek,
   requestEvidenceComet,
@@ -48,6 +52,7 @@ export function TodayStrip({
   onVectorStateChange,
 }: TodayStripProps) {
   const operatingSystem = useMissionOperatingSystem(intelligence.activityDates);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [captureText, setCaptureText] = useState("");
   const [feedback, setFeedback] = useState("");
   const [pendingCycleId, setPendingCycleId] = useState<string | null>(null);
@@ -81,6 +86,15 @@ export function TodayStrip({
   useEffect(() => {
     onVectorStateChange?.(incompleteEvidenceRatio);
   }, [incompleteEvidenceRatio, onVectorStateChange]);
+
+  useEffect(
+    () =>
+      subscribeToInterfaceSurfaces((surfaceId) => {
+        if (surfaceId === "today-orbit") return;
+        setIsExpanded(false);
+      }),
+    [],
+  );
 
   if (!isVisible) {
     return null;
@@ -143,10 +157,19 @@ export function TodayStrip({
     }
   };
 
+  const toggleExpanded = () => {
+    setIsExpanded((current) => {
+      const next = !current;
+      if (next) activateInterfaceSurface("today-orbit");
+      return next;
+    });
+  };
+
   return (
     <section
       aria-label="Today orbit"
       className={styles.strip}
+      data-expanded={isExpanded}
       data-loading={operatingSystem.isLoading}
     >
       <header className={styles.header}>
@@ -158,81 +181,100 @@ export function TodayStrip({
               : `${evidencedCount}/${totalCycles} evidenced`}
           </strong>
         </div>
-        {nextDeadlineLabel !== null ? (
-          <p className={styles.deadline}>{nextDeadlineLabel}</p>
-        ) : (
-          <p className={styles.deadline}>No university deadlines this week</p>
-        )}
+        <div className={styles.headerMeta}>
+          {isExpanded ? (
+            nextDeadlineLabel !== null ? (
+              <p className={styles.deadline}>{nextDeadlineLabel}</p>
+            ) : (
+              <p className={styles.deadline}>
+                No university deadlines this week
+              </p>
+            )
+          ) : null}
+          <button
+            aria-controls="today-orbit-content"
+            aria-expanded={isExpanded}
+            className={styles.toggle}
+            onClick={toggleExpanded}
+            type="button"
+          >
+            {isExpanded ? "Minimize" : "Open"}
+          </button>
+        </div>
       </header>
 
-      {resumeLabel !== null &&
-      resumeId !== null &&
-      onResumeDestination !== undefined ? (
-        <button
-          className={styles.resume}
-          onClick={() => onResumeDestination(resumeId)}
-          type="button"
-        >
-          <span>Resume</span>
-          <strong>{resumeLabel}</strong>
-        </button>
-      ) : null}
-
-      {showCeremonyNudge ? (
-        <button
-          className={styles.ceremony}
-          onClick={() => requestOpenMissionDeckPanel("review")}
-          type="button"
-        >
-          End-of-week ceremony available
-        </button>
-      ) : null}
-
-      <div className={styles.cycles}>
-        {operatingSystem.currentVector.length === 0 ? (
-          <p className={styles.empty}>
-            Open Mission to set up to three active cycles.
-          </p>
-        ) : (
-          operatingSystem.currentVector.map((item) => (
+      {isExpanded ? (
+        <div className={styles.body} id="today-orbit-content">
+          {resumeLabel !== null &&
+          resumeId !== null &&
+          onResumeDestination !== undefined ? (
             <button
-              aria-pressed={item.isCompleteToday}
-              disabled={pendingCycleId === item.cycle.id}
-              key={item.cycle.id}
-              onClick={() => void handleEvidence(item.cycle.id)}
+              className={styles.resume}
+              onClick={() => onResumeDestination(resumeId)}
               type="button"
             >
-              <i data-complete={item.isCompleteToday} />
-              <span>{item.cycle.title}</span>
+              <span>Resume</span>
+              <strong>{resumeLabel}</strong>
             </button>
-          ))
-        )}
-      </div>
+          ) : null}
 
-      <form
-        className={styles.capture}
-        onSubmit={(event) => void handleCapture(event)}
-      >
-        <label className={styles.srOnly} htmlFor="today-orbit-capture">
-          Quick capture
-        </label>
-        <input
-          id="today-orbit-capture"
-          onChange={(event) => setCaptureText(event.target.value)}
-          placeholder="Capture a thought…"
-          value={captureText}
-        />
-        <button disabled={captureText.trim().length === 0} type="submit">
-          Save
-        </button>
-      </form>
+          {showCeremonyNudge ? (
+            <button
+              className={styles.ceremony}
+              onClick={() => requestOpenMissionDeckPanel("review")}
+              type="button"
+            >
+              End-of-week ceremony available
+            </button>
+          ) : null}
 
-      <div className={styles.footer}>
-        <p aria-live="polite">{feedback}</p>
-        <button onClick={onOpenMission} type="button">
-          Open Mission
-        </button>
-      </div>
+          <div className={styles.cycles}>
+            {operatingSystem.currentVector.length === 0 ? (
+              <p className={styles.empty}>
+                Open Mission to set up to three active cycles.
+              </p>
+            ) : (
+              operatingSystem.currentVector.map((item) => (
+                <button
+                  aria-pressed={item.isCompleteToday}
+                  disabled={pendingCycleId === item.cycle.id}
+                  key={item.cycle.id}
+                  onClick={() => void handleEvidence(item.cycle.id)}
+                  type="button"
+                >
+                  <i data-complete={item.isCompleteToday} />
+                  <span>{item.cycle.title}</span>
+                </button>
+              ))
+            )}
+          </div>
+
+          <form
+            className={styles.capture}
+            onSubmit={(event) => void handleCapture(event)}
+          >
+            <label className={styles.srOnly} htmlFor="today-orbit-capture">
+              Quick capture
+            </label>
+            <input
+              id="today-orbit-capture"
+              onChange={(event) => setCaptureText(event.target.value)}
+              placeholder="Capture a thought…"
+              value={captureText}
+            />
+            <button disabled={captureText.trim().length === 0} type="submit">
+              Save
+            </button>
+          </form>
+
+          <div className={styles.footer}>
+            <p aria-live="polite">{feedback}</p>
+            <button onClick={onOpenMission} type="button">
+              Open Mission
+            </button>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
