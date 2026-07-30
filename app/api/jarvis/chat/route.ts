@@ -78,19 +78,48 @@ function getMessageTextLength(message: UIMessage) {
   );
 }
 
+function getNestedErrors(error: unknown): unknown[] {
+  if (typeof error !== "object" || error === null) return [];
+  const candidate = error as { errors?: unknown; lastError?: unknown };
+  const nested: unknown[] = [];
+  if (Array.isArray(candidate.errors)) nested.push(...candidate.errors);
+  if (candidate.lastError !== undefined) nested.push(candidate.lastError);
+  return nested;
+}
+
 function describeJarvisStreamError(error: unknown) {
   console.error("Jarvis response failed", error);
 
-  if (GatewayError.isInstance(error)) {
-    if (error.statusCode === 429) {
-      return "Request volume is high right now. Wait a moment and continue.";
+  const queue = [error, ...getNestedErrors(error)];
+  for (const candidate of queue) {
+    if (GatewayError.isInstance(candidate)) {
+      if (candidate.statusCode === 429) {
+        return "Free AI capacity is rate-limited right now. Wait a minute, or top up Vercel AI Gateway credits.";
+      }
+      if (candidate.statusCode === 402) {
+        return "The intelligence route is temporarily unavailable. Try again shortly.";
+      }
+      return "Jarvis could not reach the intelligence service. Try again shortly.";
     }
 
-    if (error.statusCode === 402) {
-      return "The intelligence route is temporarily unavailable. Try again shortly.";
+    if (
+      typeof candidate === "object" &&
+      candidate !== null &&
+      "statusCode" in candidate &&
+      (candidate as { statusCode?: number }).statusCode === 429
+    ) {
+      return "Free AI capacity is rate-limited right now. Wait a minute, or top up Vercel AI Gateway credits.";
     }
 
-    return "Jarvis could not reach the intelligence service. Try again shortly.";
+    const message =
+      candidate instanceof Error
+        ? candidate.message
+        : typeof candidate === "string"
+          ? candidate
+          : "";
+    if (/rate[_ -]?limit/i.test(message) || /rate-limited/i.test(message)) {
+      return "Free AI capacity is rate-limited right now. Wait a minute, or top up Vercel AI Gateway credits.";
+    }
   }
 
   return "That response did not complete. Try again.";
