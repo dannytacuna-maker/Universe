@@ -16,29 +16,71 @@ import {
   globalObservatoryDefinition,
   type ObservatoryDefinition,
 } from "./observatory-definition";
-import { ObservatoryCrystallineCore } from "./observatory-visuals";
 
-const PERIMETER_LIGHT_COUNT = 12;
-const SUPPORT_COUNT = 4;
+function buildWindowLights() {
+  const lights: Array<
+    Readonly<{ position: readonly [number, number, number] }>
+  > = [];
 
-const perimeterLights = Array.from(
-  { length: PERIMETER_LIGHT_COUNT },
-  (_, index) => {
-    const angle = (index / PERIMETER_LIGHT_COUNT) * Math.PI * 2;
+  for (let band = 0; band < 7; band += 1) {
+    const y = -0.52 + band * 0.15;
+    const radius = Math.sqrt(Math.max(0.04, 0.78 * 0.78 - y * y));
+    const count = 18 + (band % 3) * 4;
+    for (let index = 0; index < count; index += 1) {
+      if ((index + band) % 5 === 0) continue;
+      const angle = (index / count) * Math.PI * 2 + band * 0.08;
+      lights.push({
+        position: [
+          Math.cos(angle) * radius,
+          y,
+          Math.sin(angle) * radius,
+        ] as const,
+      });
+    }
+  }
+
+  for (let index = 0; index < 36; index += 1) {
+    if (index % 4 === 0) continue;
+    const angle = (index / 36) * Math.PI * 2;
+    lights.push({
+      position: [
+        Math.cos(angle) * 1.08,
+        0.02 + (index % 3) * 0.04 - 0.04,
+        Math.sin(angle) * 1.08,
+      ] as const,
+    });
+  }
+
+  return lights;
+}
+
+function buildRingModules() {
+  return Array.from({ length: 16 }, (_, index) => {
+    const angle = (index / 16) * Math.PI * 2;
     return {
       angle,
-      position: [Math.cos(angle) * 0.92, 0.08, Math.sin(angle) * 0.92] as const,
+      position: [Math.cos(angle) * 1.05, 0, Math.sin(angle) * 1.05] as const,
     };
-  },
-);
+  });
+}
 
-const supportLegs = Array.from({ length: SUPPORT_COUNT }, (_, index) => {
-  const angle = (index / SUPPORT_COUNT) * Math.PI * 2 + Math.PI / 4;
-  return {
-    angle,
-    position: [Math.cos(angle) * 0.58, -0.42, Math.sin(angle) * 0.58] as const,
-  };
-});
+function buildPanelSeams() {
+  return Array.from({ length: 12 }, (_, index) => {
+    const angle = (index / 12) * Math.PI * 2;
+    return {
+      angle,
+      position: [
+        Math.cos(angle) * 0.795,
+        0.08,
+        Math.sin(angle) * 0.795,
+      ] as const,
+    };
+  });
+}
+
+const windowLights = buildWindowLights();
+const ringModules = buildRingModules();
+const panelSeams = buildPanelSeams();
 
 export type GlobalObservatoryProps = Readonly<{
   briefingPulse?: number;
@@ -65,16 +107,15 @@ export function GlobalObservatory({
 }: GlobalObservatoryProps) {
   const station = useRef<Group>(null);
   const root = useRef<Group>(null);
-  const coreLight = useRef<PointLight>(null);
-  const pulseGlow = useRef<Mesh>(null);
+  const rimLight = useRef<PointLight>(null);
+  const beacon = useRef<Mesh>(null);
   const pulsePhase = useRef(0);
 
   useCursor(isHovered && isInteractive, "pointer", "auto");
 
   const emphasis = isEmphasized ? 1 : 0;
-  const hoverLift = isHovered ? 0.12 : 0;
+  const hoverLift = isHovered ? 0.08 : 0;
   const palette = definition.palette;
-  const presence = 0.9 + emphasis * 0.1 + hoverLift;
 
   useFrame((_, delta) => {
     if (!motionEnabled || !isVisible) return;
@@ -82,7 +123,7 @@ export function GlobalObservatory({
     const safeDelta = Math.min(delta, 0.075);
 
     if (station.current !== null) {
-      station.current.rotation.y += safeDelta * 0.007;
+      station.current.rotation.y += safeDelta * 0.0045;
     }
 
     const pulse =
@@ -91,24 +132,24 @@ export function GlobalObservatory({
         : 0;
 
     if (briefingPulse > 0.05) {
-      pulsePhase.current += safeDelta * (1.4 + briefingPulse * 1.8);
+      pulsePhase.current += safeDelta * (1.2 + briefingPulse * 1.4);
     }
 
     if (root.current !== null) {
-      const nextScale =
+      root.current.scale.setScalar(
         definition.scale *
-        (1 + emphasis * 0.04 + hoverLift * 0.015 + pulse * 0.03);
-      root.current.scale.setScalar(nextScale);
+          (1 + emphasis * 0.03 + hoverLift * 0.012 + pulse * 0.02),
+      );
     }
 
-    if (coreLight.current !== null) {
-      coreLight.current.intensity = 3.4 + emphasis * 1.1 + pulse * 0.9;
+    if (rimLight.current !== null) {
+      rimLight.current.intensity = 1.1 + emphasis * 0.35 + pulse * 0.4;
     }
 
-    if (pulseGlow.current !== null) {
-      const material = pulseGlow.current.material;
+    if (beacon.current !== null) {
+      const material = beacon.current.material;
       if (!Array.isArray(material) && "opacity" in material) {
-        material.opacity = 0.04 + pulse * 0.1;
+        material.opacity = 0.35 + pulse * 0.35 + emphasis * 0.1;
       }
     }
   });
@@ -118,7 +159,7 @@ export function GlobalObservatory({
       position={definition.position}
       ref={root}
       rotation={definition.orientation}
-      scale={definition.scale * (1 + emphasis * 0.04 + hoverLift * 0.015)}
+      scale={definition.scale * (1 + emphasis * 0.03 + hoverLift * 0.012)}
       visible={isVisible}
     >
       <SpatialLabelAnchor
@@ -126,263 +167,208 @@ export function GlobalObservatory({
         enabled={isInteractive && isVisible}
       />
 
+      {/* Cool rim from above-left — cinematic, not neon */}
       <pointLight
-        color={palette.core}
+        color="#c8d4e4"
         decay={2}
-        distance={5.2}
-        intensity={3.4 + emphasis * 1.1}
-        position={[0.15, 0.75, 1.35]}
-        ref={coreLight}
+        distance={6.5}
+        intensity={1.15 + emphasis * 0.35}
+        position={[-1.6, 2.1, 1.8]}
+        ref={rimLight}
       />
       <pointLight
-        color={palette.aperture}
+        color="#f0d8a8"
         decay={2}
-        distance={4.2}
-        intensity={1.45 + emphasis * 0.5}
-        position={[-0.9, 0.2, 0.85]}
-      />
-      <pointLight
-        color={palette.beacon}
-        decay={2}
-        distance={3.4}
-        intensity={0.85}
-        position={[0.05, 1.65, 0.1]}
+        distance={3.8}
+        intensity={0.55}
+        position={[0.2, 0.05, 1.4]}
       />
 
       <group ref={station}>
-        {/* Habitat drum */}
-        <mesh position={[0, -0.08, 0]}>
-          <cylinderGeometry args={[0.72, 0.78, 0.55, 48]} />
+        {/* Main habitat sphere — dark gunmetal */}
+        <mesh>
+          <sphereGeometry args={[0.78, 64, 48]} />
           <meshStandardMaterial
-            color={palette.metalDark}
-            emissive="#0a1218"
-            emissiveIntensity={0.28}
-            metalness={0.96}
+            color="#12161c"
+            emissive="#07090c"
+            emissiveIntensity={0.18}
+            metalness={0.92}
+            roughness={0.48}
+          />
+        </mesh>
+
+        {/* Upper dome plating — slightly lighter rim catch */}
+        <mesh position={[0, 0.12, 0]}>
+          <sphereGeometry
+            args={[0.782, 48, 24, 0, Math.PI * 2, 0, Math.PI / 2.15]}
+          />
+          <meshStandardMaterial
+            color="#1a2028"
+            emissive="#0a0e14"
+            emissiveIntensity={0.12}
+            metalness={0.94}
+            roughness={0.4}
+          />
+        </mesh>
+
+        {/* Equatorial groove */}
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.78, 0.012, 8, 96]} />
+          <meshStandardMaterial
+            color="#0a0c10"
+            metalness={0.9}
+            roughness={0.55}
+          />
+        </mesh>
+
+        {/* Thick structural ring */}
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[1.05, 0.11, 16, 96]} />
+          <meshStandardMaterial
+            color="#161b22"
+            emissive="#080a0e"
+            emissiveIntensity={0.15}
+            metalness={0.93}
+            roughness={0.42}
+          />
+        </mesh>
+
+        {/* Ring outer rail */}
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[1.15, 0.028, 10, 96]} />
+          <meshStandardMaterial
+            color="#222830"
+            metalness={0.95}
             roughness={0.34}
           />
         </mesh>
 
-        {/* Mid belt */}
-        <mesh position={[0, 0.12, 0]}>
-          <cylinderGeometry args={[0.74, 0.74, 0.08, 48]} />
-          <meshStandardMaterial
-            color={palette.metalLight}
-            emissive="#152028"
-            emissiveIntensity={0.22}
-            metalness={0.97}
-            roughness={0.22}
-          />
-        </mesh>
+        {ringModules.map((module) => (
+          <group
+            key={module.angle}
+            position={module.position}
+            rotation={[0, -module.angle, 0]}
+          >
+            <mesh>
+              <boxGeometry args={[0.22, 0.14, 0.12]} />
+              <meshStandardMaterial
+                color="#14181f"
+                metalness={0.92}
+                roughness={0.4}
+              />
+            </mesh>
+            <mesh position={[0.12, 0.09, 0]}>
+              <boxGeometry args={[0.04, 0.05, 0.03]} />
+              <meshStandardMaterial
+                color="#1c222a"
+                metalness={0.9}
+                roughness={0.36}
+              />
+            </mesh>
+            {(module.angle * 10) % 3 < 1.2 ? (
+              <mesh position={[0.14, 0.16, 0]}>
+                <cylinderGeometry args={[0.008, 0.008, 0.18, 6]} />
+                <meshStandardMaterial
+                  color={palette.metalLight}
+                  metalness={0.95}
+                  roughness={0.28}
+                />
+              </mesh>
+            ) : null}
+          </group>
+        ))}
 
-        {/* Central dome */}
-        <mesh position={[0, 0.34, 0]}>
-          <sphereGeometry
-            args={[0.58, 40, 24, 0, Math.PI * 2, 0, Math.PI / 2]}
-          />
-          <meshStandardMaterial
-            color="#1a2834"
-            emissive={palette.signal}
-            emissiveIntensity={0.08 + emphasis * 0.05}
-            metalness={0.88}
-            roughness={0.28}
-          />
-        </mesh>
+        {/* Panel seam ribs */}
+        {panelSeams.map((seam) => (
+          <mesh
+            key={seam.angle}
+            position={seam.position}
+            rotation={[0, -seam.angle, 0]}
+          >
+            <boxGeometry args={[0.012, 0.55, 0.02]} />
+            <meshStandardMaterial
+              color="#0c0e12"
+              metalness={0.88}
+              roughness={0.55}
+            />
+          </mesh>
+        ))}
 
-        {/* Dome window band */}
-        <mesh position={[0, 0.42, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.42, 0.018, 10, 64]} />
-          <meshStandardMaterial
-            color={palette.metalLight}
-            emissive="#18242c"
-            emissiveIntensity={0.35}
-            metalness={0.96}
-            roughness={0.2}
-          />
-        </mesh>
+        {/* Warm inhabited windows — discrete emissive points */}
+        {windowLights.map((light, index) => (
+          <mesh
+            key={`${light.position[0]}-${light.position[1]}-${index}`}
+            position={light.position}
+          >
+            <boxGeometry args={[0.028, 0.016, 0.01]} />
+            <meshBasicMaterial
+              color={index % 7 === 0 ? "#e8c98a" : "#d4b87a"}
+              toneMapped={false}
+            />
+          </mesh>
+        ))}
 
-        {/* Interior aperture glow under dome glass */}
-        <mesh position={[0, 0.36, 0]}>
-          <sphereGeometry
-            args={[0.34, 28, 16, 0, Math.PI * 2, 0, Math.PI / 2.2]}
-          />
+        {/* Soft warm fill from windows — restrained */}
+        <mesh>
+          <sphereGeometry args={[0.79, 32, 24]} />
           <meshBasicMaterial
             blending={AdditiveBlending}
-            color={palette.core}
+            color="#c9a86a"
             depthWrite={false}
-            opacity={0.12 + emphasis * 0.06}
+            opacity={0.025 + emphasis * 0.012}
             side={DoubleSide}
             toneMapped={false}
             transparent
           />
         </mesh>
 
-        <group position={[0, 0.22, 0]}>
-          <ObservatoryCrystallineCore
-            apertureColor={palette.aperture}
-            coreColor={palette.core}
-            opacity={presence}
-            radius={0.14}
-            signalColor={palette.signal}
-          />
-        </group>
-
-        {/* Structural habitat ring */}
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.92, 0.045, 14, 96]} />
+        {/* Lower docking collar */}
+        <mesh position={[0, -0.72, 0]}>
+          <cylinderGeometry args={[0.22, 0.28, 0.14, 24]} />
           <meshStandardMaterial
-            color={palette.metalLight}
-            emissive="#18242c"
-            emissiveIntensity={0.28}
-            metalness={0.97}
-            roughness={0.24}
-          />
-        </mesh>
-
-        {/* Ring edge accent */}
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.92, 0.008, 8, 96]} />
-          <meshBasicMaterial
-            blending={AdditiveBlending}
-            color={palette.signal}
-            depthWrite={false}
-            opacity={0.22 + emphasis * 0.1}
-            toneMapped={false}
-            transparent
-          />
-        </mesh>
-
-        {perimeterLights.map((light, index) => (
-          <group
-            key={light.angle}
-            position={light.position}
-            rotation={[0, -light.angle, 0]}
-          >
-            <mesh>
-              <boxGeometry args={[0.07, 0.04, 0.05]} />
-              <meshStandardMaterial
-                color={palette.metalDark}
-                metalness={0.95}
-                roughness={0.28}
-              />
-            </mesh>
-            <mesh position={[0, 0.03, 0]}>
-              <boxGeometry args={[0.045, 0.018, 0.028]} />
-              <meshBasicMaterial
-                color={index % 3 === 0 ? palette.aperture : palette.beacon}
-                toneMapped={false}
-              />
-            </mesh>
-            <mesh position={[0, 0.035, 0]}>
-              <sphereGeometry args={[0.028, 10, 8]} />
-              <meshBasicMaterial
-                blending={AdditiveBlending}
-                color={index % 3 === 0 ? palette.aperture : palette.beacon}
-                depthWrite={false}
-                opacity={0.18 + emphasis * 0.1}
-                toneMapped={false}
-                transparent
-              />
-            </mesh>
-          </group>
-        ))}
-
-        {supportLegs.map((leg) => (
-          <group key={leg.angle} position={leg.position}>
-            <mesh rotation={[0.35, -leg.angle, 0.18]}>
-              <cylinderGeometry args={[0.02, 0.028, 0.55, 8]} />
-              <meshStandardMaterial
-                color={palette.metalLight}
-                metalness={0.96}
-                roughness={0.28}
-              />
-            </mesh>
-            <mesh position={[0, -0.28, 0]}>
-              <boxGeometry args={[0.1, 0.035, 0.1]} />
-              <meshStandardMaterial
-                color={palette.metalDark}
-                metalness={0.94}
-                roughness={0.34}
-              />
-            </mesh>
-          </group>
-        ))}
-
-        {/* Lower disc platform */}
-        <mesh position={[0, -0.42, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.48, 0.52, 0.06, 40]} />
-          <meshStandardMaterial
-            color={palette.metalDark}
-            emissive="#0a1218"
-            emissiveIntensity={0.2}
-            metalness={0.95}
-            roughness={0.36}
+            color="#10141a"
+            metalness={0.92}
+            roughness={0.45}
           />
         </mesh>
 
         {/* Tall antenna mast */}
-        <group position={[0.02, 0.55, 0.02]}>
+        <group position={[0, 0.78, 0]}>
           <mesh>
-            <cylinderGeometry args={[0.018, 0.028, 1.15, 12]} />
+            <cylinderGeometry args={[0.012, 0.02, 0.95, 10]} />
             <meshStandardMaterial
-              color={palette.metalLight}
-              metalness={0.97}
-              roughness={0.2}
+              color="#2a313a"
+              metalness={0.96}
+              roughness={0.28}
             />
           </mesh>
-          <mesh position={[0, 0.28, 0]}>
-            <boxGeometry args={[0.12, 0.04, 0.04]} />
+          <mesh position={[0, 0.22, 0]}>
+            <boxGeometry args={[0.08, 0.03, 0.03]} />
             <meshStandardMaterial
-              color={palette.metalDark}
+              color="#1a1f26"
+              metalness={0.94}
+              roughness={0.32}
+            />
+          </mesh>
+          <mesh position={[0.06, 0.38, 0]} rotation={[0, 0, Math.PI / 2.5]}>
+            <cylinderGeometry args={[0.035, 0.035, 0.008, 16]} />
+            <meshStandardMaterial
+              color="#252b34"
               metalness={0.95}
-              roughness={0.26}
+              roughness={0.3}
             />
           </mesh>
-          <mesh position={[0.09, 0.42, 0]} rotation={[0, 0, Math.PI / 2.4]}>
-            <cylinderGeometry args={[0.055, 0.055, 0.012, 24]} />
-            <meshStandardMaterial
-              color={palette.metalLight}
-              metalness={0.96}
-              roughness={0.22}
-            />
+          <mesh position={[0, 0.5, 0]}>
+            <sphereGeometry args={[0.022, 12, 10]} />
+            <meshBasicMaterial color="#f4f7fb" toneMapped={false} />
           </mesh>
-          <mesh position={[-0.08, 0.58, 0]} rotation={[0.2, 0, -Math.PI / 2.6]}>
-            <cylinderGeometry args={[0.04, 0.04, 0.01, 20]} />
-            <meshStandardMaterial
-              color={palette.metalLight}
-              metalness={0.96}
-              roughness={0.22}
-            />
-          </mesh>
-          <mesh position={[0, 0.62, 0]}>
-            <octahedronGeometry args={[0.042, 0]} />
-            <meshBasicMaterial color={palette.beacon} toneMapped={false} />
-          </mesh>
-          <mesh position={[0, 0.62, 0]} ref={pulseGlow}>
-            <sphereGeometry args={[0.08, 14, 10]} />
+          <mesh position={[0, 0.5, 0]} ref={beacon}>
+            <sphereGeometry args={[0.055, 12, 10]} />
             <meshBasicMaterial
               blending={AdditiveBlending}
-              color={palette.beacon}
+              color="#eef3f8"
               depthWrite={false}
-              opacity={0.14 + emphasis * 0.08}
-              toneMapped={false}
-              transparent
-            />
-          </mesh>
-        </group>
-
-        {/* Side aperture / sensor eye */}
-        <group position={[-0.55, 0.05, 0.48]} rotation={[0, 0.65, 0]}>
-          <mesh>
-            <circleGeometry args={[0.11, 40]} />
-            <meshBasicMaterial color="#020508" toneMapped={false} />
-          </mesh>
-          <mesh position={[0, 0, 0.002]}>
-            <ringGeometry args={[0.11, 0.128, 48]} />
-            <meshBasicMaterial
-              blending={AdditiveBlending}
-              color={palette.aperture}
-              depthWrite={false}
-              opacity={0.5 + emphasis * 0.16}
+              opacity={0.35}
               toneMapped={false}
               transparent
             />
@@ -405,7 +391,7 @@ export function GlobalObservatory({
             onHoverChange(true);
           }}
         >
-          <sphereGeometry args={[1.15, 18, 12]} />
+          <sphereGeometry args={[1.25, 18, 12]} />
           <meshBasicMaterial
             colorWrite={false}
             depthWrite={false}

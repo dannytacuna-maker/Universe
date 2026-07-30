@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 
 import styles from "./jarvis.module.css";
 
@@ -41,12 +42,12 @@ type VoiceWindow = Window &
     webkitSpeechRecognition?: SpeechRecognitionConstructor;
   };
 
-type JarvisVoiceSessionProps = Readonly<{
+type JarvisVoiceModeProps = Readonly<{
   disabled: boolean;
+  isSpeaking: boolean;
+  onClose: () => void;
   onTranscript: (transcript: string) => void;
-  /** When true, mic stays armed and restarts after each reply. */
-  sessionActive: boolean;
-  onSessionActiveChange: (active: boolean) => void;
+  open: boolean;
 }>;
 
 function getSpeechRecognition() {
@@ -58,29 +59,36 @@ function describeRecognitionError(error: string) {
   if (error === "not-allowed" || error === "service-not-allowed") {
     return "Microphone access is blocked in this browser.";
   }
-  if (error === "no-speech") return "Standing by. Tap the mic or speak again.";
+  if (error === "no-speech") return "Still listening…";
   if (error === "network") return "Browser speech recognition is unavailable.";
-  return "Voice input could not start. You can still type to Jarvis.";
+  return "Voice input could not start.";
 }
 
-export function JarvisVoiceSession({
+export function JarvisVoiceMode({
   disabled,
-  onSessionActiveChange,
+  isSpeaking,
+  onClose,
   onTranscript,
-  sessionActive,
-}: JarvisVoiceSessionProps) {
+  open,
+}: JarvisVoiceModeProps) {
+  const hasMounted = useSyncExternalStore(
+    () => () => undefined,
+    () => true,
+    () => false,
+  );
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
-  const sessionActiveRef = useRef(sessionActive);
+  const openRef = useRef(open);
   const disabledRef = useRef(disabled);
   const onTranscriptRef = useRef(onTranscript);
   const restartTimerRef = useRef<number | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [transcript, setTranscript] = useState("");
+  const [typedDraft, setTypedDraft] = useState("");
 
   useEffect(() => {
-    sessionActiveRef.current = sessionActive;
-  }, [sessionActive]);
+    openRef.current = open;
+  }, [open]);
 
   useEffect(() => {
     disabledRef.current = disabled;
@@ -89,6 +97,18 @@ export function JarvisVoiceSession({
   useEffect(() => {
     onTranscriptRef.current = onTranscript;
   }, [onTranscript]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [onClose, open]);
 
   useEffect(() => {
     return () => {
@@ -114,7 +134,7 @@ export function JarvisVoiceSession({
       recognitionRef.current = null;
     };
 
-    if (!sessionActive || disabled) {
+    if (!open || disabled) {
       haltRecognition();
       return () => {
         haltRecognition();
@@ -125,9 +145,8 @@ export function JarvisVoiceSession({
     if (Recognition === undefined) {
       restartTimerRef.current = window.setTimeout(() => {
         setErrorMessage(
-          "Voice input is not supported here. You can still type to Jarvis.",
+          "Voice input is not supported here. You can still type below.",
         );
-        onSessionActiveChange(false);
       }, 0);
       return () => clearRestart();
     }
@@ -135,7 +154,7 @@ export function JarvisVoiceSession({
     let cancelled = false;
 
     const armRecognition = () => {
-      if (cancelled || !sessionActiveRef.current || disabledRef.current) {
+      if (cancelled || !openRef.current || disabledRef.current) {
         return;
       }
 
@@ -169,7 +188,7 @@ export function JarvisVoiceSession({
           recognitionRef.current = null;
           return;
         }
-        if (event.error === "no-speech" && sessionActiveRef.current) {
+        if (event.error === "no-speech" && openRef.current) {
           setIsListening(false);
           recognitionRef.current = null;
           restartTimerRef.current = window.setTimeout(() => {
@@ -180,17 +199,11 @@ export function JarvisVoiceSession({
         setErrorMessage(describeRecognitionError(event.error));
         setIsListening(false);
         recognitionRef.current = null;
-        if (
-          event.error === "not-allowed" ||
-          event.error === "service-not-allowed"
-        ) {
-          onSessionActiveChange(false);
-        }
       };
       recognition.onend = () => {
         setIsListening(false);
         recognitionRef.current = null;
-        if (sessionActiveRef.current && !disabledRef.current && !cancelled) {
+        if (openRef.current && !disabledRef.current && !cancelled) {
           restartTimerRef.current = window.setTimeout(() => {
             armRecognition();
           }, 420);
@@ -215,66 +228,85 @@ export function JarvisVoiceSession({
       cancelled = true;
       haltRecognition();
     };
-  }, [disabled, onSessionActiveChange, sessionActive]);
+  }, [disabled, open]);
 
-  const toggleSession = () => {
-    if (sessionActive) {
-      onSessionActiveChange(false);
-      setTranscript("");
-      return;
-    }
-    setErrorMessage(null);
-    onSessionActiveChange(true);
-  };
+  if (!open || !hasMounted) {
+    return null;
+  }
 
-  return (
-    <div className={styles.voiceRegion} data-open={sessionActive}>
-      <button
-        aria-expanded={sessionActive}
-        aria-label={
-          sessionActive
-            ? "End Jarvis voice session"
-            : "Start Jarvis voice session"
-        }
-        className={styles.iconButton}
-        disabled={disabled && !sessionActive}
-        onClick={toggleSession}
-        type="button"
-      >
-        <svg aria-hidden="true" viewBox="0 0 24 24">
-          <path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z" />
-          <path d="M5.5 11.5v.5a6.5 6.5 0 0 0 13 0v-.5M12 18.5V22M9 22h6" />
-        </svg>
-      </button>
+  const statusLabel = errorMessage
+    ? "Voice unavailable"
+    : isSpeaking
+      ? "Speaking"
+      : isListening
+        ? "Listening"
+        : disabled
+          ? "Thinking"
+          : "Standing by";
 
-      {sessionActive || errorMessage ? (
-        <div aria-live="polite" className={styles.voicePanel}>
-          <div
-            className={styles.voiceStatus}
-            data-status={isListening ? "connected" : "standby"}
-          >
-            <span aria-hidden="true" className={styles.voiceOrb} />
-            <div>
-              <strong>
-                {errorMessage
-                  ? "Voice unavailable"
-                  : isListening
-                    ? "Listening"
-                    : disabled
-                      ? "Speaking"
-                      : "Standing by"}
-              </strong>
-              <span>
-                {errorMessage ??
-                  (transcript ||
-                    (isListening
-                      ? "Go ahead, sir."
-                      : "Voice channel open — speak anytime"))}
-              </span>
-            </div>
-          </div>
+  const statusDetail =
+    errorMessage ??
+    (transcript ||
+      (isSpeaking
+        ? "Jarvis is responding…"
+        : isListening
+          ? "Go ahead."
+          : "Speak anytime"));
+
+  const orbState = isSpeaking ? "speaking" : isListening ? "listening" : "idle";
+
+  return createPortal(
+    <div
+      aria-label="Jarvis voice mode"
+      aria-modal="true"
+      className={styles.voiceMode}
+      role="dialog"
+    >
+      <div className={styles.voiceModeStage}>
+        <div
+          aria-hidden="true"
+          className={styles.voiceModeOrb}
+          data-state={orbState}
+        >
+          <span className={styles.voiceModeOrbCore} />
+          <span className={styles.voiceModeOrbHalo} />
+          <span className={styles.voiceModeOrbBloom} />
         </div>
-      ) : null}
-    </div>
+
+        <div aria-live="polite" className={styles.voiceModeCopy}>
+          <strong>{statusLabel}</strong>
+          <span>{statusDetail}</span>
+        </div>
+      </div>
+
+      <form
+        className={styles.voiceModeBar}
+        onSubmit={(event) => {
+          event.preventDefault();
+          const text = typedDraft.trim();
+          if (!text || disabled) return;
+          setTypedDraft("");
+          onTranscript(text);
+        }}
+      >
+        <input
+          aria-label="Type to Jarvis"
+          onChange={(event) => setTypedDraft(event.target.value)}
+          placeholder="Type"
+          value={typedDraft}
+        />
+        <button
+          aria-label="Close voice mode"
+          className={styles.voiceModeClose}
+          onClick={onClose}
+          type="button"
+        >
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="m6 6 12 12M18 6 6 18" />
+          </svg>
+        </button>
+      </form>
+    </div>,
+    document.body,
   );
 }

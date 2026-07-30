@@ -77,41 +77,88 @@ function compactValue(value: unknown, depth = 0): CompactValue {
 
 export function createJarvisTools(ownerId: string) {
   return {
-    readWeeklyIntelligence: tool({
+    getCurrentTime: tool({
       description:
-        "Read the latest source-grounded Observatory world briefing. Use for current geopolitics, global economy, business, trade, Spain or EU, technology, AI, monetary-policy, or institutional questions. It never changes data.",
+        "Get the current date and local clock time in UTC and Europe/Madrid. Use for any question about the current time, date, day of week, or 'what time is it'.",
       inputSchema: z.object({}),
       execute: async () => {
-        if (!isIntelligenceDatabaseConfigured()) {
-          return {
-            available: false,
-            reason: "Observatory storage is not configured.",
-          };
-        }
+        const now = new Date();
+        const madridFormatter = new Intl.DateTimeFormat("en-GB", {
+          timeZone: "Europe/Madrid",
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        });
+        const utcFormatter = new Intl.DateTimeFormat("en-GB", {
+          timeZone: "UTC",
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: false,
+        });
 
-        const weeklyBriefing = await getLatestWeeklyIntelligenceBriefing();
-
-        if (weeklyBriefing !== null) {
-          return {
-            available: true,
-            briefing: weeklyBriefing,
-            cadence: "weekly",
-            readOnly: true,
-          };
-        }
-
-        const sourceBriefing = await getLatestIntelligenceBriefing();
-        return sourceBriefing === null
-          ? {
+        return {
+          isoUtc: now.toISOString(),
+          madrid: madridFormatter.format(now),
+          utc: utcFormatter.format(now),
+          timeZone: "Europe/Madrid",
+        };
+      },
+    }),
+    readWeeklyIntelligence: tool({
+      description:
+        "Read the latest source-grounded Observatory world briefing. Use for current geopolitics, global economy, business, trade, Spain or EU, technology, AI, monetary-policy, or institutional questions. It never changes data. Do not use this for clock time or ordinary general knowledge.",
+      inputSchema: z.object({}),
+      execute: async () => {
+        try {
+          if (!isIntelligenceDatabaseConfigured()) {
+            return {
               available: false,
-              reason: "No Observatory briefing has been published yet.",
-            }
-          : {
+              reason: "Observatory storage is not configured.",
+            };
+          }
+
+          const weeklyBriefing = await getLatestWeeklyIntelligenceBriefing();
+
+          if (weeklyBriefing !== null) {
+            return {
               available: true,
-              briefing: sourceBriefing,
-              cadence: "source-fallback",
+              briefing: weeklyBriefing,
+              cadence: "weekly",
               readOnly: true,
             };
+          }
+
+          const sourceBriefing = await getLatestIntelligenceBriefing();
+          return sourceBriefing === null
+            ? {
+                available: false,
+                reason: "No Observatory briefing has been published yet.",
+              }
+            : {
+                available: true,
+                briefing: sourceBriefing,
+                cadence: "source-fallback",
+                readOnly: true,
+              };
+        } catch (error: unknown) {
+          return {
+            available: false,
+            reason:
+              error instanceof Error
+                ? error.message
+                : "Observatory briefing could not be read.",
+          };
+        }
       },
     }),
     reviewMissionRecords: tool({
@@ -129,22 +176,33 @@ export function createJarvisTools(ownerId: string) {
         ]),
       }),
       execute: async ({ area }) => {
-        const records = await listMissionRecords(ownerId);
-        const selected = areaCollections[area];
+        try {
+          const records = await listMissionRecords(ownerId);
+          const selected = areaCollections[area];
 
-        return {
-          area,
-          collections: selected.map((collection) => {
-            const values = records[collection] ?? [];
-            return {
-              collection,
-              count: values.length,
-              recentRecords: values.slice(-8).reverse().map(compactValue),
-            };
-          }),
-          generatedAt: new Date().toISOString(),
-          readOnly: true,
-        };
+          return {
+            area,
+            collections: selected.map((collection) => {
+              const values = records[collection] ?? [];
+              return {
+                collection,
+                count: values.length,
+                recentRecords: values.slice(-8).reverse().map(compactValue),
+              };
+            }),
+            generatedAt: new Date().toISOString(),
+            readOnly: true,
+          };
+        } catch (error: unknown) {
+          return {
+            area,
+            available: false,
+            reason:
+              error instanceof Error
+                ? error.message
+                : "Mission records could not be read.",
+          };
+        }
       },
     }),
   };
