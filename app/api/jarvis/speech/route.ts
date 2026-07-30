@@ -5,8 +5,8 @@ export const runtime = "nodejs";
 
 const maxSpeechCharacters = 2_500;
 
-/** Calm, formal male default — override with ELEVENLABS_VOICE_ID. */
-const defaultVoiceId = "onwK4e9ZLuTAKqWW03F9"; // Daniel
+/** Default Jarvis voice — override with ELEVENLABS_VOICE_ID. */
+const defaultVoiceId = "lUTamkMw7gOzZbFIwmq4";
 
 type SpeechRequestBody = Readonly<{
   text?: unknown;
