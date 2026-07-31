@@ -44,7 +44,6 @@ type ActivityLoadState = Readonly<{
 
 type UniverseActivityInput = Readonly<{
   french: ActivityLoadState & Readonly<{ summary: FrenchLearningSummary }>;
-  incompleteEvidenceRatio?: number;
   jiuJitsu: ActivityLoadState & Readonly<{ progress: JiuJitsuProgress }>;
   observatoryAttention?: number;
   reading: ActivityLoadState &
@@ -182,12 +181,14 @@ export function deriveUniverseActivitySignals(
     reading.activity,
     strength.activity,
   ]);
-  const incompleteEvidenceRatio = clamp(input.incompleteEvidenceRatio ?? 0);
   const personalGrowthAttention = clamp(
-    incompleteEvidenceRatio * 0.72 +
-      (1 - personalGrowthActivity) *
-        0.28 *
-        (incompleteEvidenceRatio > 0 ? 1 : 0.35),
+    Math.max(
+      french.attention,
+      jiuJitsu.attention,
+      reading.attention,
+      strength.attention,
+      (1 - personalGrowthActivity) * 0.28,
+    ),
   );
 
   return {

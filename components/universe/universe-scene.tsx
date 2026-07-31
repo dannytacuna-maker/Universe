@@ -12,7 +12,6 @@ import { CosmicFilamentField } from "./cosmic-filament-field";
 import { CosmicGuardian } from "./cosmic-guardian";
 import { DeepSpaceBackdrop } from "./deep-space-backdrop";
 import { DistantCelestialStructures } from "./distant-celestial-structures";
-import { EvidenceComet } from "./evidence-comet";
 import { LivingAtmosphere } from "./living-atmosphere";
 import { UniversityGalaxy } from "./galaxies/university-galaxy";
 import { UniversityCourseSystemGroup } from "./galaxies/university/university-course-system-group";
@@ -298,10 +297,6 @@ export function UniverseScene({
         onHoverChange={(isHovered) =>
           onPlanetHoverChange(isHovered ? globalObservatoryDefinition.id : null)
         }
-      />
-      <EvidenceComet
-        isVisible={navigationLevel === "universe"}
-        motionEnabled={motionEnabled}
       />
       {standardPersonalGrowthPlanets.map((planet) => (
         <PersonalGrowthDestinationPlanet
