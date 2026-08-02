@@ -33,6 +33,8 @@ import { JiuJitsuTrainingLog } from "./galaxies/personal-growth/jiu-jitsu/jiu-ji
 import { useJiuJitsuSessions } from "./galaxies/personal-growth/jiu-jitsu/use-jiu-jitsu-sessions";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
 import { CelestialLibraryDashboard } from "./galaxies/personal-growth/reading/celestial-library-dashboard";
+import { FirmusLandingDashboard } from "./galaxies/forge/firmus-landing-dashboard";
+import { firmusLandingDefinition } from "./galaxies/forge/firmus-planets";
 import { celestialLibraryDefinition } from "./galaxies/personal-growth/reading/reading-planets";
 import { useReadingLibrary } from "./galaxies/personal-growth/reading/use-reading-library";
 import { beerusPlanetDefinition } from "./galaxies/personal-growth/strength-physique/beerus-planet-definition";
@@ -55,6 +57,7 @@ import {
   findGalaxyStation,
   findPlanet,
   findSystem,
+  forgeGalaxyId,
   personalGrowthGalaxyId,
   universityGalaxyId,
   universeOriginState,
@@ -944,6 +947,11 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
     selectedGalaxyId === personalGrowthGalaxyId &&
     activeSystemId === readingSystemId &&
     selectedPlanetId === celestialLibraryDefinition.id;
+  const isFirmusLandingActive =
+    navigationLevel === "planet" &&
+    selectedGalaxyId === forgeGalaxyId &&
+    activeSystemId === "firmus" &&
+    selectedPlanetId === firmusLandingDefinition.id;
   const isFrenchStationActive =
     navigationLevel === "planet" &&
     selectedGalaxyId === personalGrowthGalaxyId &&
@@ -1115,6 +1123,10 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
         summary={readingSummary}
       />
 
+      <FirmusLandingDashboard
+        isVisible={isFirmusLandingActive && isViewSettled}
+      />
+
       <FrenchStationDashboard
         isLoading={frenchLearning.isLoading}
         isVisible={isFrenchStationActive && isViewSettled}
@@ -1138,14 +1150,16 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
       </span>
       <span className="sr-only">
         {navigationLevel === "universe"
-          ? "University and Personal Growth galaxies are available to explore."
+          ? "University, Personal Growth, and The Forge galaxies are available to explore."
           : navigationLevel === "galaxy"
             ? selectedGalaxyId === personalGrowthGalaxyId
               ? "Three Personal Growth systems and one independent French station are mapped: Jiu-Jitsu, Strength and Physique, Reading, and Lumière Station."
-              : "Five University systems are mapped: four scheduled courses and Final Project. Logistics and Distribution is available to explore."
+              : selectedGalaxyId === forgeGalaxyId
+                ? "The Forge maps venture systems. Firmus is available to explore."
+                : "Five University systems are mapped: four scheduled courses and Final Project. Logistics and Distribution is available to explore."
             : navigationLevel === "planet"
               ? activeDestination === null
-                ? "Personal Growth destination."
+                ? "Destination surface."
                 : `${activeDestination.name}. ${activeDestination.description}`
               : selectedGalaxyId === personalGrowthGalaxyId
                 ? activeSystemId === strengthPhysiqueSystemId
@@ -1153,9 +1167,11 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
                   : activeSystemId === jiuJitsuSystemId
                     ? "Jiu-Jitsu system. Training sessions can be logged privately, and the Hyperbolic Time Chamber is available to enter."
                     : "Reading system. The Celestial Library is available to enter."
-                : activeCourse === null
-                  ? "University course system."
-                  : `${activeCourse.name} course system. ${formatCourseScheduleDetails(activeCourse.schedule)}. Workspaces have not been introduced yet.`}
+                : selectedGalaxyId === forgeGalaxyId
+                  ? "Firmus system. Firmus Landing is available to enter."
+                  : activeCourse === null
+                    ? "University course system."
+                    : `${activeCourse.name} course system. ${formatCourseScheduleDetails(activeCourse.schedule)}. Workspaces have not been introduced yet.`}
       </span>
       <span className="sr-only">
         Use the scroll wheel or plus and minus keys to adjust camera distance.

@@ -12,7 +12,6 @@ import {
 } from "three";
 
 import { SpatialLabelAnchor } from "../../spatial-label-anchor";
-import type { PersonalGrowthPlanetDefinition } from "./personal-growth-planet-definition";
 import { PlanetAtmosphere } from "./planet-atmosphere";
 
 const planetVertexShader = /* glsl */ `
@@ -132,7 +131,17 @@ const cloudFragmentShader = /* glsl */ `
 `;
 
 type PersonalGrowthDestinationPlanetProps = Readonly<{
-  definition: PersonalGrowthPlanetDefinition;
+  definition: Readonly<{
+    id: string;
+    kind?: string;
+    palette: Readonly<{
+      accent: string;
+      atmosphere: string;
+      base: string;
+    }>;
+    position: readonly [number, number, number];
+    seed: number;
+  }>;
   isEmphasized: boolean;
   isHovered: boolean;
   isInteractive: boolean;

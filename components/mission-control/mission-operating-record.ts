@@ -44,6 +44,11 @@ export const missionDestinations = [
   { areaId: "business", id: "forge", label: "The Forge galaxy" },
   { areaId: "business", id: "firmus", label: "Firmus system" },
   {
+    areaId: "business",
+    id: "firmus-landing",
+    label: "Firmus Landing",
+  },
+  {
     areaId: "general",
     id: "observatory",
     label: "The Observatory",

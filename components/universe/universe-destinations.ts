@@ -3,6 +3,7 @@ import type { NavigationState } from "@/store/navigation-store";
 import { frenchStationDefinition } from "./galaxies/personal-growth/french/french-station-definition";
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
 import { forgeSystems } from "./galaxies/forge/forge-systems";
+import { forgePlanets } from "./galaxies/forge/firmus-planets";
 import { personalGrowthPlanets } from "./galaxies/personal-growth/personal-growth-planets";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
 import { globalObservatoryDefinition } from "./observatory/observatory-definition";
@@ -71,15 +72,27 @@ export function findPlanet(
   systemId: string | null,
   planetId: string | null,
 ) {
-  if (galaxyId !== personalGrowthGalaxyId || systemId === null) {
+  if (systemId === null || planetId === null) {
     return null;
   }
 
-  return (
-    personalGrowthPlanets.find(
-      (planet) => planet.systemId === systemId && planet.id === planetId,
-    ) ?? null
-  );
+  if (galaxyId === personalGrowthGalaxyId) {
+    return (
+      personalGrowthPlanets.find(
+        (planet) => planet.systemId === systemId && planet.id === planetId,
+      ) ?? null
+    );
+  }
+
+  if (galaxyId === forgeGalaxyId) {
+    return (
+      forgePlanets.find(
+        (planet) => planet.systemId === systemId && planet.id === planetId,
+      ) ?? null
+    );
+  }
+
+  return null;
 }
 
 export function findGalaxyStation(

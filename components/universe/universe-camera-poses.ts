@@ -2,6 +2,7 @@ import type { NavigationLevel } from "@/store/navigation-store";
 
 import { frenchStationDefinition } from "./galaxies/personal-growth/french/french-station-definition";
 import { forgeSystems } from "./galaxies/forge/forge-systems";
+import { forgePlanets } from "./galaxies/forge/firmus-planets";
 import { personalGrowthPlanets } from "./galaxies/personal-growth/personal-growth-planets";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
@@ -30,8 +31,8 @@ const galaxyPoses: Readonly<Record<string, CameraPose>> = {
   [forgeGalaxyId]: {
     ambientScale: 0.34,
     fov: 46,
-    lookTarget: [-4.6, -1.4, -11.3],
-    position: [-4.6, -1.05, -6.55],
+    lookTarget: [-9.3, -2.3, -14.35],
+    position: [-9.3, -1.95, -9.55],
   },
   [personalGrowthGalaxyId]: {
     ambientScale: 0.34,
@@ -80,12 +81,19 @@ export function getCameraPose(
       };
     }
 
-    const planet = personalGrowthPlanets.find(
-      (definition) =>
-        definition.galaxyId === selectedGalaxyId &&
-        definition.systemId === selectedSystemId &&
-        definition.id === selectedPlanetId,
-    );
+    const planet =
+      personalGrowthPlanets.find(
+        (definition) =>
+          definition.galaxyId === selectedGalaxyId &&
+          definition.systemId === selectedSystemId &&
+          definition.id === selectedPlanetId,
+      ) ??
+      forgePlanets.find(
+        (definition) =>
+          definition.galaxyId === selectedGalaxyId &&
+          definition.systemId === selectedSystemId &&
+          definition.id === selectedPlanetId,
+      );
 
     if (planet !== undefined) {
       return {

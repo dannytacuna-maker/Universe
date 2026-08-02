@@ -21,7 +21,7 @@ export const forgeGalaxyDefinition = {
     thickness: 0.24,
     twist: 1.05,
   },
-  position: [-4.65, -1.55, -11.35],
+  position: [-9.35, -2.45, -14.4],
   rotationSpeed: 0.0036,
   scale: 1.12,
 } as const satisfies GalaxyDefinition;

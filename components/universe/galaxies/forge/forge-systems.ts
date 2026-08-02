@@ -2,7 +2,7 @@ import type { ForgeSystemDefinition } from "./forge-system-definition";
 
 export const forgeSystems = [
   {
-    cameraPosition: [-4.65, -1.28, -7.05],
+    cameraPosition: [-9.35, -2.15, -9.75],
     description:
       "Firmus landing and venture workspace — briefs, assets, and ship decisions.",
     displayName: "Firmus",
@@ -18,7 +18,7 @@ export const forgeSystems = [
       halo: "#e85a4f",
       orbit: "#a83228",
     },
-    position: [-4.65, -1.72, -11.5],
+    position: [-9.35, -2.65, -14.55],
     scale: 1,
     seed: 314_159,
     status: "explorable",

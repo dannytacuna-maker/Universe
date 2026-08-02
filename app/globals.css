@@ -470,16 +470,16 @@ body {
 }
 
 .forge-galaxy-label {
-  --galaxy-label-x: 18%;
-  --galaxy-label-y: 74%;
-  color: rgb(220 150 132 / 64%);
+  --galaxy-label-x: 12%;
+  --galaxy-label-y: 78%;
+  color: rgb(255 255 255 / 78%);
 }
 
 .forge-galaxy-label:hover,
 .forge-galaxy-label[data-emphasized="true"],
 .forge-galaxy-label:focus-visible {
-  color: rgb(255 210 196 / 94%);
-  text-shadow: 0 0 1rem rgb(220 80 55 / 28%);
+  color: rgb(255 255 255 / 96%);
+  text-shadow: 0 0 1rem rgb(255 255 255 / 22%);
 }
 
 .forge-system-label {
@@ -494,6 +494,16 @@ body {
 
 .forge-system-label__purpose {
   color: rgb(190 120 100 / 58%);
+}
+
+.forge-planet-label {
+  color: rgb(255 220 208 / 78%);
+}
+
+.forge-planet-label[data-emphasized="true"],
+.forge-planet-label:hover,
+.forge-planet-label:focus-visible {
+  color: rgb(255 255 255 / 96%);
 }
 
 .universe-navigation-overlay {
@@ -3094,8 +3104,8 @@ select {
   }
 
   .forge-galaxy-label {
-    --galaxy-label-x: 16%;
-    --galaxy-label-y: 76%;
+    --galaxy-label-x: 10%;
+    --galaxy-label-y: 80%;
   }
 
   .course-system-label {
@@ -3467,8 +3477,8 @@ select {
   }
 
   .forge-galaxy-label {
-    --galaxy-label-x: 16%;
-    --galaxy-label-y: 76%;
+    --galaxy-label-x: 10%;
+    --galaxy-label-y: 80%;
   }
 
   .course-system-label {
@@ -3511,7 +3521,7 @@ select {
   }
 
   .forge-galaxy-label {
-    --galaxy-label-x: 17%;
+    --galaxy-label-x: 11%;
   }
 }
 

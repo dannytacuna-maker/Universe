@@ -7,6 +7,7 @@ import { FrenchStationLabel } from "./galaxies/personal-growth/french/french-sta
 import { PersonalGrowthPlanetLabels } from "./galaxies/personal-growth/personal-growth-planet-labels";
 import { PersonalGrowthSystemLabels } from "./galaxies/personal-growth/personal-growth-system-labels";
 import { ForgeGalaxyLabel } from "./galaxies/forge/forge-galaxy-label";
+import { ForgePlanetLabels } from "./galaxies/forge/forge-planet-labels";
 import { ForgeSystemLabels } from "./galaxies/forge/forge-system-labels";
 import { UniversityCourseSystemLabels } from "./galaxies/university/university-course-system-labels";
 import { UniversityWeeklySchedule } from "./galaxies/university/university-weekly-schedule";
@@ -183,6 +184,19 @@ export function UniverseNavigationOverlay({
         emphasizedPlanetId={emphasizedPlanetId}
         isVisible={
           selectedGalaxyId === personalGrowthGalaxyId &&
+          level === "system" &&
+          isViewSettled
+        }
+        onActivate={onPlanetActivate}
+        onFocusChange={onPlanetFocusChange}
+        onHoverChange={onPlanetHoverChange}
+        selectedSystemId={selectedSystemId}
+      />
+
+      <ForgePlanetLabels
+        emphasizedPlanetId={emphasizedPlanetId}
+        isVisible={
+          selectedGalaxyId === forgeGalaxyId &&
           level === "system" &&
           isViewSettled
         }

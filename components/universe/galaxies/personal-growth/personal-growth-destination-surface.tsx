@@ -6,7 +6,6 @@ import { useMemo, useRef } from "react";
 import { AdditiveBlending, BackSide, Color, type Group } from "three";
 
 import { createSeededRandom } from "../../procedural-random";
-import type { PersonalGrowthPlanetDefinition } from "./personal-growth-planet-definition";
 
 const backdropVertexShader = /* glsl */ `
   varying vec2 vUv;
@@ -53,7 +52,16 @@ function createSurfaceMotes(seed: number) {
 }
 
 type PersonalGrowthDestinationSurfaceProps = Readonly<{
-  definition: PersonalGrowthPlanetDefinition;
+  definition: Readonly<{
+    kind?: string;
+    landingOrigin: readonly [number, number, number];
+    palette: Readonly<{
+      accent: string;
+      atmosphere: string;
+      base: string;
+    }>;
+    seed: number;
+  }>;
   isVisible: boolean;
   motionEnabled: boolean;
 }>;

@@ -35,6 +35,7 @@ import { PersonalGrowthSystemGroup } from "./galaxies/personal-growth/personal-g
 import { ForgeGalaxy } from "./galaxies/forge/forge-galaxy";
 import { ForgeInteriorField } from "./galaxies/forge/forge-interior-field";
 import { ForgeSystemGroup } from "./galaxies/forge/forge-system-group";
+import { forgePlanets } from "./galaxies/forge/firmus-planets";
 import { ProceduralStarfield } from "./procedural-starfield";
 import { GlobalObservatory } from "./observatory/global-observatory";
 import { globalObservatoryDefinition } from "./observatory/observatory-definition";
@@ -141,6 +142,10 @@ export function UniverseScene({
       ? (genericPersonalGrowthSurfaces.find(
           (planet) => planet.id === selectedPlanetId,
         ) ?? null)
+      : null;
+  const selectedForgeSurface =
+    navigationLevel === "planet"
+      ? (forgePlanets.find((planet) => planet.id === selectedPlanetId) ?? null)
       : null;
 
   return (
@@ -369,6 +374,29 @@ export function UniverseScene({
           }
         />
       ))}
+      {forgePlanets.map((planet) => (
+        <PersonalGrowthDestinationPlanet
+          definition={planet}
+          isEmphasized={emphasizedPlanetId === planet.id}
+          isHovered={hoveredPlanetId === planet.id}
+          isInteractive={
+            forgeSelected &&
+            navigationLevel === "system" &&
+            activeSystemId === planet.systemId
+          }
+          isVisible={
+            forgeSelected &&
+            navigationLevel === "system" &&
+            activeSystemId === planet.systemId
+          }
+          key={planet.id}
+          motionEnabled={motionEnabled}
+          onActivate={() => onPlanetActivate(planet.id)}
+          onHoverChange={(isHovered) =>
+            onPlanetHoverChange(isHovered ? planet.id : null)
+          }
+        />
+      ))}
       <Suspense fallback={null}>
         {isBeerusSurfaceSelected ? (
           <BeerusPlanetSurface isVisible motionEnabled={motionEnabled} />
@@ -382,6 +410,13 @@ export function UniverseScene({
         {selectedGenericPersonalGrowthSurface ? (
           <PersonalGrowthDestinationSurface
             definition={selectedGenericPersonalGrowthSurface}
+            isVisible
+            motionEnabled={motionEnabled}
+          />
+        ) : null}
+        {selectedForgeSurface ? (
+          <PersonalGrowthDestinationSurface
+            definition={selectedForgeSurface}
             isVisible
             motionEnabled={motionEnabled}
           />
