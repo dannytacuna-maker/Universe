@@ -4,6 +4,7 @@ export type ForgePlanetDefinition = Readonly<{
   cameraLookTarget: Vector3Tuple;
   cameraPosition: Vector3Tuple;
   description: string;
+  externalUrl?: string;
   galaxyId: "forge";
   id: string;
   kind: "landing";

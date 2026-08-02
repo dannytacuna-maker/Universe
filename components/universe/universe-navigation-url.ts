@@ -80,6 +80,16 @@ export function readUniverseNavigation(search: string): NavigationState {
         planetId ?? null,
       );
 
+      // External launch planets stay at system level; the live site opens on click.
+      if (system?.status === "explorable" && planetId === "firmus-landing") {
+        return {
+          level: "system",
+          selectedGalaxyId: galaxy.id,
+          selectedPlanetId: null,
+          selectedSystemId: system.id,
+        };
+      }
+
       if (system?.status === "explorable" && planet !== null) {
         return {
           level: "planet",

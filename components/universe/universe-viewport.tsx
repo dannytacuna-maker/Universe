@@ -33,8 +33,10 @@ import { JiuJitsuTrainingLog } from "./galaxies/personal-growth/jiu-jitsu/jiu-ji
 import { useJiuJitsuSessions } from "./galaxies/personal-growth/jiu-jitsu/use-jiu-jitsu-sessions";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
 import { CelestialLibraryDashboard } from "./galaxies/personal-growth/reading/celestial-library-dashboard";
-import { FirmusLandingDashboard } from "./galaxies/forge/firmus-landing-dashboard";
-import { firmusLandingDefinition } from "./galaxies/forge/firmus-planets";
+import {
+  firmusLandingDefinition,
+  firmusLandingUrl,
+} from "./galaxies/forge/firmus-planets";
 import { celestialLibraryDefinition } from "./galaxies/personal-growth/reading/reading-planets";
 import { useReadingLibrary } from "./galaxies/personal-growth/reading/use-reading-library";
 import { beerusPlanetDefinition } from "./galaxies/personal-growth/strength-physique/beerus-planet-definition";
@@ -465,6 +467,12 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
         return;
       }
 
+      if (planet.id === firmusLandingDefinition.id) {
+        window.open(firmusLandingUrl, "_blank", "noopener,noreferrer");
+        setAnnouncement(`Opening ${planet.name}.`);
+        return;
+      }
+
       const enterDestination = () => {
         beginCameraTravel();
         setAnnouncement(`Descending to ${planet.name}.`);
@@ -707,6 +715,10 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
 
       rememberMissionDestination(destinationId);
 
+      if (destinationId === "firmus-landing") {
+        window.open(firmusLandingUrl, "_blank", "noopener,noreferrer");
+      }
+
       if (destinationId === "observatory") {
         clearInteractionState();
         beginCameraTravel();
@@ -947,11 +959,6 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
     selectedGalaxyId === personalGrowthGalaxyId &&
     activeSystemId === readingSystemId &&
     selectedPlanetId === celestialLibraryDefinition.id;
-  const isFirmusLandingActive =
-    navigationLevel === "planet" &&
-    selectedGalaxyId === forgeGalaxyId &&
-    activeSystemId === "firmus" &&
-    selectedPlanetId === firmusLandingDefinition.id;
   const isFrenchStationActive =
     navigationLevel === "planet" &&
     selectedGalaxyId === personalGrowthGalaxyId &&
@@ -1121,10 +1128,6 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
         sessions={readingSessions}
         storageError={readingStorageError}
         summary={readingSummary}
-      />
-
-      <FirmusLandingDashboard
-        isVisible={isFirmusLandingActive && isViewSettled}
       />
 
       <FrenchStationDashboard

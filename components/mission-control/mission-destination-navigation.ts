@@ -73,9 +73,9 @@ export function createMissionDestinationState(
       };
     case "firmus-landing":
       return {
-        level: "planet",
+        level: "system",
         selectedGalaxyId: "forge",
-        selectedPlanetId: "firmus-landing",
+        selectedPlanetId: null,
         selectedSystemId: "firmus",
       };
     case "observatory":

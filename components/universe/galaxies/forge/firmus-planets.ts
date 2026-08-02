@@ -1,10 +1,13 @@
 import type { ForgePlanetDefinition } from "./forge-planet-definition";
 
+export const firmusLandingUrl = "https://firmus-landing.vercel.app";
+
 export const firmusLandingDefinition = {
   cameraLookTarget: [-48, -1.05, -52.35],
   cameraPosition: [-48, -0.12, -45.8],
   description:
     "Firmus landing page workspace — positioning, assets, and ship readiness for the public site.",
+  externalUrl: firmusLandingUrl,
   galaxyId: "forge",
   id: "firmus-landing",
   kind: "landing",

@@ -255,13 +255,6 @@ export function UniverseNavigationOverlay({
         </div>
       ) : null}
 
-      {level === "planet" && isViewSettled && activePlanetName !== null ? (
-        <div className="planet-context-label">
-          <span>{activeSystemName ?? "Personal Growth · Orbital station"}</span>
-          <strong>{activePlanetName}</strong>
-        </div>
-      ) : null}
-
       {level !== "universe" ? (
         <button
           aria-label="Return to universe origin"
