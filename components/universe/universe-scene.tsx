@@ -32,10 +32,14 @@ import { BeerusPlanetSurface } from "./galaxies/personal-growth/strength-physiqu
 import { PersonalGrowthGalaxy } from "./galaxies/personal-growth/personal-growth-galaxy";
 import { PersonalGrowthInteriorField } from "./galaxies/personal-growth/personal-growth-interior-field";
 import { PersonalGrowthSystemGroup } from "./galaxies/personal-growth/personal-growth-system-group";
+import { ForgeGalaxy } from "./galaxies/forge/forge-galaxy";
+import { ForgeInteriorField } from "./galaxies/forge/forge-interior-field";
+import { ForgeSystemGroup } from "./galaxies/forge/forge-system-group";
 import { ProceduralStarfield } from "./procedural-starfield";
 import { GlobalObservatory } from "./observatory/global-observatory";
 import { globalObservatoryDefinition } from "./observatory/observatory-definition";
 import {
+  forgeGalaxyId,
   personalGrowthGalaxyId,
   universityGalaxyId,
 } from "./universe-destinations";
@@ -116,6 +120,7 @@ export function UniverseScene({
             : 0.24;
   const universitySelected = selectedGalaxyId === universityGalaxyId;
   const personalGrowthSelected = selectedGalaxyId === personalGrowthGalaxyId;
+  const forgeSelected = selectedGalaxyId === forgeGalaxyId;
   const universityNavigationLevel = universitySelected
     ? navigationLevel
     : "universe";
@@ -255,6 +260,49 @@ export function UniverseScene({
         onHoverChange={onSystemHoverChange}
         signals={activitySignals.personalGrowth}
         strengthProgress={strengthProgress}
+      />
+      <ForgeGalaxy
+        attention={0}
+        isEmphasized={emphasizedGalaxyId === forgeGalaxyId}
+        isHovered={hoveredGalaxyId === forgeGalaxyId}
+        isInteractive={navigationLevel === "universe"}
+        motionEnabled={motionEnabled}
+        onActivate={() => onGalaxyActivate(forgeGalaxyId)}
+        onHoverChange={(isHovered) =>
+          onGalaxyHoverChange(isHovered ? forgeGalaxyId : null)
+        }
+        presence={
+          navigationLevel === "universe"
+            ? 0.94
+            : forgeSelected && navigationLevel === "galaxy"
+              ? 0.24
+              : forgeSelected
+                ? 0.01
+                : 0.024
+        }
+      />
+      <ForgeInteriorField
+        isVisible={
+          forgeSelected &&
+          navigationLevel !== "universe" &&
+          navigationLevel !== "planet"
+        }
+        motionEnabled={motionEnabled}
+        presence={navigationLevel === "galaxy" ? 1 : 0.16}
+      />
+      <ForgeSystemGroup
+        activeSystemId={forgeSelected ? activeSystemId : null}
+        emphasizedSystemId={forgeSelected ? emphasizedSystemId : null}
+        hoveredSystemId={forgeSelected ? hoveredSystemId : null}
+        isInteractive={forgeSelected && navigationLevel === "galaxy"}
+        isVisible={
+          forgeSelected &&
+          navigationLevel !== "universe" &&
+          navigationLevel !== "planet"
+        }
+        motionEnabled={motionEnabled}
+        onActivate={onSystemActivate}
+        onHoverChange={onSystemHoverChange}
       />
       <BeerusPlanet
         isEmphasized={emphasizedPlanetId === beerusPlanetDefinition.id}

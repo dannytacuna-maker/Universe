@@ -1,10 +1,12 @@
 import type { NavigationLevel } from "@/store/navigation-store";
 
 import { frenchStationDefinition } from "./galaxies/personal-growth/french/french-station-definition";
+import { forgeSystems } from "./galaxies/forge/forge-systems";
 import { personalGrowthPlanets } from "./galaxies/personal-growth/personal-growth-planets";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
 import {
+  forgeGalaxyId,
   personalGrowthGalaxyId,
   universityGalaxyId,
 } from "./universe-destinations";
@@ -25,6 +27,12 @@ const universePose: CameraPose = {
 };
 
 const galaxyPoses: Readonly<Record<string, CameraPose>> = {
+  [forgeGalaxyId]: {
+    ambientScale: 0.34,
+    fov: 46,
+    lookTarget: [-4.6, -1.4, -11.3],
+    position: [-4.6, -1.05, -6.55],
+  },
   [personalGrowthGalaxyId]: {
     ambientScale: 0.34,
     fov: 46,
@@ -95,7 +103,9 @@ export function getCameraPose(
         ? personalGrowthSystems
         : selectedGalaxyId === universityGalaxyId
           ? universityCourseSystems
-          : [];
+          : selectedGalaxyId === forgeGalaxyId
+            ? forgeSystems
+            : [];
     const system = systems.find(
       (definition) => definition.id === selectedSystemId,
     );

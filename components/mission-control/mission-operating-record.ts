@@ -41,6 +41,8 @@ export const missionDestinations = [
     id: "celestial-library",
     label: "Celestial Library",
   },
+  { areaId: "business", id: "forge", label: "The Forge galaxy" },
+  { areaId: "business", id: "firmus", label: "Firmus system" },
   {
     areaId: "general",
     id: "observatory",

@@ -6,6 +6,8 @@ import { PersonalGrowthGalaxyLabel } from "./galaxies/personal-growth/personal-g
 import { FrenchStationLabel } from "./galaxies/personal-growth/french/french-station-label";
 import { PersonalGrowthPlanetLabels } from "./galaxies/personal-growth/personal-growth-planet-labels";
 import { PersonalGrowthSystemLabels } from "./galaxies/personal-growth/personal-growth-system-labels";
+import { ForgeGalaxyLabel } from "./galaxies/forge/forge-galaxy-label";
+import { ForgeSystemLabels } from "./galaxies/forge/forge-system-labels";
 import { UniversityCourseSystemLabels } from "./galaxies/university/university-course-system-labels";
 import { UniversityWeeklySchedule } from "./galaxies/university/university-weekly-schedule";
 import { UniversityGalaxyLabel } from "./galaxies/university-galaxy-label";
@@ -13,6 +15,7 @@ import { ObservatoryLabel } from "./observatory/observatory-label";
 import { globalObservatoryDefinition } from "./observatory/observatory-definition";
 import { LocationBreadcrumb } from "./location-breadcrumb";
 import {
+  forgeGalaxyId,
   personalGrowthGalaxyId,
   universityGalaxyId,
 } from "./universe-destinations";
@@ -78,6 +81,8 @@ export function UniverseNavigationOverlay({
     selectedGalaxyId === personalGrowthGalaxyId &&
     level === "galaxy" &&
     isViewSettled;
+  const isForgeOverviewVisible =
+    selectedGalaxyId === forgeGalaxyId && level === "galaxy" && isViewSettled;
 
   return (
     <div className="universe-navigation-overlay">
@@ -102,6 +107,18 @@ export function UniverseNavigationOverlay({
         }
         onHoverChange={(isHovered) =>
           onGalaxyHoverChange(isHovered ? personalGrowthGalaxyId : null)
+        }
+      />
+
+      <ForgeGalaxyLabel
+        isEmphasized={emphasizedGalaxyId === forgeGalaxyId}
+        isVisible={level === "universe" && isViewSettled}
+        onActivate={() => onGalaxyActivate(forgeGalaxyId)}
+        onFocusChange={(isFocused) =>
+          onGalaxyFocusChange(isFocused ? forgeGalaxyId : null)
+        }
+        onHoverChange={(isHovered) =>
+          onGalaxyHoverChange(isHovered ? forgeGalaxyId : null)
         }
       />
 
@@ -137,6 +154,14 @@ export function UniverseNavigationOverlay({
       <PersonalGrowthSystemLabels
         emphasizedSystemId={emphasizedSystemId}
         isVisible={isPersonalGrowthOverviewVisible}
+        onActivate={onSystemActivate}
+        onFocusChange={onSystemFocusChange}
+        onHoverChange={onSystemHoverChange}
+      />
+
+      <ForgeSystemLabels
+        emphasizedSystemId={emphasizedSystemId}
+        isVisible={isForgeOverviewVisible}
         onActivate={onSystemActivate}
         onFocusChange={onSystemFocusChange}
         onHoverChange={onSystemHoverChange}

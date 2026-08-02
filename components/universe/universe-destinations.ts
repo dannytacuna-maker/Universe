@@ -2,15 +2,19 @@ import type { NavigationState } from "@/store/navigation-store";
 
 import { frenchStationDefinition } from "./galaxies/personal-growth/french/french-station-definition";
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
+import { forgeSystems } from "./galaxies/forge/forge-systems";
 import { personalGrowthPlanets } from "./galaxies/personal-growth/personal-growth-planets";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
 import { globalObservatoryDefinition } from "./observatory/observatory-definition";
 
 export const universityGalaxyId = "university";
 export const personalGrowthGalaxyId = "personal-growth";
+export const forgeGalaxyId = "forge";
 
 export type UniverseGalaxyId =
-  typeof personalGrowthGalaxyId | typeof universityGalaxyId;
+  | typeof forgeGalaxyId
+  | typeof personalGrowthGalaxyId
+  | typeof universityGalaxyId;
 
 export type UniverseSystemStatus = "explorable" | "future";
 
@@ -36,6 +40,11 @@ export const universeGalaxies = [
     id: personalGrowthGalaxyId,
     name: "Personal Growth",
     systems: personalGrowthSystems,
+  },
+  {
+    id: forgeGalaxyId,
+    name: "The Forge",
+    systems: forgeSystems,
   },
 ] as const satisfies readonly UniverseGalaxyDestination[];
 

@@ -469,6 +469,33 @@ body {
   text-shadow: 0 0 1rem rgb(105 190 178 / 22%);
 }
 
+.forge-galaxy-label {
+  --galaxy-label-x: 18%;
+  --galaxy-label-y: 74%;
+  color: rgb(220 150 132 / 64%);
+}
+
+.forge-galaxy-label:hover,
+.forge-galaxy-label[data-emphasized="true"],
+.forge-galaxy-label:focus-visible {
+  color: rgb(255 210 196 / 94%);
+  text-shadow: 0 0 1rem rgb(220 80 55 / 28%);
+}
+
+.forge-system-label {
+  color: rgb(228 170 150 / 72%);
+}
+
+.forge-system-label[data-emphasized="true"],
+.forge-system-label:hover,
+.forge-system-label:focus-visible {
+  color: rgb(255 220 205 / 94%);
+}
+
+.forge-system-label__purpose {
+  color: rgb(190 120 100 / 58%);
+}
+
 .universe-navigation-overlay {
   position: absolute;
   z-index: 2;
@@ -3066,6 +3093,11 @@ select {
     --galaxy-label-y: 70%;
   }
 
+  .forge-galaxy-label {
+    --galaxy-label-x: 16%;
+    --galaxy-label-y: 76%;
+  }
+
   .course-system-label {
     top: var(--spatial-label-y, var(--course-label-compact-y));
     left: var(--spatial-label-x, var(--course-label-compact-x));
@@ -3434,6 +3466,11 @@ select {
     --galaxy-label-y: 70%;
   }
 
+  .forge-galaxy-label {
+    --galaxy-label-x: 16%;
+    --galaxy-label-y: 76%;
+  }
+
   .course-system-label {
     top: var(--spatial-label-y, var(--course-label-portrait-y));
     left: var(--spatial-label-x, var(--course-label-portrait-x));
@@ -3472,6 +3509,10 @@ select {
   .personal-growth-galaxy-label {
     --galaxy-label-x: 72%;
   }
+
+  .forge-galaxy-label {
+    --galaxy-label-x: 17%;
+  }
 }
 
 @media (max-height: 34rem) {
@@ -3505,6 +3546,7 @@ select {
 @media (pointer: coarse) {
   .university-galaxy-label,
   .personal-growth-galaxy-label,
+  .forge-galaxy-label,
   .course-system-label,
   .universe-back-control,
   .universe-origin-control {
