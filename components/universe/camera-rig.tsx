@@ -20,7 +20,7 @@ const CAMERA_ZOOM_LIMITS = {
 
 const CAMERA_ZOOM_STEP = 0.08;
 const WHEEL_ZOOM_SENSITIVITY = 0.00055;
-const TRAVEL_SPEED_MULTIPLIER = 1.5;
+const TRAVEL_SPEED_MULTIPLIER = 2.25;
 
 function smootherStep(progress: number) {
   return progress * progress * progress * (progress * (progress * 6 - 15) + 10);
