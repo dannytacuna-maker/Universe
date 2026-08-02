@@ -62,11 +62,12 @@ export function useObservatoryAttention(isUniverseView: boolean) {
             : typeof candidate.briefing.weekStartIso === "string"
               ? candidate.briefing.weekStartIso
               : getIsoWeekId();
-        const isWeekly = candidate.kind === "weekly";
+        const isAnalyzed =
+          candidate.kind === "daily" || candidate.kind === "weekly";
         const seenId = getSeenObservatoryBriefingId();
-        const isFresh = isWeekly && seenId !== briefingId;
+        const isFresh = isAnalyzed && seenId !== briefingId;
 
-        setAttention(isFresh ? 0.82 : isWeekly ? 0.18 : 0.08);
+        setAttention(isFresh ? 0.82 : isAnalyzed ? 0.18 : 0.08);
       })
       .catch(() => {
         if (!controller.signal.aborted) {

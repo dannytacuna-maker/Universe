@@ -116,7 +116,7 @@ export function createJarvisTools(ownerId: string) {
     }),
     readWeeklyIntelligence: tool({
       description:
-        "Read the latest source-grounded Observatory world briefing. Use for current geopolitics, global economy, business, trade, Spain or EU, technology, AI, monetary-policy, or institutional questions. It never changes data. Do not use this for clock time or ordinary general knowledge.",
+        "Read the latest source-grounded Observatory daily world briefing. Use for current geopolitics, global economy, business, trade, Spain or EU, technology, AI, monetary-policy, or institutional questions. It never changes data. Do not use this for clock time or ordinary general knowledge.",
       inputSchema: z.object({}),
       execute: async () => {
         try {
@@ -133,7 +133,7 @@ export function createJarvisTools(ownerId: string) {
             return {
               available: true,
               briefing: weeklyBriefing,
-              cadence: "weekly",
+              cadence: "daily",
               readOnly: true,
             };
           }

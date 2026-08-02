@@ -3,7 +3,7 @@ import {
   saveIntelligenceBriefing,
   saveWeeklyIntelligenceBriefing,
 } from "@/lib/server/intelligence-database";
-import { analyzeWeeklyIntelligence } from "@/lib/server/intelligence-analysis";
+import { analyzeDailyIntelligence } from "@/lib/server/intelligence-analysis";
 import { ingestIntelligenceFeeds } from "@/lib/server/intelligence-ingestion";
 
 export const dynamic = "force-dynamic";
@@ -54,12 +54,12 @@ export async function GET(request: Request) {
     let analysisPublished = false;
 
     try {
-      const weeklyBriefing = await analyzeWeeklyIntelligence(result.briefing);
-      await saveWeeklyIntelligenceBriefing(weeklyBriefing);
+      const dailyBriefing = await analyzeDailyIntelligence(result.briefing);
+      await saveWeeklyIntelligenceBriefing(dailyBriefing);
       analysisPublished = true;
     } catch (analysisError: unknown) {
       console.warn(
-        "Weekly intelligence analysis was not published; the source briefing remains available.",
+        "Daily intelligence analysis was not published; the source briefing remains available.",
         analysisError,
       );
     }
@@ -74,14 +74,14 @@ export async function GET(request: Request) {
       sources: result.briefing.sources,
     });
   } catch (error: unknown) {
-    console.error("Weekly intelligence ingestion failed.", error);
+    console.error("Daily intelligence ingestion failed.", error);
     const detail =
       process.env.NODE_ENV === "development" && error instanceof Error
         ? ` ${error.message}`
         : "";
 
     return Response.json(
-      { error: `Weekly intelligence ingestion failed.${detail}` },
+      { error: `Daily intelligence ingestion failed.${detail}` },
       { status: 500 },
     );
   }

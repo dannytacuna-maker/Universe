@@ -27,7 +27,7 @@ export const globalObservatoryDefinition: ObservatoryDefinition = {
   cameraLookTarget: [0.9, -3.35, -12.2],
   cameraPosition: [2.2, -2.7, -9.4],
   description:
-    "A weekly intelligence station translating verified world developments into a concise, source-grounded briefing.",
+    "A daily intelligence station translating verified world developments into a concise, source-grounded briefing.",
   descriptor: "Global insight. Clear mind.",
   galaxyId: null,
   id: "global-observatory",

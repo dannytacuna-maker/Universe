@@ -41,7 +41,7 @@ export async function GET() {
 
     if (weeklyBriefing !== null) {
       return Response.json(
-        { briefing: weeklyBriefing, kind: "weekly" },
+        { briefing: weeklyBriefing, kind: "daily" },
         { headers: privateHeaders },
       );
     }

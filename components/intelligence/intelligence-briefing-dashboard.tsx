@@ -74,13 +74,13 @@ function BriefingHeader({
         <span className={styles.eyebrow}>Global intelligence station</span>
         <h1 id={headingId}>The Observatory</h1>
         <p>
-          A concise weekly view of the world developments most worth
+          A concise daily view of the world developments most worth
           understanding.
         </p>
       </div>
       {edition === null ? null : (
         <div className={styles.edition}>
-          <span>Weekly brief</span>
+          <span>Daily brief</span>
           <time dateTime={edition.editionDateIso}>
             {edition.editionDateLabel}
           </time>
@@ -163,13 +163,13 @@ function ReadyBriefing({
       )}
 
       <section
-        aria-labelledby="observatory-weekly-intelligence"
+        aria-labelledby="observatory-daily-intelligence"
         className={styles.briefSection}
       >
         <div className={styles.sectionHeading}>
           <div>
-            <span>Weekly intelligence</span>
-            <h2 id="observatory-weekly-intelligence">
+            <span>Daily intelligence</span>
+            <h2 id="observatory-daily-intelligence">
               What changed and why it matters
             </h2>
           </div>
@@ -257,7 +257,7 @@ function SourceFeedBriefing({
         </h2>
         <p>
           These headlines arrive directly from monitored publishers and public
-          institutions. They remain available when the weekly analysis layer is
+          institutions. They remain available when the daily analysis layer is
           temporarily unavailable.
         </p>
       </section>
@@ -372,13 +372,13 @@ export function IntelligenceBriefingDashboard({
       {state.status === "loading" ? (
         <div className={styles.state} role="status">
           <span className={styles.stateMark} aria-hidden="true" />
-          <strong>Receiving this week’s intelligence</strong>
+          <strong>Receiving today’s intelligence</strong>
           <p>The Observatory is assembling a finite, source-grounded brief.</p>
         </div>
       ) : state.status === "error" ? (
         <div className={styles.state} role="alert">
           <span className={styles.errorMark} aria-hidden="true" />
-          <strong>The weekly brief is unavailable</strong>
+          <strong>The daily brief is unavailable</strong>
           <p>{state.message}</p>
         </div>
       ) : state.briefing === null || state.briefing.items.length === 0 ? (

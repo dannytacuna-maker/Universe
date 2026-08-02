@@ -54,7 +54,7 @@ export function ObservatoryExperience({
             kind?: unknown;
           }>;
 
-          if (candidate.kind === "weekly") {
+          if (candidate.kind === "daily" || candidate.kind === "weekly") {
             setState({
               briefing: candidate.briefing as WeeklyIntelligenceBriefing,
               status: "ready",
@@ -74,7 +74,7 @@ export function ObservatoryExperience({
           "error" in payload &&
           typeof (payload as Readonly<{ error?: unknown }>).error === "string"
             ? (payload as Readonly<{ error: string }>).error
-            : "The weekly intelligence briefing could not be reached.";
+            : "The daily intelligence briefing could not be reached.";
         setState({ message, status: "error" });
       })
       .catch((error: unknown) => {
@@ -83,7 +83,7 @@ export function ObservatoryExperience({
           message:
             error instanceof Error
               ? error.message
-              : "The weekly intelligence briefing could not be reached.",
+              : "The daily intelligence briefing could not be reached.",
           status: "error",
         });
       });
