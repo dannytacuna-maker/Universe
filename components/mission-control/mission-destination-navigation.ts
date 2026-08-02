@@ -22,9 +22,9 @@ export function createMissionDestinationState(
       };
     case "french-station":
       return {
-        level: "planet",
+        level: "galaxy",
         selectedGalaxyId: "personal-growth",
-        selectedPlanetId: "french-station",
+        selectedPlanetId: null,
         selectedSystemId: null,
       };
     case "hyperbolic-time-chamber":

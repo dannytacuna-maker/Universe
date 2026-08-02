@@ -4,6 +4,7 @@ export type FrenchStationDefinition = Readonly<{
   cameraLookTarget: Vector3Tuple;
   cameraPosition: Vector3Tuple;
   description: string;
+  externalUrl: string;
   galaxyId: "personal-growth";
   id: "french-station";
   labelPosition: Readonly<{
@@ -23,11 +24,14 @@ export type FrenchStationDefinition = Readonly<{
   seed: number;
 }>;
 
+export const lumiereStationUrl = "https://www.duolingo.com/learn";
+
 export const frenchStationDefinition = {
   cameraLookTarget: [48, 0.65, -52.4],
   cameraPosition: [48, 0.85, -45.4],
   description:
-    "An independent orbital station for French practice, Duolingo progress, and language reflection.",
+    "An independent orbital station for French practice — opens Duolingo while you stay in Personal Growth.",
+  externalUrl: lumiereStationUrl,
   galaxyId: "personal-growth",
   id: "french-station",
   labelPosition: {

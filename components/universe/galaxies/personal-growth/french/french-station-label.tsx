@@ -67,7 +67,7 @@ export function FrenchStationLabel({
         French · Dock
       </span>
       <span className="sr-only" id={descriptionId}>
-        {frenchStationDefinition.description} Activate to dock with the station.
+        {frenchStationDefinition.description} Activate to open Duolingo.
       </span>
     </button>
   );

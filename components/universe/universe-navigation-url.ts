@@ -42,13 +42,13 @@ export function readUniverseNavigation(search: string): NavigationState {
 
       if (
         galaxy.id === "personal-growth" &&
-        systemId === "french" &&
-        planetId === "french-station"
+        ((systemId === "french" && planetId === "french-station") ||
+          systemId === "french-station")
       ) {
         return {
-          level: "planet",
+          level: "galaxy",
           selectedGalaxyId: galaxy.id,
-          selectedPlanetId: "french-station",
+          selectedPlanetId: null,
           selectedSystemId: null,
         };
       }

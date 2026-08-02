@@ -17,7 +17,10 @@ import { rememberMissionDestination } from "@/lib/living-universe";
 import type { NavigationState } from "@/store/navigation-store";
 import { useNavigationStore } from "@/store/navigation-store-provider";
 
-import { frenchStationDefinition } from "./galaxies/personal-growth/french/french-station-definition";
+import {
+  frenchStationDefinition,
+  lumiereStationUrl,
+} from "./galaxies/personal-growth/french/french-station-definition";
 import { FrenchStationDashboard } from "./galaxies/personal-growth/french/french-station-dashboard";
 import { useFrenchLearning } from "./galaxies/personal-growth/french/use-french-learning";
 import {
@@ -439,11 +442,9 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
 
       if (galaxy !== null && station !== null && selectedSystemId === null) {
         if (station.id === frenchStationDefinition.id) {
-          window.open(
-            "https://www.duolingo.com/learn",
-            "_blank",
-            "noopener,noreferrer",
-          );
+          window.open(lumiereStationUrl, "_blank", "noopener,noreferrer");
+          setAnnouncement(`Opening ${station.name}.`);
+          return;
         }
 
         clearInteractionState();
@@ -717,6 +718,10 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
 
       if (destinationId === "firmus-landing") {
         window.open(firmusLandingUrl, "_blank", "noopener,noreferrer");
+      }
+
+      if (destinationId === "french-station") {
+        window.open(lumiereStationUrl, "_blank", "noopener,noreferrer");
       }
 
       if (destinationId === "observatory") {
