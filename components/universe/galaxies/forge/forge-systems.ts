@@ -23,6 +23,29 @@ export const forgeSystems = [
     seed: 314_159,
     status: "explorable",
   },
+  {
+    cameraPosition: [-7.55, -1.55, -9.15],
+    description:
+      "Delicias Típicas La Sancarlena — the live public site for the food venture.",
+    displayName: "Delicias",
+    id: "delicias",
+    labelPosition: {
+      compact: [62, 38],
+      desktop: [64, 36],
+      portrait: [63, 37],
+    },
+    name: "Delicias",
+    palette: {
+      core: "#fff8e8",
+      halo: "#e8a03a",
+      orbit: "#a85a1a",
+    },
+    position: [-7.55, -1.85, -13.65],
+    scale: 0.94,
+    seed: 577_215,
+    status: "explorable",
+  },
 ] as const satisfies readonly ForgeSystemDefinition[];
 
 export const firmusSystem = forgeSystems[0];
+export const deliciasSystem = forgeSystems[1];

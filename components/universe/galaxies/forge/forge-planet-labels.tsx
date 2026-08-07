@@ -64,9 +64,9 @@ export function ForgePlanetLabels({
           type="button"
         >
           <span>{planet.name}</span>
-          <small aria-hidden="true">Open landing</small>
+          <small aria-hidden="true">Open site</small>
           <span className="sr-only" id={descriptionId}>
-            {planet.description} Activate to enter this destination.
+            {planet.description} Activate to open this destination.
           </span>
         </button>
       );

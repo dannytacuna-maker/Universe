@@ -37,8 +37,7 @@ import { useJiuJitsuSessions } from "./galaxies/personal-growth/jiu-jitsu/use-ji
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
 import { CelestialLibraryDashboard } from "./galaxies/personal-growth/reading/celestial-library-dashboard";
 import {
-  firmusLandingDefinition,
-  firmusLandingUrl,
+  getForgeExternalUrl,
 } from "./galaxies/forge/firmus-planets";
 import { celestialLibraryDefinition } from "./galaxies/personal-growth/reading/reading-planets";
 import { useReadingLibrary } from "./galaxies/personal-growth/reading/use-reading-library";
@@ -468,8 +467,10 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
         return;
       }
 
-      if (planet.id === firmusLandingDefinition.id) {
-        window.open(firmusLandingUrl, "_blank", "noopener,noreferrer");
+      const externalUrl = getForgeExternalUrl(planet.id);
+
+      if (externalUrl !== null) {
+        window.open(externalUrl, "_blank", "noopener,noreferrer");
         setAnnouncement(`Opening ${planet.name}.`);
         return;
       }
@@ -716,8 +717,11 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
 
       rememberMissionDestination(destinationId);
 
-      if (destinationId === "firmus-landing") {
-        window.open(firmusLandingUrl, "_blank", "noopener,noreferrer");
+      if (destinationId === "firmus-landing" || destinationId === "delicias-landing") {
+        const externalUrl = getForgeExternalUrl(destinationId);
+        if (externalUrl !== null) {
+          window.open(externalUrl, "_blank", "noopener,noreferrer");
+        }
       }
 
       if (destinationId === "french-station") {
@@ -1163,7 +1167,7 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
             ? selectedGalaxyId === personalGrowthGalaxyId
               ? "Three Personal Growth systems and one independent French station are mapped: Jiu-Jitsu, Strength and Physique, Reading, and Lumière Station."
               : selectedGalaxyId === forgeGalaxyId
-                ? "The Forge maps venture systems. Firmus is available to explore."
+                ? "The Forge maps venture systems. Firmus and Delicias are available to explore."
                 : "Five University systems are mapped: four scheduled courses and Final Project. Logistics and Distribution is available to explore."
             : navigationLevel === "planet"
               ? activeDestination === null
@@ -1176,7 +1180,9 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
                     ? "Jiu-Jitsu system. Training sessions can be logged privately, and the Hyperbolic Time Chamber is available to enter."
                     : "Reading system. The Celestial Library is available to enter."
                 : selectedGalaxyId === forgeGalaxyId
-                  ? "Firmus system. Firmus Landing is available to enter."
+                  ? activeSystemId === "delicias"
+                    ? "Delicias system. La Sancarlena opens the live public site."
+                    : "Firmus system. Firmus Landing opens the live public site."
                   : activeCourse === null
                     ? "University course system."
                     : `${activeCourse.name} course system. ${formatCourseScheduleDetails(activeCourse.schedule)}. Workspaces have not been introduced yet.`}

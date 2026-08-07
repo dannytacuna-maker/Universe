@@ -48,6 +48,12 @@ export const missionDestinations = [
     id: "firmus-landing",
     label: "Firmus Landing",
   },
+  { areaId: "business", id: "delicias", label: "Delicias system" },
+  {
+    areaId: "business",
+    id: "delicias-landing",
+    label: "La Sancarlena",
+  },
   {
     areaId: "general",
     id: "observatory",

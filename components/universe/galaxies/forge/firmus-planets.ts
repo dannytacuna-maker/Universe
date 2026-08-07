@@ -28,6 +28,41 @@ export const firmusLandingDefinition = {
   systemId: "firmus",
 } as const satisfies ForgePlanetDefinition;
 
+export const deliciasLandingUrl =
+  "https://delicias-tipicas-la-sancarlena.vercel.app/#inicio";
+
+export const deliciasLandingDefinition = {
+  cameraLookTarget: [-38, -0.85, -48.35],
+  cameraPosition: [-38, 0.05, -41.8],
+  description:
+    "Delicias Típicas La Sancarlena — opens the live public site while you stay in The Forge.",
+  externalUrl: deliciasLandingUrl,
+  galaxyId: "forge",
+  id: "delicias-landing",
+  kind: "landing",
+  labelPosition: {
+    compact: [58, 42],
+    desktop: [60, 40],
+    portrait: [59, 41],
+  },
+  landingOrigin: [-38, -1.75, -48],
+  name: "La Sancarlena",
+  palette: {
+    accent: "#f0b429",
+    atmosphere: "#c45c26",
+    base: "#1a1008",
+  },
+  position: [-6.85, -1.55, -13.45],
+  seed: 161_803,
+  systemId: "delicias",
+} as const satisfies ForgePlanetDefinition;
+
 export const forgePlanets = [
   firmusLandingDefinition,
+  deliciasLandingDefinition,
 ] as const satisfies readonly ForgePlanetDefinition[];
+
+export function getForgeExternalUrl(planetId: string) {
+  const planet = forgePlanets.find((candidate) => candidate.id === planetId);
+  return planet?.externalUrl ?? null;
+}

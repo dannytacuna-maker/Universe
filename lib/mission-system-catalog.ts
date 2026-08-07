@@ -41,6 +41,13 @@ export const missionSystemCatalog = [
     label: "Firmus",
     records: ["brief", "asset", "decision", "milestone", "note"],
   },
+  {
+    cadence: "project",
+    galaxyId: "forge",
+    id: "delicias",
+    label: "Delicias",
+    records: ["brief", "asset", "decision", "milestone", "note"],
+  },
 ] as const;
 
 export type MissionSystemId = (typeof missionSystemCatalog)[number]["id"];

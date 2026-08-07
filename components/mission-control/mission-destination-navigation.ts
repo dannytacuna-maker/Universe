@@ -78,6 +78,20 @@ export function createMissionDestinationState(
         selectedPlanetId: null,
         selectedSystemId: "firmus",
       };
+    case "delicias":
+      return {
+        level: "system",
+        selectedGalaxyId: "forge",
+        selectedPlanetId: null,
+        selectedSystemId: "delicias",
+      };
+    case "delicias-landing":
+      return {
+        level: "system",
+        selectedGalaxyId: "forge",
+        selectedPlanetId: null,
+        selectedSystemId: "delicias",
+      };
     case "observatory":
       return {
         level: "planet",
