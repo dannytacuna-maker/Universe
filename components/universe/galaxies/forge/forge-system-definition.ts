@@ -4,7 +4,7 @@ export type ForgeSystemDefinition = Readonly<{
   cameraPosition: Vector3Tuple;
   description: string;
   displayName: string;
-  id: "firmus" | "delicias";
+  id: "firmus" | "delicias" | "rio-trucking";
   labelPosition: Readonly<{
     compact: readonly [number, number];
     desktop: readonly [number, number];

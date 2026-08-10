@@ -45,7 +45,30 @@ export const forgeSystems = [
     seed: 577_215,
     status: "explorable",
   },
+  {
+    cameraPosition: [-10.85, -2.85, -10.35],
+    description:
+      "Rio Trucking — the live public site for the logistics venture.",
+    displayName: "Rio Trucking",
+    id: "rio-trucking",
+    labelPosition: {
+      compact: [34, 44],
+      desktop: [36, 42],
+      portrait: [35, 43],
+    },
+    name: "Rio Trucking",
+    palette: {
+      core: "#eef4fb",
+      halo: "#4a7eb8",
+      orbit: "#1f3f66",
+    },
+    position: [-10.85, -3.15, -14.95],
+    scale: 0.96,
+    seed: 418_221,
+    status: "explorable",
+  },
 ] as const satisfies readonly ForgeSystemDefinition[];
 
 export const firmusSystem = forgeSystems[0];
 export const deliciasSystem = forgeSystems[1];
+export const rioTruckingSystem = forgeSystems[2];

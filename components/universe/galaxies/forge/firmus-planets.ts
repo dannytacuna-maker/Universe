@@ -57,9 +57,38 @@ export const deliciasLandingDefinition = {
   systemId: "delicias",
 } as const satisfies ForgePlanetDefinition;
 
+export const rioTruckingLandingUrl = "https://rio-trucking.vercel.app/#contact";
+
+export const rioTruckingLandingDefinition = {
+  cameraLookTarget: [-55, -1.45, -54.35],
+  cameraPosition: [-55, -0.35, -47.8],
+  description:
+    "Rio Trucking — opens the live public site while you stay in The Forge.",
+  externalUrl: rioTruckingLandingUrl,
+  galaxyId: "forge",
+  id: "rio-trucking-landing",
+  kind: "landing",
+  labelPosition: {
+    compact: [40, 54],
+    desktop: [42, 52],
+    portrait: [41, 53],
+  },
+  landingOrigin: [-55, -2.35, -54],
+  name: "Rio Trucking",
+  palette: {
+    accent: "#6ea8e0",
+    atmosphere: "#2f5f8f",
+    base: "#0a121c",
+  },
+  position: [-10.15, -2.85, -14.75],
+  seed: 739_391,
+  systemId: "rio-trucking",
+} as const satisfies ForgePlanetDefinition;
+
 export const forgePlanets = [
   firmusLandingDefinition,
   deliciasLandingDefinition,
+  rioTruckingLandingDefinition,
 ] as const satisfies readonly ForgePlanetDefinition[];
 
 export function getForgeExternalUrl(planetId: string) {

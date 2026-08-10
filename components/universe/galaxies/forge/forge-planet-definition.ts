@@ -22,5 +22,5 @@ export type ForgePlanetDefinition = Readonly<{
   }>;
   position: Vector3Tuple;
   seed: number;
-  systemId: "firmus" | "delicias";
+  systemId: "firmus" | "delicias" | "rio-trucking";
 }>;

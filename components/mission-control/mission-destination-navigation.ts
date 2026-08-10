@@ -92,6 +92,20 @@ export function createMissionDestinationState(
         selectedPlanetId: null,
         selectedSystemId: "delicias",
       };
+    case "rio-trucking":
+      return {
+        level: "system",
+        selectedGalaxyId: "forge",
+        selectedPlanetId: null,
+        selectedSystemId: "rio-trucking",
+      };
+    case "rio-trucking-landing":
+      return {
+        level: "system",
+        selectedGalaxyId: "forge",
+        selectedPlanetId: null,
+        selectedSystemId: "rio-trucking",
+      };
     case "observatory":
       return {
         level: "planet",

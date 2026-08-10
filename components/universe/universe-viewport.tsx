@@ -717,7 +717,11 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
 
       rememberMissionDestination(destinationId);
 
-      if (destinationId === "firmus-landing" || destinationId === "delicias-landing") {
+      if (
+        destinationId === "firmus-landing" ||
+        destinationId === "delicias-landing" ||
+        destinationId === "rio-trucking-landing"
+      ) {
         const externalUrl = getForgeExternalUrl(destinationId);
         if (externalUrl !== null) {
           window.open(externalUrl, "_blank", "noopener,noreferrer");
@@ -1167,7 +1171,7 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
             ? selectedGalaxyId === personalGrowthGalaxyId
               ? "Three Personal Growth systems and one independent French station are mapped: Jiu-Jitsu, Strength and Physique, Reading, and Lumière Station."
               : selectedGalaxyId === forgeGalaxyId
-                ? "The Forge maps venture systems. Firmus and Delicias are available to explore."
+                ? "The Forge maps venture systems. Firmus, Delicias, and Rio Trucking are available to explore."
                 : "Five University systems are mapped: four scheduled courses and Final Project. Logistics and Distribution is available to explore."
             : navigationLevel === "planet"
               ? activeDestination === null
@@ -1182,7 +1186,9 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
                 : selectedGalaxyId === forgeGalaxyId
                   ? activeSystemId === "delicias"
                     ? "Delicias system. La Sancarlena opens the live public site."
-                    : "Firmus system. Firmus Landing opens the live public site."
+                    : activeSystemId === "rio-trucking"
+                      ? "Rio Trucking system. Rio Trucking opens the live public site."
+                      : "Firmus system. Firmus Landing opens the live public site."
                   : activeCourse === null
                     ? "University course system."
                     : `${activeCourse.name} course system. ${formatCourseScheduleDetails(activeCourse.schedule)}. Workspaces have not been introduced yet.`}

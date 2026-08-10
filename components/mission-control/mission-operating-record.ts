@@ -54,6 +54,12 @@ export const missionDestinations = [
     id: "delicias-landing",
     label: "La Sancarlena",
   },
+  { areaId: "business", id: "rio-trucking", label: "Rio Trucking system" },
+  {
+    areaId: "business",
+    id: "rio-trucking-landing",
+    label: "Rio Trucking",
+  },
   {
     areaId: "general",
     id: "observatory",
