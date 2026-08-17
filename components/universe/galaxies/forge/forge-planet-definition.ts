@@ -4,7 +4,7 @@ export type ForgePlanetDefinition = Readonly<{
   cameraLookTarget: Vector3Tuple;
   cameraPosition: Vector3Tuple;
   description: string;
-  externalUrl?: string;
+  externalUrl: string;
   galaxyId: "forge";
   id: string;
   kind: "landing";
@@ -22,5 +22,6 @@ export type ForgePlanetDefinition = Readonly<{
   }>;
   position: Vector3Tuple;
   seed: number;
-  systemId: "firmus" | "delicias" | "rio-trucking";
+  systemId: "websites";
+  vercelUrl: string;
 }>;

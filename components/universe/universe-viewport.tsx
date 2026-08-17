@@ -36,9 +36,7 @@ import { JiuJitsuTrainingLog } from "./galaxies/personal-growth/jiu-jitsu/jiu-ji
 import { useJiuJitsuSessions } from "./galaxies/personal-growth/jiu-jitsu/use-jiu-jitsu-sessions";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
 import { CelestialLibraryDashboard } from "./galaxies/personal-growth/reading/celestial-library-dashboard";
-import {
-  getForgeExternalUrl,
-} from "./galaxies/forge/firmus-planets";
+import { getForgePlanet } from "./galaxies/forge/firmus-planets";
 import { celestialLibraryDefinition } from "./galaxies/personal-growth/reading/reading-planets";
 import { useReadingLibrary } from "./galaxies/personal-growth/reading/use-reading-library";
 import { beerusPlanetDefinition } from "./galaxies/personal-growth/strength-physique/beerus-planet-definition";
@@ -467,7 +465,7 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
         return;
       }
 
-      const externalUrl = getForgeExternalUrl(planet.id);
+      const externalUrl = getForgePlanet(planet.id)?.externalUrl ?? null;
 
       if (externalUrl !== null) {
         window.open(externalUrl, "_blank", "noopener,noreferrer");
@@ -717,15 +715,9 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
 
       rememberMissionDestination(destinationId);
 
-      if (
-        destinationId === "firmus-landing" ||
-        destinationId === "delicias-landing" ||
-        destinationId === "rio-trucking-landing"
-      ) {
-        const externalUrl = getForgeExternalUrl(destinationId);
-        if (externalUrl !== null) {
-          window.open(externalUrl, "_blank", "noopener,noreferrer");
-        }
+      const forgePlanet = getForgePlanet(destinationId);
+      if (forgePlanet !== null) {
+        window.open(forgePlanet.externalUrl, "_blank", "noopener,noreferrer");
       }
 
       if (destinationId === "french-station") {
@@ -1171,7 +1163,7 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
             ? selectedGalaxyId === personalGrowthGalaxyId
               ? "Three Personal Growth systems and one independent French station are mapped: Jiu-Jitsu, Strength and Physique, Reading, and Lumière Station."
               : selectedGalaxyId === forgeGalaxyId
-                ? "The Forge maps venture systems. Firmus, Delicias, and Rio Trucking are available to explore."
+                ? "The Forge maps the Websites system, containing every live Vercel project."
                 : "Five University systems are mapped: four scheduled courses and Final Project. Logistics and Distribution is available to explore."
             : navigationLevel === "planet"
               ? activeDestination === null
@@ -1184,11 +1176,7 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
                     ? "Jiu-Jitsu system. Training sessions can be logged privately, and the Hyperbolic Time Chamber is available to enter."
                     : "Reading system. The Celestial Library is available to enter."
                 : selectedGalaxyId === forgeGalaxyId
-                  ? activeSystemId === "delicias"
-                    ? "Delicias system. La Sancarlena opens the live public site."
-                    : activeSystemId === "rio-trucking"
-                      ? "Rio Trucking system. Rio Trucking opens the live public site."
-                      : "Firmus system. Firmus Landing opens the live public site."
+                  ? "Websites system. Each planet opens its live site; each Vercel link opens that project's deployments."
                   : activeCourse === null
                     ? "University course system."
                     : `${activeCourse.name} course system. ${formatCourseScheduleDetails(activeCourse.schedule)}. Workspaces have not been introduced yet.`}

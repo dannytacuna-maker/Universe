@@ -37,22 +37,8 @@ export const missionSystemCatalog = [
   {
     cadence: "project",
     galaxyId: "forge",
-    id: "firmus",
-    label: "Firmus",
-    records: ["brief", "asset", "decision", "milestone", "note"],
-  },
-  {
-    cadence: "project",
-    galaxyId: "forge",
-    id: "delicias",
-    label: "Delicias",
-    records: ["brief", "asset", "decision", "milestone", "note"],
-  },
-  {
-    cadence: "project",
-    galaxyId: "forge",
-    id: "rio-trucking",
-    label: "Rio Trucking",
+    id: "websites",
+    label: "Websites",
     records: ["brief", "asset", "decision", "milestone", "note"],
   },
 ] as const;

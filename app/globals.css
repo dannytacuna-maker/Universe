@@ -502,7 +502,7 @@ body {
 
 .forge-planet-label[data-emphasized="true"],
 .forge-planet-label:hover,
-.forge-planet-label:focus-visible {
+.forge-planet-label:focus-within {
   color: rgb(255 255 255 / 96%);
 }
 
@@ -1124,6 +1124,48 @@ body {
   font-size: 0.48rem;
   font-weight: 400;
   letter-spacing: 0.14em;
+}
+
+.forge-planet-label {
+  align-content: center;
+  justify-items: center;
+}
+
+.forge-planet-label button {
+  display: grid;
+  justify-items: center;
+  padding: 0;
+  border: 0;
+  outline: 1px solid transparent;
+  outline-offset: 0.22rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.forge-planet-label button:focus-visible {
+  outline-color: rgb(205 181 226 / 58%);
+}
+
+.forge-planet-label a {
+  margin-top: 0.36rem;
+  color: rgb(196 171 128 / 72%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.46rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+.forge-planet-label a:hover,
+.forge-planet-label a:focus-visible {
+  color: rgb(255 233 190 / 96%);
+  text-decoration: underline;
+  text-underline-offset: 0.18rem;
 }
 
 .planet-context-label {

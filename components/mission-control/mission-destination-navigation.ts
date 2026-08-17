@@ -64,47 +64,25 @@ export function createMissionDestinationState(
         selectedPlanetId: null,
         selectedSystemId: null,
       };
-    case "firmus":
+    case "websites":
       return {
         level: "system",
         selectedGalaxyId: "forge",
         selectedPlanetId: null,
-        selectedSystemId: "firmus",
+        selectedSystemId: "websites",
       };
     case "firmus-landing":
-      return {
-        level: "system",
-        selectedGalaxyId: "forge",
-        selectedPlanetId: null,
-        selectedSystemId: "firmus",
-      };
-    case "delicias":
-      return {
-        level: "system",
-        selectedGalaxyId: "forge",
-        selectedPlanetId: null,
-        selectedSystemId: "delicias",
-      };
     case "delicias-landing":
-      return {
-        level: "system",
-        selectedGalaxyId: "forge",
-        selectedPlanetId: null,
-        selectedSystemId: "delicias",
-      };
-    case "rio-trucking":
-      return {
-        level: "system",
-        selectedGalaxyId: "forge",
-        selectedPlanetId: null,
-        selectedSystemId: "rio-trucking",
-      };
     case "rio-trucking-landing":
+    case "ontrack-cr-landing":
+    case "countme-landing":
+    case "ssc-outsourcing-landing":
+    case "javier-barter-landing":
       return {
         level: "system",
         selectedGalaxyId: "forge",
         selectedPlanetId: null,
-        selectedSystemId: "rio-trucking",
+        selectedSystemId: "websites",
       };
     case "observatory":
       return {

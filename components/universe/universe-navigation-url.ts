@@ -38,7 +38,14 @@ export function readUniverseNavigation(search: string): NavigationState {
         };
       }
 
-      const system = findSystem(galaxy.id, systemId);
+      const resolvedSystemId =
+        galaxy.id === "forge" &&
+        (systemId === "firmus" ||
+          systemId === "delicias" ||
+          systemId === "rio-trucking")
+          ? "websites"
+          : systemId;
+      const system = findSystem(galaxy.id, resolvedSystemId);
 
       if (
         galaxy.id === "personal-growth" &&

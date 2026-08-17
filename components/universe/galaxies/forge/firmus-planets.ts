@@ -1,97 +1,130 @@
 import type { ForgePlanetDefinition } from "./forge-planet-definition";
 
-export const firmusLandingUrl = "https://firmus-landing.vercel.app";
-
-export const firmusLandingDefinition = {
-  cameraLookTarget: [-48, -1.05, -52.35],
-  cameraPosition: [-48, -0.12, -45.8],
-  description:
-    "Firmus landing page workspace — positioning, assets, and ship readiness for the public site.",
-  externalUrl: firmusLandingUrl,
-  galaxyId: "forge",
-  id: "firmus-landing",
-  kind: "landing",
-  labelPosition: {
-    compact: [62, 48],
-    desktop: [64, 46],
-    portrait: [63, 48],
-  },
-  landingOrigin: [-48, -2.05, -52],
-  name: "Firmus Landing",
-  palette: {
-    accent: "#ff7a5c",
-    atmosphere: "#c94a3c",
-    base: "#1a0c0b",
-  },
-  position: [-8.55, -2.35, -14.35],
-  seed: 271_828,
-  systemId: "firmus",
-} as const satisfies ForgePlanetDefinition;
-
-export const deliciasLandingUrl =
-  "https://delicias-tipicas-la-sancarlena.vercel.app/#inicio";
-
-export const deliciasLandingDefinition = {
-  cameraLookTarget: [-38, -0.85, -48.35],
-  cameraPosition: [-38, 0.05, -41.8],
-  description:
-    "Delicias Típicas La Sancarlena — opens the live public site while you stay in The Forge.",
-  externalUrl: deliciasLandingUrl,
-  galaxyId: "forge",
-  id: "delicias-landing",
-  kind: "landing",
-  labelPosition: {
-    compact: [58, 42],
-    desktop: [60, 40],
-    portrait: [59, 41],
-  },
-  landingOrigin: [-38, -1.75, -48],
-  name: "La Sancarlena",
-  palette: {
-    accent: "#f0b429",
-    atmosphere: "#c45c26",
-    base: "#1a1008",
-  },
-  position: [-6.85, -1.55, -13.45],
-  seed: 161_803,
-  systemId: "delicias",
-} as const satisfies ForgePlanetDefinition;
-
-export const rioTruckingLandingUrl = "https://rio-trucking.vercel.app/#contact";
-
-export const rioTruckingLandingDefinition = {
-  cameraLookTarget: [-55, -1.45, -54.35],
-  cameraPosition: [-55, -0.35, -47.8],
-  description:
-    "Rio Trucking — opens the live public site while you stay in The Forge.",
-  externalUrl: rioTruckingLandingUrl,
-  galaxyId: "forge",
-  id: "rio-trucking-landing",
-  kind: "landing",
-  labelPosition: {
-    compact: [40, 54],
-    desktop: [42, 52],
-    portrait: [41, 53],
-  },
-  landingOrigin: [-55, -2.35, -54],
-  name: "Rio Trucking",
-  palette: {
-    accent: "#6ea8e0",
-    atmosphere: "#2f5f8f",
-    base: "#0a121c",
-  },
-  position: [-10.15, -2.85, -14.75],
-  seed: 739_391,
-  systemId: "rio-trucking",
-} as const satisfies ForgePlanetDefinition;
+const systemId = "websites";
+const vercelProjectRoot = "https://vercel.com/danielacunatorres";
 
 export const forgePlanets = [
-  firmusLandingDefinition,
-  deliciasLandingDefinition,
-  rioTruckingLandingDefinition,
+  {
+    cameraLookTarget: [-48, -1.05, -52.35],
+    cameraPosition: [-48, -0.12, -45.8],
+    description: "Firmus — live public site and brand experience.",
+    externalUrl: "https://www.firmuscr.com",
+    galaxyId: "forge",
+    id: "firmus-landing",
+    kind: "landing",
+    labelPosition: { compact: [60, 30], desktop: [61, 27], portrait: [60, 28] },
+    landingOrigin: [-48, -2.05, -52],
+    name: "Firmus",
+    palette: { accent: "#ff7a5c", atmosphere: "#c94a3c", base: "#1a0c0b" },
+    position: [-8.35, -2.3, -14.5],
+    seed: 271_828,
+    systemId,
+    vercelUrl: `${vercelProjectRoot}/firmus-landing`,
+  },
+  {
+    cameraLookTarget: [-38, -0.85, -48.35],
+    cameraPosition: [-38, 0.05, -41.8],
+    description: "Delicias Típicas La Sancarlena — live food venture site.",
+    externalUrl: "https://delicias-tipicas-la-sancarlena.vercel.app/#inicio",
+    galaxyId: "forge",
+    id: "delicias-landing",
+    kind: "landing",
+    labelPosition: { compact: [72, 44], desktop: [76, 43], portrait: [75, 43] },
+    landingOrigin: [-38, -1.75, -48],
+    name: "La Sancarlena",
+    palette: { accent: "#f0b429", atmosphere: "#c45c26", base: "#1a1008" },
+    position: [-9.9, -1.9, -14.1],
+    seed: 161_803,
+    systemId,
+    vercelUrl: `${vercelProjectRoot}/delicias-tipicas-la-sancarlena`,
+  },
+  {
+    cameraLookTarget: [-55, -1.45, -54.35],
+    cameraPosition: [-55, -0.35, -47.8],
+    description: "Rio Trucking — live logistics venture site.",
+    externalUrl: "https://rio-trucking.vercel.app/#contact",
+    galaxyId: "forge",
+    id: "rio-trucking-landing",
+    kind: "landing",
+    labelPosition: { compact: [27, 46], desktop: [23, 44], portrait: [24, 45] },
+    landingOrigin: [-55, -2.35, -54],
+    name: "Rio Trucking",
+    palette: { accent: "#6ea8e0", atmosphere: "#2f5f8f", base: "#0a121c" },
+    position: [-10.2, -2.8, -13.9],
+    seed: 739_391,
+    systemId,
+    vercelUrl: `${vercelProjectRoot}/rio-trucking`,
+  },
+  {
+    cameraLookTarget: [-43, -2.15, -50.35],
+    cameraPosition: [-43, -0.95, -43.8],
+    description: "OnTrack CR — live transport and logistics site.",
+    externalUrl: "https://www.ontrackcr.net",
+    galaxyId: "forge",
+    id: "ontrack-cr-landing",
+    kind: "landing",
+    labelPosition: { compact: [32, 64], desktop: [28, 64], portrait: [29, 64] },
+    landingOrigin: [-43, -3.05, -50],
+    name: "OnTrack CR",
+    palette: { accent: "#55d6c2", atmosphere: "#197e73", base: "#061614" },
+    position: [-8.5, -3.35, -13.75],
+    seed: 402_461,
+    systemId,
+    vercelUrl: `${vercelProjectRoot}/ontrack-cr`,
+  },
+  {
+    cameraLookTarget: [-50, -2.45, -53.35],
+    cameraPosition: [-50, -1.25, -46.8],
+    description: "CountMe — live counting and utility site.",
+    externalUrl: "https://countme-pied.vercel.app",
+    galaxyId: "forge",
+    id: "countme-landing",
+    kind: "landing",
+    labelPosition: { compact: [48, 72], desktop: [49, 73], portrait: [49, 72] },
+    landingOrigin: [-50, -3.35, -53],
+    name: "CountMe",
+    palette: { accent: "#b294ff", atmosphere: "#6546b8", base: "#100a20" },
+    position: [-9.3, -3.45, -15.25],
+    seed: 577_215,
+    systemId,
+    vercelUrl: `${vercelProjectRoot}/countme`,
+  },
+  {
+    cameraLookTarget: [-59, -1.15, -55.35],
+    cameraPosition: [-59, 0.05, -48.8],
+    description: "SSC Outsourcing — live outsourcing services site.",
+    externalUrl: "https://www.sscoutsourcing.com",
+    galaxyId: "forge",
+    id: "ssc-outsourcing-landing",
+    kind: "landing",
+    labelPosition: { compact: [76, 59], desktop: [79, 60], portrait: [78, 60] },
+    landingOrigin: [-59, -2.05, -55],
+    name: "SSC Outsourcing",
+    palette: { accent: "#ff8292", atmosphere: "#a7374f", base: "#20090f" },
+    position: [-10.5, -2.15, -15.1],
+    seed: 892_645,
+    systemId,
+    vercelUrl: `${vercelProjectRoot}/ssc-outsourcing`,
+  },
+  {
+    cameraLookTarget: [-46, -0.75, -49.35],
+    cameraPosition: [-46, 0.45, -42.8],
+    description: "Javier Barter — live barter platform site.",
+    externalUrl: "https://javier-barter.vercel.app",
+    galaxyId: "forge",
+    id: "javier-barter-landing",
+    kind: "landing",
+    labelPosition: { compact: [47, 18], desktop: [48, 17], portrait: [48, 18] },
+    landingOrigin: [-46, -1.65, -49],
+    name: "Javier Barter",
+    palette: { accent: "#9fe36c", atmosphere: "#4c8b32", base: "#0b1a08" },
+    position: [-8.75, -1.75, -15.25],
+    seed: 619_033,
+    systemId,
+    vercelUrl: `${vercelProjectRoot}/javier-barter`,
+  },
 ] as const satisfies readonly ForgePlanetDefinition[];
 
-export function getForgeExternalUrl(planetId: string) {
-  const planet = forgePlanets.find((candidate) => candidate.id === planetId);
-  return planet?.externalUrl ?? null;
+export function getForgePlanet(planetId: string) {
+  return forgePlanets.find((candidate) => candidate.id === planetId) ?? null;
 }

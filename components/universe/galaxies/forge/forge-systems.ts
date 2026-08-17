@@ -2,73 +2,27 @@ import type { ForgeSystemDefinition } from "./forge-system-definition";
 
 export const forgeSystems = [
   {
-    cameraPosition: [-9.35, -2.15, -9.75],
+    cameraPosition: [-9.3, -2.05, -9.55],
     description:
-      "Firmus landing and venture workspace — briefs, assets, and ship decisions.",
-    displayName: "Firmus",
-    id: "firmus",
+      "A solar system for the live sites you ship — launch each site or open its Vercel deployment controls.",
+    displayName: "Websites",
+    id: "websites",
     labelPosition: {
-      compact: [48, 52],
-      desktop: [50, 50],
-      portrait: [49, 51],
+      compact: [50, 48],
+      desktop: [50, 48],
+      portrait: [50, 49],
     },
-    name: "Firmus",
+    name: "Websites",
     palette: {
-      core: "#fff4ef",
-      halo: "#e85a4f",
-      orbit: "#a83228",
+      core: "#f5f8ff",
+      halo: "#7899d6",
+      orbit: "#34588c",
     },
-    position: [-9.35, -2.65, -14.55],
-    scale: 1,
-    seed: 314_159,
-    status: "explorable",
-  },
-  {
-    cameraPosition: [-7.55, -1.55, -9.15],
-    description:
-      "Delicias Típicas La Sancarlena — the live public site for the food venture.",
-    displayName: "Delicias",
-    id: "delicias",
-    labelPosition: {
-      compact: [62, 38],
-      desktop: [64, 36],
-      portrait: [63, 37],
-    },
-    name: "Delicias",
-    palette: {
-      core: "#fff8e8",
-      halo: "#e8a03a",
-      orbit: "#a85a1a",
-    },
-    position: [-7.55, -1.85, -13.65],
-    scale: 0.94,
-    seed: 577_215,
-    status: "explorable",
-  },
-  {
-    cameraPosition: [-10.85, -2.85, -10.35],
-    description:
-      "Rio Trucking — the live public site for the logistics venture.",
-    displayName: "Rio Trucking",
-    id: "rio-trucking",
-    labelPosition: {
-      compact: [34, 44],
-      desktop: [36, 42],
-      portrait: [35, 43],
-    },
-    name: "Rio Trucking",
-    palette: {
-      core: "#eef4fb",
-      halo: "#4a7eb8",
-      orbit: "#1f3f66",
-    },
-    position: [-10.85, -3.15, -14.95],
-    scale: 0.96,
-    seed: 418_221,
+    position: [-9.35, -2.65, -14.45],
+    scale: 1.06,
+    seed: 902_117,
     status: "explorable",
   },
 ] as const satisfies readonly ForgeSystemDefinition[];
 
-export const firmusSystem = forgeSystems[0];
-export const deliciasSystem = forgeSystems[1];
-export const rioTruckingSystem = forgeSystems[2];
+export const websitesSystem = forgeSystems[0];

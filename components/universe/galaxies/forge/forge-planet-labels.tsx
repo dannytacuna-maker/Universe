@@ -45,8 +45,7 @@ export function ForgePlanetLabels({
       };
 
       return (
-        <button
-          aria-describedby={descriptionId}
+        <div
           aria-hidden={!isVisible}
           className="strength-planet-label forge-planet-label"
           data-emphasized={emphasizedPlanetId === planet.id}
@@ -54,21 +53,33 @@ export function ForgePlanetLabels({
           data-spatial-anchor={`planet:${planet.id}`}
           data-visible={isVisible}
           key={planet.id}
-          onBlur={() => onFocusChange(null)}
-          onClick={() => onActivate(planet.id)}
-          onFocus={() => onFocusChange(planet.id)}
-          onMouseEnter={() => onHoverChange(planet.id)}
-          onMouseLeave={() => onHoverChange(null)}
           style={style}
-          tabIndex={isVisible ? 0 : -1}
-          type="button"
         >
-          <span>{planet.name}</span>
-          <small aria-hidden="true">Open site</small>
+          <button
+            aria-describedby={descriptionId}
+            onBlur={() => onFocusChange(null)}
+            onClick={() => onActivate(planet.id)}
+            onFocus={() => onFocusChange(planet.id)}
+            onMouseEnter={() => onHoverChange(planet.id)}
+            onMouseLeave={() => onHoverChange(null)}
+            tabIndex={isVisible ? 0 : -1}
+            type="button"
+          >
+            <span>{planet.name}</span>
+            <small>Open site</small>
+          </button>
+          <a
+            href={planet.vercelUrl}
+            rel="noreferrer"
+            tabIndex={isVisible ? 0 : -1}
+            target="_blank"
+          >
+            Vercel ↗
+          </a>
           <span className="sr-only" id={descriptionId}>
-            {planet.description} Activate to open this destination.
+            {planet.description} Use the Vercel link to manage deployments.
           </span>
-        </button>
+        </div>
       );
     });
 }
