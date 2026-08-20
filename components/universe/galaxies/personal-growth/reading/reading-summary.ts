@@ -1,10 +1,18 @@
-import type { ReadingBook, ReadingSession } from "./reading-record";
+import {
+  readingShelfForStatus,
+  type ReadingBook,
+  type ReadingSession,
+  type ReadingShelfId,
+} from "./reading-record";
 
 export type ReadingSummary = Readonly<{
+  completed: readonly ReadingBook[];
   currentBook: ReadingBook | null;
+  currentlyReading: readonly ReadingBook[];
   pagesThisWeek: number;
   recentReflections: readonly ReadingSession[];
   timeThisWeekMinutes: number;
+  wantToRead: readonly ReadingBook[];
   wantToReadNext: readonly ReadingBook[];
 }>;
 
@@ -13,6 +21,13 @@ function startOfCurrentWeek(now: Date) {
   const day = start.getDay();
   start.setDate(start.getDate() - (day === 0 ? 6 : day - 1));
   return start;
+}
+
+function booksOnShelf(
+  books: readonly ReadingBook[],
+  shelf: ReadingShelfId,
+): readonly ReadingBook[] {
+  return books.filter((book) => readingShelfForStatus(book.status) === shelf);
 }
 
 export function deriveReadingSummary(
@@ -25,9 +40,16 @@ export function deriveReadingSummary(
     (session) =>
       new Date(`${session.occurredOn}T12:00:00`).getTime() >= weekStart,
   );
+  const currentlyReading = booksOnShelf(books, "reading");
+  const wantToRead = booksOnShelf(books, "want-to-read");
 
   return {
-    currentBook: books.find((book) => book.status === "reading") ?? null,
+    completed: booksOnShelf(books, "completed"),
+    currentBook:
+      currentlyReading.find((book) => book.status === "reading") ??
+      currentlyReading[0] ??
+      null,
+    currentlyReading,
     pagesThisWeek: weeklySessions.reduce(
       (total, session) => total + session.pagesRead,
       0,
@@ -39,8 +61,7 @@ export function deriveReadingSummary(
       (total, session) => total + session.durationMinutes,
       0,
     ),
-    wantToReadNext: books
-      .filter((book) => book.status === "want-to-read")
-      .slice(0, 4),
+    wantToRead,
+    wantToReadNext: wantToRead.slice(0, 4),
   };
 }

@@ -1,18 +1,28 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+} from "react";
 
 import { activateInterfaceSurface } from "@/lib/interface-surface";
 
 import {
-  readingBookStatusLabels,
+  parseReadingShelfId,
+  readingShelfForStatus,
+  readingShelfLabels,
+  readingStatusForShelf,
   type NewReadingBook,
   type NewReadingSession,
   type ReadingBook,
-  type ReadingBookStatus,
   type ReadingBookUpdate,
   type ReadingSession,
-  type ReadingSessionUpdate,
+  type ReadingShelfId,
 } from "./reading-record";
 import type { ReadingSummary } from "./reading-summary";
 
@@ -23,7 +33,6 @@ type CelestialLibraryDashboardProps = Readonly<{
   onAddBook: (input: NewReadingBook) => Promise<void>;
   onAddSession: (input: NewReadingSession) => Promise<void>;
   onEditBook: (input: ReadingBookUpdate) => Promise<void>;
-  onEditSession: (input: ReadingSessionUpdate) => Promise<void>;
   onRemoveBook: (bookId: string) => Promise<void>;
   onRemoveSession: (sessionId: string) => Promise<void>;
   sessions: readonly ReadingSession[];
@@ -31,11 +40,22 @@ type CelestialLibraryDashboardProps = Readonly<{
   summary: ReadingSummary;
 }>;
 
-type SessionEditor = Readonly<{
-  bookId: string;
-  revision: number;
-  session: ReadingSession | null;
-}>;
+const volumePalette = [
+  "#5c2a3a",
+  "#2a3d5c",
+  "#2d4634",
+  "#5a4020",
+  "#3d2a55",
+  "#4a2a2a",
+  "#1f3f3c",
+  "#4a3820",
+] as const;
+
+const shelfOrder = [
+  "reading",
+  "want-to-read",
+  "completed",
+] as const satisfies readonly ReadingShelfId[];
 
 function todayAsInputValue() {
   const now = new Date();
@@ -56,6 +76,67 @@ function formatDate(value: string) {
   }).format(new Date(`${value}T12:00:00`));
 }
 
+function volumeAppearance(title: string) {
+  let hash = 0;
+
+  for (const character of title) {
+    hash = Math.imul(hash, 31) + character.charCodeAt(0);
+  }
+
+  return {
+    color: volumePalette[Math.abs(hash) % volumePalette.length],
+    height: 7.2 + (Math.abs(hash) % 5) * 0.55,
+  };
+}
+
+function bookProgress(book: ReadingBook) {
+  return Math.min(book.currentPage / book.totalPages, 1);
+}
+
+function toBookUpdate(
+  book: ReadingBook,
+  changes: Partial<
+    Pick<
+      ReadingBook,
+      | "author"
+      | "currentPage"
+      | "finalReflection"
+      | "rating"
+      | "status"
+      | "title"
+      | "totalPages"
+    >
+  >,
+): ReadingBookUpdate {
+  return {
+    author: changes.author ?? book.author,
+    currentPage: changes.currentPage ?? book.currentPage,
+    finalReflection: changes.finalReflection ?? book.finalReflection,
+    id: book.id,
+    rating: changes.rating === undefined ? book.rating : changes.rating,
+    status: changes.status ?? book.status,
+    title: changes.title ?? book.title,
+    totalPages: changes.totalPages ?? book.totalPages,
+  };
+}
+
+function bookStatusCaption(book: ReadingBook) {
+  switch (book.status) {
+    case "abandoned":
+      return "Set aside";
+    case "paused":
+      return "Paused";
+    case "completed":
+    case "reading":
+    case "want-to-read":
+      return null;
+    default: {
+      const exhaustive: never = book.status;
+      return exhaustive;
+    }
+  }
+}
+
 export function CelestialLibraryDashboard({
   books,
   isLoading,
@@ -63,26 +144,28 @@ export function CelestialLibraryDashboard({
   onAddBook,
   onAddSession,
   onEditBook,
-  onEditSession,
   onRemoveBook,
   onRemoveSession,
   sessions,
   storageError,
   summary,
 }: CelestialLibraryDashboardProps) {
-  const sessionComposerId = useId();
+  const addBookFormId = useId();
   const [isSaving, setIsSaving] = useState(false);
-  const [isSessionComposerOpen, setIsSessionComposerOpen] = useState(false);
-  const [pendingRemovalKey, setPendingRemovalKey] = useState<string | null>(
-    null,
-  );
+  const [isAddingBook, setIsAddingBook] = useState(false);
+  const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
+  const [checkInRevision, setCheckInRevision] = useState(0);
   const [feedback, setFeedback] = useState("");
-  const [sessionEditor, setSessionEditor] = useState<SessionEditor>({
-    bookId: "",
-    revision: 0,
-    session: null,
-  });
   const operationLockRef = useRef(false);
+
+  const selectedBook = books.find((book) => book.id === selectedBookId) ?? null;
+  const selectedSessions = useMemo(
+    () =>
+      selectedBook === null
+        ? []
+        : sessions.filter((session) => session.bookId === selectedBook.id),
+    [selectedBook, sessions],
+  );
 
   useEffect(() => {
     if (!isVisible) {
@@ -95,16 +178,6 @@ export function CelestialLibraryDashboard({
   if (!isVisible) {
     return null;
   }
-
-  const currentBook = summary.currentBook;
-  const currentProgress =
-    currentBook === null
-      ? 0
-      : Math.min(currentBook.currentPage / currentBook.totalPages, 1);
-  const sessionTargetBookId =
-    sessionEditor.bookId || currentBook?.id || books[0]?.id || "";
-  const sessionTargetBook =
-    books.find((book) => book.id === sessionTargetBookId) ?? null;
 
   const runOperation = async (
     operation: () => Promise<void>,
@@ -132,150 +205,93 @@ export function CelestialLibraryDashboard({
     }
   };
 
-  const resetSessionEditor = (excludedBookId?: string) => {
-    const fallbackBookId =
-      currentBook?.id !== excludedBookId
-        ? currentBook?.id
-        : books.find((book) => book.id !== excludedBookId)?.id;
-
-    setSessionEditor((current) => ({
-      bookId: fallbackBookId ?? "",
-      revision: current.revision + 1,
-      session: null,
-    }));
-  };
-
-  const openSessionEditor = (
-    bookId: string,
-    session: ReadingSession | null,
-  ) => {
-    setSessionEditor((current) => ({
-      bookId,
-      revision: current.revision + 1,
-      session,
-    }));
-    setIsSessionComposerOpen(true);
-    setFeedback(
-      session === null
-        ? "Ready for your next reading session."
-        : "Editing reading session.",
-    );
-  };
-
-  const handleBookSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleAddBook = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
     const data = new FormData(form);
+    const shelf = parseReadingShelfId(String(data.get("shelf") ?? ""));
+
+    if (shelf === null) {
+      setFeedback("Choose a shelf for this book.");
+      return;
+    }
     const input: NewReadingBook = {
       author: String(data.get("author") ?? "").trim(),
-      status: String(data.get("status")) as ReadingBookStatus,
+      status: readingStatusForShelf(shelf),
       title: String(data.get("title") ?? "").trim(),
       totalPages: Number(data.get("totalPages")),
     };
     const didSave = await runOperation(
       () => onAddBook(input),
-      "Book added to the Celestial Library.",
+      "Book added to the library.",
       "The book could not be saved.",
     );
 
     if (didSave) {
       form.reset();
+      setIsAddingBook(false);
     }
   };
 
-  const handleSessionSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleCheckIn = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const sessionBeingEdited = sessionEditor.session;
-    const input: NewReadingSession = {
-      bookId: String(data.get("bookId")),
-      durationMinutes: Number(data.get("durationMinutes")),
-      endPage: Number(data.get("endPage")),
-      occurredOn: String(data.get("occurredOn")),
-      reflection: String(data.get("reflection") ?? "").trim(),
-      startPage: Number(data.get("startPage")),
-    };
-    const didSave =
-      sessionBeingEdited === null
-        ? await runOperation(
-            () => onAddSession(input),
-            "Reading session logged.",
-            "The reading session could not be saved.",
-          )
-        : await runOperation(
-            () =>
-              onEditSession({
-                ...input,
-                id: sessionBeingEdited.id,
-              }),
-            "Reading session updated.",
-            "The reading session could not be updated.",
-          );
 
-    if (didSave) {
-      resetSessionEditor();
-      setIsSessionComposerOpen(false);
-    }
-  };
-
-  const handleBookUpdate = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    const ratingValue = String(data.get("rating") ?? "");
-    const input: ReadingBookUpdate = {
-      author: String(data.get("author") ?? "").trim(),
-      currentPage: Number(data.get("currentPage")),
-      finalReflection: String(data.get("finalReflection") ?? "").trim(),
-      id: String(data.get("id")),
-      rating: ratingValue.length === 0 ? null : Number(ratingValue),
-      status: String(data.get("status")) as ReadingBookStatus,
-      title: String(data.get("title") ?? "").trim(),
-      totalPages: Number(data.get("totalPages")),
-    };
-
-    await runOperation(
-      () => onEditBook(input),
-      "Book details and progress updated.",
-      "The book could not be updated.",
-    );
-  };
-
-  const handleRemoveSession = async (session: ReadingSession) => {
-    if (
-      operationLockRef.current ||
-      !window.confirm("Delete this reading session? This cannot be undone.")
-    ) {
+    if (selectedBook === null) {
       return;
     }
 
-    const removalKey = `session:${session.id}`;
-    setPendingRemovalKey(removalKey);
-    const didRemove = await runOperation(
-      () => onRemoveSession(session.id),
-      "Reading session deleted.",
-      "The reading session could not be deleted.",
+    const data = new FormData(event.currentTarget);
+    const page = Number(data.get("page"));
+    const input: NewReadingSession = {
+      bookId: selectedBook.id,
+      durationMinutes: Math.max(
+        0,
+        Math.round(Number(data.get("durationMinutes") || 0)),
+      ),
+      endPage: page,
+      occurredOn: todayAsInputValue(),
+      reflection: String(data.get("reflection") ?? "").trim(),
+      startPage: selectedBook.currentPage,
+    };
+    const didSave = await runOperation(
+      () => onAddSession(input),
+      "Reading recorded.",
+      "This update could not be saved.",
     );
-    setPendingRemovalKey(null);
 
-    if (didRemove && sessionEditor.session?.id === session.id) {
-      resetSessionEditor();
-      setIsSessionComposerOpen(false);
+    if (didSave) {
+      setCheckInRevision((current) => current + 1);
     }
+  };
+
+  const handleMoveToShelf = async (
+    book: ReadingBook,
+    shelf: ReadingShelfId,
+  ) => {
+    const nextStatus = readingStatusForShelf(shelf);
+    await runOperation(
+      () =>
+        onEditBook(
+          toBookUpdate(book, {
+            currentPage:
+              nextStatus === "completed" ? book.totalPages : book.currentPage,
+            status: nextStatus,
+          }),
+        ),
+      `Moved to ${readingShelfLabels[shelf].toLowerCase()}.`,
+      "The book could not be moved.",
+    );
   };
 
   const handleRemoveBook = async (book: ReadingBook) => {
-    if (operationLockRef.current) {
-      return;
-    }
-
     const relatedSessionCount = sessions.filter(
       (session) => session.bookId === book.id,
     ).length;
     const sessionWarning =
       relatedSessionCount === 0
         ? ""
-        : ` and ${relatedSessionCount} reading ${
-            relatedSessionCount === 1 ? "session" : "sessions"
+        : ` and ${relatedSessionCount} recorded ${
+            relatedSessionCount === 1 ? "update" : "updates"
           }`;
 
     if (
@@ -286,19 +302,40 @@ export function CelestialLibraryDashboard({
       return;
     }
 
-    const removalKey = `book:${book.id}`;
-    setPendingRemovalKey(removalKey);
     const didRemove = await runOperation(
       () => onRemoveBook(book.id),
-      "Book deleted from the library.",
+      "Book removed from the library.",
       "The book could not be deleted.",
     );
-    setPendingRemovalKey(null);
 
-    if (didRemove && sessionTargetBookId === book.id) {
-      resetSessionEditor(book.id);
-      setIsSessionComposerOpen(false);
+    if (didRemove) {
+      setSelectedBookId(null);
     }
+  };
+
+  const handleRemoveSession = async (session: ReadingSession) => {
+    if (
+      !window.confirm("Delete this recorded update? This cannot be undone.")
+    ) {
+      return;
+    }
+
+    await runOperation(
+      () => onRemoveSession(session.id),
+      "Update deleted.",
+      "The update could not be deleted.",
+    );
+  };
+
+  const currentBook = summary.currentBook;
+  const selectedShelfLabel =
+    selectedBook === null
+      ? null
+      : readingShelfLabels[readingShelfForStatus(selectedBook.status)];
+  const shelves: Readonly<Record<ReadingShelfId, readonly ReadingBook[]>> = {
+    completed: summary.completed,
+    reading: summary.currentlyReading,
+    "want-to-read": summary.wantToRead,
   };
 
   return (
@@ -308,391 +345,114 @@ export function CelestialLibraryDashboard({
     >
       <header className="immersive-dashboard__header library-dashboard__header">
         <div>
-          <span>Reading · Celestial Library</span>
-          <strong>{currentBook?.title ?? "Choose your next book"}</strong>
-          <p>
-            {currentBook === null
-              ? "Build a quiet record of books, sessions, and ideas."
-              : `${currentBook.author || "Unknown author"} · page ${currentBook.currentPage} of ${currentBook.totalPages}`}
-          </p>
-          {currentBook !== null ? (
-            <div className="library-action">
-              <button
-                aria-controls={sessionComposerId}
-                aria-expanded={isSessionComposerOpen}
-                disabled={isSaving}
-                onClick={() => openSessionEditor(currentBook.id, null)}
-                type="button"
-              >
-                Continue reading
-              </button>
-            </div>
-          ) : null}
+          {selectedBook === null ? (
+            <>
+              <span>Reading · Celestial Library</span>
+              <strong>Your shelves</strong>
+              <p>
+                {currentBook === null
+                  ? "See what you have finished, what you are reading, and what comes next."
+                  : `${currentBook.title} · page ${currentBook.currentPage} of ${currentBook.totalPages}`}
+              </p>
+            </>
+          ) : (
+            <>
+              <span>{selectedShelfLabel}</span>
+              <strong>{selectedBook.title}</strong>
+              <p>
+                {selectedBook.author || "Unknown author"} · page{" "}
+                {selectedBook.currentPage} of {selectedBook.totalPages}
+              </p>
+            </>
+          )}
         </div>
-        <div aria-label="Weekly reading summary" className="immersive-metrics">
-          <span>
-            <strong>{formatMinutes(summary.timeThisWeekMinutes)}</strong>Time
-            this week
-          </span>
-          <span>
-            <strong>{summary.pagesThisWeek}</strong>Pages this week
-          </span>
-          <span>
-            <strong>{books.length}</strong>Books saved
-          </span>
+        <div className="library-dashboard__header-actions">
+          {selectedBook !== null ? (
+            <button
+              disabled={isSaving}
+              onClick={() => setSelectedBookId(null)}
+              type="button"
+            >
+              Back to shelves
+            </button>
+          ) : (
+            <button
+              aria-controls={addBookFormId}
+              aria-expanded={isAddingBook}
+              disabled={isSaving}
+              onClick={() => setIsAddingBook((current) => !current)}
+              type="button"
+            >
+              {isAddingBook ? "Close" : "Add a book"}
+            </button>
+          )}
         </div>
       </header>
 
-      <div className="library-dashboard__progress">
-        <span>Current book progress</span>
-        <i aria-hidden="true">
-          <b style={{ width: `${currentProgress * 100}%` }} />
-        </i>
-        <strong>{Math.round(currentProgress * 100)}%</strong>
-      </div>
-
-      <div className="library-dashboard__grid">
-        <section className="immersive-panel library-reflections">
-          <header>
-            <span>Recent reflections</span>
-          </header>
-          {summary.recentReflections.length === 0 ? (
-            <p>Reflections from reading sessions will collect here.</p>
-          ) : (
-            <ul>
-              {summary.recentReflections.map((session) => (
-                <li key={session.id}>
-                  <time dateTime={session.occurredOn}>
-                    {formatDate(session.occurredOn)}
-                  </time>
-                  <p>{session.reflection}</p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <section className="immersive-panel library-next-books">
-          <header>
-            <span>Want to read next</span>
-          </header>
-          {summary.wantToReadNext.length === 0 ? (
-            <p>Save future books with “Want to read” status.</p>
-          ) : (
-            <ul>
-              {summary.wantToReadNext.map((book) => (
-                <li key={book.id}>
-                  <strong>{book.title}</strong>
-                  <span>{book.author || "Unknown author"}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        <details
-          className="immersive-panel library-action"
-          open={books.length === 0}
+      {selectedBook === null && isAddingBook ? (
+        <form
+          className="library-action library-add-form"
+          id={addBookFormId}
+          onSubmit={handleAddBook}
         >
-          <summary>Add a book</summary>
-          <form onSubmit={handleBookSubmit}>
-            <label>
-              Title
-              <input name="title" required type="text" />
-            </label>
-            <label>
-              Author
-              <input name="author" type="text" />
-            </label>
-            <label>
-              Total pages
-              <input min="1" name="totalPages" required type="number" />
-            </label>
-            <label>
-              Status
-              <select defaultValue="want-to-read" name="status">
-                {Object.entries(readingBookStatusLabels).map(
-                  ([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ),
-                )}
-              </select>
-            </label>
-            <button disabled={isSaving} type="submit">
-              Add to library
-            </button>
-          </form>
-        </details>
-
-        <details
-          className="immersive-panel library-action"
-          id={sessionComposerId}
-          onToggle={(event) =>
-            setIsSessionComposerOpen(event.currentTarget.open)
-          }
-          open={isSessionComposerOpen}
-        >
-          <summary>
-            {sessionEditor.session === null
-              ? "Log reading"
-              : "Edit reading session"}
-          </summary>
-          {books.length === 0 ? (
-            <p>Add a book before logging a reading session.</p>
-          ) : (
-            <form
-              key={`${sessionEditor.session?.id ?? "new"}:${sessionTargetBookId}:${sessionEditor.revision}`}
-              onSubmit={handleSessionSubmit}
-            >
-              <label>
-                Book
-                <select
-                  defaultValue={sessionTargetBookId}
-                  name="bookId"
-                  required
-                >
-                  {books.map((book) => (
-                    <option key={book.id} value={book.id}>
-                      {book.title}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Date
-                <input
-                  defaultValue={
-                    sessionEditor.session?.occurredOn ?? todayAsInputValue()
-                  }
-                  max={todayAsInputValue()}
-                  name="occurredOn"
-                  required
-                  type="date"
-                />
-              </label>
-              <label>
-                Minutes
-                <input
-                  defaultValue={
-                    sessionEditor.session?.durationMinutes ?? undefined
-                  }
-                  min="1"
-                  name="durationMinutes"
-                  required
-                  type="number"
-                />
-              </label>
-              <label>
-                Starting page
-                <input
-                  defaultValue={
-                    sessionEditor.session?.startPage ??
-                    sessionTargetBook?.currentPage ??
-                    0
-                  }
-                  min="0"
-                  name="startPage"
-                  required
-                  type="number"
-                />
-              </label>
-              <label>
-                Ending page
-                <input
-                  defaultValue={sessionEditor.session?.endPage ?? undefined}
-                  min="0"
-                  name="endPage"
-                  required
-                  type="number"
-                />
-              </label>
-              <label className="library-action__wide">
-                Reflection
-                <textarea
-                  defaultValue={sessionEditor.session?.reflection ?? ""}
-                  maxLength={1600}
-                  name="reflection"
-                  rows={2}
-                />
-              </label>
-              <button disabled={isSaving} type="submit">
-                {isSaving
-                  ? "Saving"
-                  : sessionEditor.session === null
-                    ? "Save reading session"
-                    : "Save changes"}
-              </button>
-              {sessionEditor.session !== null ? (
-                <button
-                  disabled={isSaving}
-                  onClick={() => resetSessionEditor()}
-                  type="button"
-                >
-                  Cancel edit
-                </button>
-              ) : null}
-            </form>
-          )}
-        </details>
-
-        <details className="immersive-panel library-collection">
-          <summary>Library · {books.length}</summary>
-          {isLoading ? (
-            <p>Opening the library.</p>
-          ) : books.length === 0 ? (
-            <p>No books saved yet.</p>
-          ) : (
-            <div className="library-book-list">
-              {books.map((book) => (
-                <form key={book.id} onSubmit={handleBookUpdate}>
-                  <input name="id" type="hidden" value={book.id} />
-                  <div>
-                    <strong>{book.title}</strong>
-                    <span>{book.author || "Unknown author"}</span>
-                  </div>
-                  <label>
-                    Title
-                    <input
-                      defaultValue={book.title}
-                      name="title"
-                      required
-                      type="text"
-                    />
-                  </label>
-                  <label>
-                    Author
-                    <input
-                      defaultValue={book.author}
-                      name="author"
-                      type="text"
-                    />
-                  </label>
-                  <label>
-                    Total pages
-                    <input
-                      defaultValue={book.totalPages}
-                      min="1"
-                      name="totalPages"
-                      required
-                      type="number"
-                    />
-                  </label>
-                  <label>
-                    Current page
-                    <input
-                      defaultValue={book.currentPage}
-                      max={book.totalPages}
-                      min="0"
-                      name="currentPage"
-                      required
-                      type="number"
-                    />
-                  </label>
-                  <label>
-                    Status
-                    <select defaultValue={book.status} name="status">
-                      {Object.entries(readingBookStatusLabels).map(
-                        ([value, label]) => (
-                          <option key={value} value={value}>
-                            {label}
-                          </option>
-                        ),
-                      )}
-                    </select>
-                  </label>
-                  <label>
-                    Rating
-                    <input
-                      defaultValue={book.rating ?? ""}
-                      max="5"
-                      min="1"
-                      name="rating"
-                      placeholder="1–5"
-                      type="number"
-                    />
-                  </label>
-                  <label className="library-action__wide">
-                    Final reflection
-                    <textarea
-                      defaultValue={book.finalReflection}
-                      maxLength={2400}
-                      name="finalReflection"
-                      rows={2}
-                    />
-                  </label>
-                  <button disabled={isSaving} type="submit">
-                    Update book
-                  </button>
-                  <button
-                    disabled={isSaving}
-                    onClick={() => void handleRemoveBook(book)}
-                    type="button"
-                  >
-                    {pendingRemovalKey === `book:${book.id}`
-                      ? "Deleting"
-                      : "Delete book"}
-                  </button>
-                </form>
+          <label>
+            Title
+            <input autoFocus name="title" required type="text" />
+          </label>
+          <label>
+            Author
+            <input name="author" type="text" />
+          </label>
+          <label>
+            Pages
+            <input min="1" name="totalPages" required type="number" />
+          </label>
+          <label>
+            Shelf
+            <select defaultValue="want-to-read" name="shelf">
+              {shelfOrder.map((shelf) => (
+                <option key={shelf} value={shelf}>
+                  {readingShelfLabels[shelf]}
+                </option>
               ))}
-            </div>
-          )}
-        </details>
+            </select>
+          </label>
+          <button disabled={isSaving} type="submit">
+            Add to library
+          </button>
+        </form>
+      ) : null}
 
-        <details className="immersive-panel library-history">
-          <summary>Past reading sessions · {sessions.length}</summary>
-          {sessions.length === 0 ? (
-            <p>No reading sessions logged yet.</p>
-          ) : (
-            <ul>
-              {sessions.map((session) => {
-                const book = books.find(
-                  (candidate) => candidate.id === session.bookId,
-                );
-                return (
-                  <li key={session.id}>
-                    <time dateTime={session.occurredOn}>
-                      {formatDate(session.occurredOn)}
-                    </time>
-                    <strong>{book?.title ?? "Unknown book"}</strong>
-                    <span>
-                      {session.durationMinutes} min · pages {session.startPage}–
-                      {session.endPage}
-                    </span>
-                    {session.reflection.length > 0 ? (
-                      <p>{session.reflection}</p>
-                    ) : null}
-                    <span className="library-action library-action__wide">
-                      <button
-                        disabled={isSaving}
-                        onClick={() =>
-                          openSessionEditor(session.bookId, session)
-                        }
-                        type="button"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        disabled={isSaving}
-                        onClick={() => void handleRemoveSession(session)}
-                        type="button"
-                      >
-                        {pendingRemovalKey === `session:${session.id}`
-                          ? "Deleting"
-                          : "Delete"}
-                      </button>
-                    </span>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </details>
-      </div>
+      {selectedBook === null ? (
+        <div className="library-shelves">
+          {isLoading ? <p>Opening the library.</p> : null}
+          {shelfOrder.map((shelf) => (
+            <LibraryShelf
+              books={shelves[shelf]}
+              key={shelf}
+              onSelect={setSelectedBookId}
+              selectedBookId={selectedBookId}
+              shelf={shelf}
+            />
+          ))}
+        </div>
+      ) : (
+        <LibraryBookDesk
+          book={selectedBook}
+          checkInRevision={checkInRevision}
+          isSaving={isSaving}
+          onCheckIn={handleCheckIn}
+          onMoveToShelf={(shelf) => void handleMoveToShelf(selectedBook, shelf)}
+          onRemoveBook={() => void handleRemoveBook(selectedBook)}
+          onRemoveSession={(session) => void handleRemoveSession(session)}
+          sessions={selectedSessions}
+        />
+      )}
 
       <p className="immersive-dashboard__feedback">
-        Saved locally first. Cloud sync status is shown in Mission.
+        {summary.timeThisWeekMinutes > 0
+          ? `${formatMinutes(summary.timeThisWeekMinutes)} recorded this week.`
+          : "Saved locally first. Cloud sync status is shown in Mission."}
       </p>
       {storageError !== null ? (
         <p className="immersive-dashboard__error">{storageError}</p>
@@ -701,5 +461,258 @@ export function CelestialLibraryDashboard({
         {feedback}
       </p>
     </aside>
+  );
+}
+
+function LibraryShelf({
+  books,
+  onSelect,
+  selectedBookId,
+  shelf,
+}: Readonly<{
+  books: readonly ReadingBook[];
+  onSelect: (bookId: string) => void;
+  selectedBookId: string | null;
+  shelf: ReadingShelfId;
+}>) {
+  return (
+    <section className="library-shelf" data-shelf={shelf}>
+      <header>
+        <span>{readingShelfLabels[shelf]}</span>
+        <strong>{books.length}</strong>
+      </header>
+      {books.length === 0 ? (
+        <p className="library-shelf__empty">
+          {shelf === "reading"
+            ? "No book open yet."
+            : shelf === "want-to-read"
+              ? "Nothing waiting on this shelf."
+              : "Finished books will collect here."}
+        </p>
+      ) : (
+        <ul className="library-shelf__books">
+          {books.map((book) =>
+            shelf === "reading" ? (
+              <li key={book.id}>
+                <ReadingVolume
+                  book={book}
+                  onSelect={onSelect}
+                  selected={book.id === selectedBookId}
+                />
+              </li>
+            ) : (
+              <li key={book.id}>
+                <BookSpine
+                  book={book}
+                  onSelect={onSelect}
+                  selected={book.id === selectedBookId}
+                />
+              </li>
+            ),
+          )}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function ReadingVolume({
+  book,
+  onSelect,
+  selected,
+}: Readonly<{
+  book: ReadingBook;
+  onSelect: (bookId: string) => void;
+  selected: boolean;
+}>) {
+  const appearance = volumeAppearance(book.title);
+  const progress = bookProgress(book);
+  const caption = bookStatusCaption(book);
+
+  return (
+    <button
+      aria-current={selected ? "true" : undefined}
+      aria-label={`${book.title} by ${book.author || "unknown author"}, page ${book.currentPage} of ${book.totalPages}`}
+      className="library-volume"
+      onClick={() => onSelect(book.id)}
+      style={{ "--volume-color": appearance.color } as CSSProperties}
+      type="button"
+    >
+      <strong>{book.title}</strong>
+      <span>{book.author || "Unknown author"}</span>
+      {caption !== null ? <em>{caption}</em> : null}
+      <i aria-hidden="true">
+        <b style={{ width: `${progress * 100}%` }} />
+      </i>
+      <small>
+        {book.currentPage} / {book.totalPages}
+      </small>
+    </button>
+  );
+}
+
+function BookSpine({
+  book,
+  onSelect,
+  selected,
+}: Readonly<{
+  book: ReadingBook;
+  onSelect: (bookId: string) => void;
+  selected: boolean;
+}>) {
+  const appearance = volumeAppearance(book.title);
+  const caption = bookStatusCaption(book);
+
+  return (
+    <button
+      aria-current={selected ? "true" : undefined}
+      aria-label={`${book.title} by ${book.author || "unknown author"}${caption === null ? "" : `, ${caption}`}`}
+      className="library-spine"
+      onClick={() => onSelect(book.id)}
+      style={
+        {
+          "--spine-color": appearance.color,
+          "--spine-height": `${appearance.height}rem`,
+        } as CSSProperties
+      }
+      type="button"
+    >
+      <strong>{book.title}</strong>
+      {caption !== null ? <em>{caption}</em> : null}
+    </button>
+  );
+}
+
+function LibraryBookDesk({
+  book,
+  checkInRevision,
+  isSaving,
+  onCheckIn,
+  onMoveToShelf,
+  onRemoveBook,
+  onRemoveSession,
+  sessions,
+}: Readonly<{
+  book: ReadingBook;
+  checkInRevision: number;
+  isSaving: boolean;
+  onCheckIn: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  onMoveToShelf: (shelf: ReadingShelfId) => void;
+  onRemoveBook: () => void;
+  onRemoveSession: (session: ReadingSession) => void;
+  sessions: readonly ReadingSession[];
+}>) {
+  const currentShelf = readingShelfForStatus(book.status);
+  const progress = bookProgress(book);
+
+  return (
+    <div className="library-desk">
+      <div className="library-desk__progress">
+        <span>Progress</span>
+        <i aria-hidden="true">
+          <b style={{ width: `${progress * 100}%` }} />
+        </i>
+        <strong>{Math.round(progress * 100)}%</strong>
+      </div>
+
+      <div
+        className="library-desk__shelves"
+        role="group"
+        aria-label="Move book"
+      >
+        {shelfOrder.map((shelf) => (
+          <button
+            aria-pressed={currentShelf === shelf}
+            disabled={isSaving || currentShelf === shelf}
+            key={shelf}
+            onClick={() => onMoveToShelf(shelf)}
+            type="button"
+          >
+            {readingShelfLabels[shelf]}
+          </button>
+        ))}
+      </div>
+
+      <form
+        className="library-action library-desk__check-in"
+        key={`${book.id}:${checkInRevision}:${book.currentPage}`}
+        onSubmit={onCheckIn}
+      >
+        <label>
+          Page
+          <input
+            defaultValue={book.currentPage}
+            max={book.totalPages}
+            min="0"
+            name="page"
+            required
+            type="number"
+          />
+        </label>
+        <label>
+          Minutes
+          <input min="0" name="durationMinutes" placeholder="0" type="number" />
+        </label>
+        <label className="library-action__wide">
+          Note
+          <textarea
+            maxLength={1600}
+            name="reflection"
+            placeholder="What stayed with you?"
+            rows={3}
+          />
+        </label>
+        <button disabled={isSaving} type="submit">
+          {isSaving ? "Saving" : "Record"}
+        </button>
+      </form>
+
+      <section className="library-timeline">
+        <header>
+          <span>Recorded updates</span>
+          <strong>{sessions.length}</strong>
+        </header>
+        {sessions.length === 0 ? (
+          <p>Page, time, and notes from this book will collect here.</p>
+        ) : (
+          <ul>
+            {sessions.map((session) => (
+              <li key={session.id}>
+                <time dateTime={session.occurredOn}>
+                  {formatDate(session.occurredOn)}
+                </time>
+                <span>
+                  {session.durationMinutes > 0
+                    ? `${session.durationMinutes} min`
+                    : "Note"}
+                  {session.endPage !== session.startPage
+                    ? ` · p. ${session.startPage}–${session.endPage}`
+                    : ` · p. ${session.endPage}`}
+                </span>
+                {session.reflection.length > 0 ? (
+                  <p>{session.reflection}</p>
+                ) : null}
+                <button
+                  disabled={isSaving}
+                  onClick={() => onRemoveSession(session)}
+                  type="button"
+                >
+                  Delete
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <button
+        className="library-desk__remove"
+        disabled={isSaving}
+        onClick={onRemoveBook}
+        type="button"
+      >
+        Remove from library
+      </button>
+    </div>
   );
 }

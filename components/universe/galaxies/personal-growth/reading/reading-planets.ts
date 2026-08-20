@@ -4,7 +4,7 @@ export const celestialLibraryDefinition = {
   cameraLookTarget: [36, -1, -37.4],
   cameraPosition: [36, -0.08, -30.9],
   description:
-    "A celestial library for books, reading sessions, progress, and lasting reflections.",
+    "A celestial library for the books you have finished, the book you are reading, and the books still waiting.",
   galaxyId: "personal-growth",
   id: "celestial-library",
   kind: "library",

@@ -12,6 +12,7 @@ import type {
   NewReadingBook,
   NewReadingSession,
   ReadingBook,
+  ReadingBookStatus,
   ReadingBookUpdate,
   ReadingSession,
   ReadingSessionUpdate,
@@ -28,6 +29,47 @@ const sessionStoreName = personalGrowthStoreNames.readingSessions;
 function normalizeSession(session: ReadingSession): ReadingSession {
   const legacy = session as ReadingSession & { updatedAt?: string };
   return { ...session, updatedAt: legacy.updatedAt ?? session.createdAt };
+}
+
+function statusAfterCheckIn(status: ReadingBookStatus): ReadingBookStatus {
+  switch (status) {
+    case "abandoned":
+    case "paused":
+    case "want-to-read":
+      return "reading";
+    case "completed":
+    case "reading":
+      return status;
+    default: {
+      const exhaustive: never = status;
+      return exhaustive;
+    }
+  }
+}
+
+function assertReadingCheckIn(input: NewReadingSession, totalPages: number) {
+  const durationMinutes = Math.round(input.durationMinutes);
+  const startPage = Math.round(input.startPage);
+  const endPage = Math.round(input.endPage);
+  const hasNote = input.reflection.trim().length > 0;
+  const hasTime = durationMinutes >= 1;
+  const hasPages = endPage !== startPage;
+
+  if (
+    !Number.isInteger(durationMinutes) ||
+    durationMinutes < 0 ||
+    !Number.isInteger(startPage) ||
+    !Number.isInteger(endPage) ||
+    startPage < 0 ||
+    endPage < 0 ||
+    endPage > totalPages
+  ) {
+    throw new Error("Enter a valid page and reading time.");
+  }
+
+  if (!hasNote && !hasTime && !hasPages) {
+    throw new Error("Add a page update, time, or note to record.");
+  }
 }
 
 export async function listReadingLibraryData(): Promise<ReadingLibraryData> {
@@ -159,17 +201,6 @@ export async function updateReadingBook(input: ReadingBookUpdate) {
 }
 
 export async function saveReadingSession(input: NewReadingSession) {
-  if (
-    !Number.isFinite(input.durationMinutes) ||
-    input.durationMinutes < 1 ||
-    !Number.isInteger(input.startPage) ||
-    !Number.isInteger(input.endPage) ||
-    input.startPage < 0 ||
-    input.endPage < input.startPage
-  ) {
-    throw new Error("Enter valid reading time and page values.");
-  }
-
   const database = await openPersonalGrowthDatabase();
 
   try {
@@ -184,23 +215,27 @@ export async function saveReadingSession(input: NewReadingSession) {
       throw new Error("Choose a book that is still in your library.");
     }
 
-    if (input.endPage > book.totalPages) {
-      throw new Error(`The ending page cannot exceed ${book.totalPages}.`);
-    }
+    assertReadingCheckIn(input, book.totalPages);
 
+    const durationMinutes = Math.round(input.durationMinutes);
+    const startPage = Math.round(input.startPage);
+    const endPage = Math.round(input.endPage);
     const now = new Date().toISOString();
     const session: ReadingSession = {
       ...input,
       createdAt: now,
+      durationMinutes,
+      endPage,
       id: crypto.randomUUID(),
-      pagesRead: input.endPage - input.startPage,
+      pagesRead: Math.max(endPage - startPage, 0),
       reflection: input.reflection.trim(),
+      startPage: Math.min(startPage, endPage),
       updatedAt: now,
     };
     const updatedBook: ReadingBook = {
       ...book,
-      currentPage: Math.max(book.currentPage, input.endPage),
-      status: book.status === "want-to-read" ? "reading" : book.status,
+      currentPage: Math.min(Math.max(endPage, 0), book.totalPages),
+      status: statusAfterCheckIn(book.status),
       updatedAt: now,
     };
     const writeTransaction = database.transaction(
@@ -245,20 +280,19 @@ export async function updateReadingSession(input: ReadingSessionUpdate) {
       throw new Error("This reading session is no longer available.");
     }
 
-    if (
-      input.durationMinutes < 1 ||
-      input.startPage < 0 ||
-      input.endPage < input.startPage ||
-      input.endPage > book.totalPages
-    ) {
-      throw new Error("Review the reading time and page range.");
-    }
+    assertReadingCheckIn(input, book.totalPages);
 
+    const durationMinutes = Math.round(input.durationMinutes);
+    const startPage = Math.round(input.startPage);
+    const endPage = Math.round(input.endPage);
     const updated: ReadingSession = {
       ...existing,
       ...input,
-      pagesRead: input.endPage - input.startPage,
+      durationMinutes,
+      endPage,
+      pagesRead: Math.max(endPage - startPage, 0),
       reflection: input.reflection.trim(),
+      startPage: Math.min(startPage, endPage),
       updatedAt: new Date().toISOString(),
     };
     sessionStore.put(updated);

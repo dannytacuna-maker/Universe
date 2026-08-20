@@ -160,7 +160,6 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
     addSession: addReadingSession,
     books: readingBooks,
     editBook,
-    editSession: editReadingSession,
     isLoading: isReadingLoading,
     removeBook: removeReadingBook,
     removeSession: removeReadingSession,
@@ -1127,7 +1126,6 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
         onAddBook={addBook}
         onAddSession={addReadingSession}
         onEditBook={editBook}
-        onEditSession={editReadingSession}
         onRemoveBook={removeReadingBook}
         onRemoveSession={removeReadingSession}
         sessions={readingSessions}

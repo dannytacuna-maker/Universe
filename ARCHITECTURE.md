@@ -353,14 +353,11 @@ keyboard-accessible open/close control. The translucent review instrument theref
 within the chamber rather than replacing it, while all metrics and history remain usable
 when WebGL is unavailable.
 
-Reading contains the Celestial Library. Its landed dashboard supports adding, editing,
-and intentionally deleting books and sessions; explicit reading statuses; page ranges;
-time; reflections; current progress; history; planned books; ratings; and final
-reflections. A prominent continue-reading path preselects the current book and starting
-page. A pure summary derives
-the current book, weekly time and pages, recent reflections, and the next reading queue.
-The library uses ordinary forms and semantic history outside WebGL, staged over a quiet
-procedural library environment.
+Reading contains the Celestial Library. Its landed dashboard is a visual shelf of
+completed books, the book currently being read, and books waiting to be opened.
+Opening a book records page, time, and notes as a reading session, and moving a
+book between shelves updates its status. The library uses ordinary forms and
+semantic history outside WebGL, staged over a quiet procedural library environment.
 
 French is represented by one deliberate galaxy-level destination, Lumière Station.
 It is neither a planet nor a solar system. The exterior combines a pressurized metallic
