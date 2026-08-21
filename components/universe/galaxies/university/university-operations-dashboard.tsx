@@ -89,6 +89,14 @@ export function UniversityOperationsDashboard({
     onCourseChange?.(selectedCourseId);
   };
 
+  const statusLine = records.isLoading
+    ? "Opening records"
+    : summary.overdueCount > 0
+      ? `${summary.overdueCount} overdue`
+      : summary.upcomingCount > 0
+        ? `${summary.upcomingCount} upcoming`
+        : "Clear";
+
   return (
     <aside
       aria-label="University operations"
@@ -98,36 +106,10 @@ export function UniversityOperationsDashboard({
     >
       <header className={styles.dashboardHeader}>
         <div className={styles.headingIdentity}>
-          <span aria-hidden="true" className={styles.orbitMark}>
-            <i />
-          </span>
           <div>
-            <span>University operations</span>
-            <strong>
-              {records.isLoading
-                ? "Opening academic records"
-                : summary.overdueCount > 0
-                  ? `${summary.overdueCount} deadline${summary.overdueCount === 1 ? "" : "s"} need attention`
-                  : summary.deadlines[0] === undefined
-                    ? "No open academic pressure"
-                    : `${summary.upcomingCount} upcoming assignment${summary.upcomingCount === 1 ? "" : "s"}`}
-            </strong>
+            <span>University</span>
+            <strong>{statusLine}</strong>
           </div>
-        </div>
-
-        <div className={styles.headerMetrics} aria-label="University summary">
-          <span data-alert={summary.overdueCount > 0}>
-            <strong>{summary.overdueCount}</strong>
-            Overdue
-          </span>
-          <span>
-            <strong>{summary.upcomingCount}</strong>
-            Upcoming
-          </span>
-          <span>
-            <strong>{records.grades.length}</strong>
-            Results
-          </span>
         </div>
 
         <button
@@ -143,7 +125,7 @@ export function UniversityOperationsDashboard({
           }
           type="button"
         >
-          {isExpanded ? "Minimize" : "Open records"}
+          {isExpanded ? "Close" : "Open"}
         </button>
       </header>
 
@@ -159,10 +141,27 @@ export function UniversityOperationsDashboard({
             </div>
           ) : null}
 
-          <UniversityDeadlineOverview
-            onSelectCourse={selectCourse}
-            summary={summary}
-          />
+          <p className={styles.pulse} aria-label="University summary">
+            <strong>{summary.overdueCount}</strong> overdue
+            <span aria-hidden="true">·</span>
+            <strong>{summary.upcomingCount}</strong> upcoming
+            <span aria-hidden="true">·</span>
+            <strong>{records.grades.length}</strong> results
+          </p>
+
+          <details
+            className={styles.attention}
+            open={summary.deadlines.length > 0}
+          >
+            <summary>
+              Attention
+              <span>{summary.deadlines.length}</span>
+            </summary>
+            <UniversityDeadlineOverview
+              onSelectCourse={selectCourse}
+              summary={summary}
+            />
+          </details>
 
           <nav aria-label="University courses" className={styles.courseNav}>
             {universityCourseSystems.map((course) => {
@@ -206,20 +205,13 @@ export function UniversityOperationsDashboard({
                 <h2 id="active-university-course-title">
                   {activeCourse.displayName}
                 </h2>
-                <p>
-                  {activeCourse.schedule.length === 0
-                    ? "Independent work with no recurring class meeting."
-                    : `Group ${activeCourse.schedule[0]?.group ?? "not recorded"} · ${activeCourse.name}`}
-                </p>
-              </div>
-              {activeDeadline === undefined ? null : (
-                <div className={styles.nextDeadline}>
-                  <span>Next deadline</span>
-                  <strong>
+                {activeDeadline === undefined ? null : (
+                  <p>
+                    Next deadline{" "}
                     {formatUniversityDeadline(activeDeadline.assignment.dueAt)}
-                  </strong>
-                </div>
-              )}
+                  </p>
+                )}
+              </div>
             </header>
 
             <div className={styles.courseGrid}>
@@ -231,20 +223,32 @@ export function UniversityOperationsDashboard({
                 onEdit={records.editAssignment}
                 onRemove={records.removeAssignment}
               />
-              <UniversityGradePanel
-                courseId={activeCourse.id}
-                grades={courseGrades}
-                key={`grades-${activeCourse.id}`}
-                onAdd={records.addGrade}
-                onRemove={records.removeGrade}
-              />
-              <UniversityNotePanel
-                courseId={activeCourse.id}
-                key={`notes-${activeCourse.id}`}
-                notes={courseNotes}
-                onAdd={records.addNote}
-                onRemove={records.removeNote}
-              />
+              <details className={styles.secondaryPanel} open={courseGrades.length > 0}>
+                <summary>
+                  Grades
+                  <span>{courseGrades.length}</span>
+                </summary>
+                <UniversityGradePanel
+                  courseId={activeCourse.id}
+                  grades={courseGrades}
+                  key={`grades-${activeCourse.id}`}
+                  onAdd={records.addGrade}
+                  onRemove={records.removeGrade}
+                />
+              </details>
+              <details className={styles.secondaryPanel} open={courseNotes.length > 0}>
+                <summary>
+                  Notes
+                  <span>{courseNotes.length}</span>
+                </summary>
+                <UniversityNotePanel
+                  courseId={activeCourse.id}
+                  key={`notes-${activeCourse.id}`}
+                  notes={courseNotes}
+                  onAdd={records.addNote}
+                  onRemove={records.removeNote}
+                />
+              </details>
             </div>
           </section>
         </div>

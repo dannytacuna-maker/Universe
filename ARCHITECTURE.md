@@ -276,7 +276,8 @@ navigation-only.
 
 University now treats all five course systems as real explorable destinations.
 The operations instrument remains semantic DOM outside WebGL and owns assignments,
-deadlines, status, grades, trajectory, course notes, and reflections. Its overview
+deadlines, status, grades, trajectory, course notes, and reflections. It is available
+only in University galaxy overview, not while orbiting a course system. Its overview
 derives cross-course deadline pressure without creating analytics records or fake
 coursework. Course schedules remain immutable definition context; academic records
 remain repository data. Each course keeps its palette and deterministic orbital

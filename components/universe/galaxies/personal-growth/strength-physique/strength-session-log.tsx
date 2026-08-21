@@ -68,22 +68,18 @@ export function StrengthSessionLog({
     const neglected = (["push", "pull", "legs"] as const).filter(
       (focus) => !recent.some((session) => session.focus === focus),
     );
-    const recoveryCount = recent.filter(
-      (session) => session.recoveryWork || session.mobilityWork,
-    ).length;
 
-    return {
-      neglected,
-      recoveryRate:
-        recent.length === 0
-          ? 0
-          : Math.round((recoveryCount / recent.length) * 100),
-      totalExercises: sessions.reduce(
-        (total, session) => total + session.exercises.length,
-        0,
-      ),
-    };
+    return { neglected };
   }, [sessions]);
+
+  const hasExtraDetails =
+    editingSession !== null &&
+    (editingSession.reflection.length > 0 ||
+      editingSession.physiqueNotes.length > 0 ||
+      editingSession.notes.length > 0 ||
+      editingSession.recoveryWork ||
+      editingSession.mobilityWork ||
+      editingSession.perceivedExertion !== null);
 
   const resetEditor = () => {
     setEditingSession(null);
@@ -147,10 +143,10 @@ export function StrengthSessionLog({
     try {
       if (editingSession === null) {
         await onAdd(input);
-        setFeedback("Strength session recorded.");
+        setFeedback("Session saved.");
       } else {
         await onEdit({ ...input, id: editingSession.id });
-        setFeedback("Strength session updated.");
+        setFeedback("Session updated.");
       }
 
       form.reset();
@@ -180,7 +176,7 @@ export function StrengthSessionLog({
       if (editingSession?.id === session.id) {
         resetEditor();
       }
-      setFeedback("Strength session removed.");
+      setFeedback("Session removed.");
     } catch (error: unknown) {
       setFeedback(
         error instanceof Error
@@ -194,30 +190,21 @@ export function StrengthSessionLog({
     <section className="strength-session-log">
       <header>
         <div>
-          <span>Training record</span>
+          <span>Session</span>
           <strong>
-            {editingSession === null ? "Log this session" : "Edit session"}
+            {editingSession === null ? "Log workout" : "Edit workout"}
           </strong>
         </div>
-        <dl>
-          <div>
-            <dt>Sessions</dt>
-            <dd>{sessions.length}</dd>
-          </div>
-          <div>
-            <dt>Recovery</dt>
-            <dd>{summary.recoveryRate}%</dd>
-          </div>
-          <div>
-            <dt>Exercise records</dt>
-            <dd>{summary.totalExercises}</dd>
-          </div>
-        </dl>
+        {editingSession !== null ? (
+          <button onClick={resetEditor} type="button">
+            Cancel
+          </button>
+        ) : null}
       </header>
 
       {summary.neglected.length > 0 && sessions.length > 0 ? (
         <p className="strength-session-log__attention">
-          Quiet over the last three weeks:{" "}
+          Quiet lately:{" "}
           {summary.neglected.map((focus) => focusLabels[focus]).join(", ")}.
         </p>
       ) : null}
@@ -248,17 +235,6 @@ export function StrengthSessionLog({
               ))}
             </select>
           </label>
-          <label>
-            Effort <span>1–10, optional</span>
-            <input
-              defaultValue={editingSession?.perceivedExertion ?? ""}
-              key={`effort-${editingSession?.id ?? "new"}`}
-              max="10"
-              min="1"
-              name="perceivedExertion"
-              type="number"
-            />
-          </label>
         </div>
 
         <fieldset className="strength-session-log__exercises">
@@ -272,7 +248,7 @@ export function StrengthSessionLog({
                   onChange={(event) =>
                     updateExercise(exercise.id, "name", event.target.value)
                   }
-                  placeholder="Choose at the gym"
+                  placeholder="Movement"
                   required
                   value={exercise.name}
                 />
@@ -341,77 +317,94 @@ export function StrengthSessionLog({
           </button>
         </fieldset>
 
-        <div className="strength-session-log__notes">
-          <label>
-            Reflection
-            <textarea
-              defaultValue={editingSession?.reflection ?? ""}
-              key={`reflection-${editingSession?.id ?? "new"}`}
-              maxLength={1200}
-              name="reflection"
-              rows={2}
-            />
-          </label>
-          <label>
-            How I felt <span>optional, neutral</span>
-            <textarea
-              defaultValue={editingSession?.physiqueNotes ?? ""}
-              key={`physique-${editingSession?.id ?? "new"}`}
-              maxLength={600}
-              name="physiqueNotes"
-              rows={2}
-            />
-          </label>
-          <label>
-            Notes
-            <textarea
-              defaultValue={editingSession?.notes ?? ""}
-              key={`notes-${editingSession?.id ?? "new"}`}
-              maxLength={800}
-              name="notes"
-              rows={2}
-            />
-          </label>
-        </div>
+        <details
+          className="strength-session-log__more"
+          open={hasExtraDetails}
+        >
+          <summary>Notes &amp; recovery</summary>
+          <div className="strength-session-log__notes">
+            <label>
+              Effort <span>1–10</span>
+              <input
+                defaultValue={editingSession?.perceivedExertion ?? ""}
+                key={`effort-${editingSession?.id ?? "new"}`}
+                max="10"
+                min="1"
+                name="perceivedExertion"
+                type="number"
+              />
+            </label>
+            <label>
+              Reflection
+              <textarea
+                defaultValue={editingSession?.reflection ?? ""}
+                key={`reflection-${editingSession?.id ?? "new"}`}
+                maxLength={1200}
+                name="reflection"
+                rows={2}
+              />
+            </label>
+            <label>
+              How I felt
+              <textarea
+                defaultValue={editingSession?.physiqueNotes ?? ""}
+                key={`physique-${editingSession?.id ?? "new"}`}
+                maxLength={600}
+                name="physiqueNotes"
+                rows={2}
+              />
+            </label>
+            <label>
+              Notes
+              <textarea
+                defaultValue={editingSession?.notes ?? ""}
+                key={`notes-${editingSession?.id ?? "new"}`}
+                maxLength={800}
+                name="notes"
+                rows={2}
+              />
+            </label>
+            <div className="strength-session-log__checks">
+              <label>
+                <input
+                  defaultChecked={editingSession?.recoveryWork ?? false}
+                  key={`recovery-${editingSession?.id ?? "new"}`}
+                  name="recoveryWork"
+                  type="checkbox"
+                />
+                Recovery
+              </label>
+              <label>
+                <input
+                  defaultChecked={editingSession?.mobilityWork ?? false}
+                  key={`mobility-${editingSession?.id ?? "new"}`}
+                  name="mobilityWork"
+                  type="checkbox"
+                />
+                Mobility
+              </label>
+            </div>
+          </div>
+        </details>
 
         <div className="strength-session-log__footer">
-          <label>
-            <input
-              defaultChecked={editingSession?.recoveryWork ?? false}
-              key={`recovery-${editingSession?.id ?? "new"}`}
-              name="recoveryWork"
-              type="checkbox"
-            />
-            Recovery completed
-          </label>
-          <label>
-            <input
-              defaultChecked={editingSession?.mobilityWork ?? false}
-              key={`mobility-${editingSession?.id ?? "new"}`}
-              name="mobilityWork"
-              type="checkbox"
-            />
-            Mobility completed
-          </label>
           <button disabled={isSaving} type="submit">
             {isSaving
               ? "Saving…"
               : editingSession === null
                 ? "Save session"
-                : "Update session"}
+                : "Save changes"}
           </button>
-          {editingSession !== null ? (
-            <button onClick={resetEditor} type="button">
-              Cancel edit
-            </button>
-          ) : null}
         </div>
       </form>
 
-      <div className="strength-session-log__history">
-        <strong>Recent sessions</strong>
+      <details className="strength-session-log__history" open={sessions.length > 0}>
+        <summary>
+          Recent
+          <span>{sessions.length}</span>
+        </summary>
         {sessions.length === 0 ? (
-          <p>No strength sessions recorded yet.</p>
+          <p>No sessions yet.</p>
         ) : (
           <ul>
             {sessions.slice(0, 6).map((session) => (
@@ -436,7 +429,7 @@ export function StrengthSessionLog({
             ))}
           </ul>
         )}
-      </div>
+      </details>
 
       {feedback !== null ? (
         <p aria-live="polite" className="strength-session-log__feedback">

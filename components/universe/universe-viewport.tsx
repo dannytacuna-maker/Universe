@@ -932,8 +932,7 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
 
   const isViewSettled = webglSupport !== "available" || isCameraSettled;
   const isUniversityOperationsVisible =
-    selectedGalaxyId === universityGalaxyId &&
-    (navigationLevel === "galaxy" || navigationLevel === "system");
+    selectedGalaxyId === universityGalaxyId && navigationLevel === "galaxy";
   const isJiuJitsuActive =
     navigationLevel === "system" &&
     selectedGalaxyId === personalGrowthGalaxyId &&
@@ -1071,7 +1070,6 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
 
       <UniversityOperationsDashboard
         courseId={activeCourse?.id ?? null}
-        defaultExpanded={navigationLevel === "system"}
         isVisible={isUniversityOperationsVisible && isViewSettled}
         key={activeCourse?.id ?? "university-overview"}
         records={universityRecords}

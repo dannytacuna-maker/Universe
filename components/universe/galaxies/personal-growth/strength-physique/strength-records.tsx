@@ -138,8 +138,8 @@ export function StrengthRecords({
     >
       <header className="strength-tracker__section-heading">
         <div>
-          <span>Progress markers</span>
-          <strong id="strength-records-title">Strength & body</strong>
+          <span>Markers</span>
+          <strong id="strength-records-title">Records & body</strong>
         </div>
       </header>
 

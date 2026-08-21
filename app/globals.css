@@ -1284,28 +1284,48 @@ body {
   scrollbar-color: rgb(132 174 166 / 24%) transparent;
 }
 
-.jiu-jitsu-log__metrics {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.7rem;
-  padding: 0.9rem 0 0.85rem;
-}
-
-.jiu-jitsu-log__metrics span {
-  display: grid;
-  gap: 0.2rem;
-  color: rgb(150 174 169 / 58%);
+.jiu-jitsu-log__pulse {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.55rem;
+  margin: 0.85rem 0 0.9rem;
+  color: rgb(150 174 169 / 52%);
   font-size: 0.52rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.jiu-jitsu-log__metrics strong {
+.jiu-jitsu-log__pulse strong {
   color: rgb(226 237 232 / 88%);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 0.9rem;
-  font-weight: 400;
-  letter-spacing: 0;
+  font-size: 0.82rem;
+  font-weight: 450;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.jiu-jitsu-log__editing {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.7rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid rgb(148 184 177 / 12%);
+  border-radius: 0.55rem;
+  background: rgb(118 169 159 / 6%);
+  color: rgb(196 214 208 / 72%);
+  font-size: 0.55rem;
+}
+
+.jiu-jitsu-log__editing button {
+  min-height: 1.8rem;
+  padding-inline: 0.6rem;
+  border: 0;
+  background: transparent;
+  color: rgb(155 175 170 / 58%);
+  font-size: 0.48rem;
 }
 
 .jiu-jitsu-log__form {
@@ -1372,8 +1392,38 @@ body {
   accent-color: #70a99e;
 }
 
+.jiu-jitsu-log__more {
+  grid-column: 1 / -1;
+  border-top: 1px solid rgb(145 181 173 / 8%);
+  padding-top: 0.15rem;
+}
+
+.jiu-jitsu-log__more > summary {
+  display: flex;
+  align-items: center;
+  min-height: 2.1rem;
+  color: rgb(157 183 176 / 58%);
+  font-size: 0.52rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+
+.jiu-jitsu-log__more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.jiu-jitsu-log__more-body {
+  display: grid;
+  gap: 0.68rem;
+  padding: 0.15rem 0 0.35rem;
+}
+
 .jiu-jitsu-log .jiu-jitsu-log__save {
-  align-self: end;
+  grid-column: 1 / -1;
+  justify-self: stretch;
   padding-inline: 0.8rem;
   border-color: rgb(139 190 180 / 30%);
   background: rgb(118 169 159 / 12%);
@@ -1385,7 +1435,36 @@ body {
 }
 
 .jiu-jitsu-log__history {
-  padding-top: 1rem;
+  margin-top: 0.85rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgb(145 181 173 / 8%);
+}
+
+.jiu-jitsu-log__history > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2.1rem;
+  color: rgb(157 183 176 / 58%);
+  font-size: 0.52rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+
+.jiu-jitsu-log__history > summary::-webkit-details-marker {
+  display: none;
+}
+
+.jiu-jitsu-log__history > summary span {
+  color: rgb(166 191 185 / 48%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.54rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
 }
 
 .jiu-jitsu-log__history p,
@@ -1401,7 +1480,7 @@ body {
 .jiu-jitsu-log__history ul {
   display: grid;
   gap: 0.35rem;
-  margin: 0.55rem 0 0;
+  margin: 0.15rem 0 0;
   padding: 0;
   list-style: none;
 }
@@ -1417,14 +1496,21 @@ body {
   font-size: 0.58rem;
 }
 
-.jiu-jitsu-log__history li > span {
-  display: flex;
-  gap: 0.55rem;
+.jiu-jitsu-log__history li > div:first-child {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
 }
 
 .jiu-jitsu-log__history li strong {
   color: rgb(216 229 224 / 78%);
   font-weight: 500;
+}
+
+.jiu-jitsu-log__history-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.15rem;
 }
 
 .jiu-jitsu-log__history li button {
@@ -1840,7 +1926,7 @@ body {
 
 .strength-session-log > header {
   display: flex;
-  align-items: end;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
@@ -1873,29 +1959,7 @@ body {
 }
 
 .strength-session-log > header dl {
-  display: grid;
-  grid-auto-flow: column;
-  gap: 0.9rem;
-  margin: 0;
-}
-
-.strength-session-log > header dl div {
-  display: grid;
-  gap: 0.12rem;
-}
-
-.strength-session-log > header dt {
-  color: rgb(159 174 148 / 46%);
-  font-size: 0.43rem;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-}
-
-.strength-session-log > header dd {
-  margin: 0;
-  color: rgb(217 226 210 / 79%);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 0.58rem;
+  display: none;
 }
 
 .strength-session-log__attention,
@@ -1955,8 +2019,55 @@ body {
 .strength-session-log__basics,
 .strength-session-log__notes {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 0.55rem;
+}
+
+.strength-session-log__notes {
+  grid-template-columns: 1fr;
+  padding-bottom: 0.2rem;
+}
+
+.strength-session-log__more {
+  border-top: 1px solid rgb(158 177 142 / 8%);
+  padding-top: 0.15rem;
+}
+
+.strength-session-log__more > summary {
+  display: flex;
+  align-items: center;
+  min-height: 2.1rem;
+  color: rgb(167 180 158 / 58%);
+  font-size: 0.52rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+
+.strength-session-log__more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.strength-session-log__checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.1rem;
+}
+
+.strength-session-log__checks label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: rgb(176 188 168 / 62%);
+  font-size: 0.55rem;
+}
+
+.strength-session-log__checks input {
+  width: 0.95rem;
+  min-height: 0.95rem;
+  accent-color: #9bb58a;
 }
 
 .strength-session-log__exercises {
@@ -1988,30 +2099,46 @@ body {
 }
 
 .strength-session-log__footer {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.62rem;
+  display: grid;
 }
 
-.strength-session-log__footer label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.strength-session-log__footer input {
-  width: 0.95rem;
-  min-height: 0.95rem;
-}
-
-.strength-session-log__footer button:first-of-type {
-  margin-left: auto;
+.strength-session-log__footer button {
+  width: 100%;
 }
 
 .strength-session-log__history {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgb(158 177 142 / 10%);
+}
+
+.strength-session-log__history > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2.1rem;
+  color: rgb(167 180 158 / 58%);
+  font-size: 0.52rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+
+.strength-session-log__history > summary::-webkit-details-marker {
+  display: none;
+}
+
+.strength-session-log__history > summary span {
+  color: rgb(176 188 168 / 48%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.54rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
 }
 
 .strength-session-log__history ul {
@@ -2098,18 +2225,20 @@ body {
   display: grid;
   min-height: 0;
   max-height: none;
-  grid-template-columns: minmax(17rem, 0.8fr) minmax(23rem, 1.15fr) minmax(
-      19rem,
-      1fr
-    );
-  gap: 0 1.2rem;
+  grid-template-columns: minmax(0, 42rem);
+  justify-content: center;
+  gap: 0;
+  overflow: auto;
   padding-inline: 1.2rem;
+  padding-bottom: 1.2rem;
 }
 
-.whis-assistant[data-open="true"] .whis-assistant__guidance,
-.whis-assistant[data-open="true"] .strength-tracker__storage,
+.whis-assistant[data-open="true"] .whis-assistant__pulse,
+.whis-assistant[data-open="true"] .strength-session-log,
+.whis-assistant[data-open="true"] .whis-assistant__more,
 .whis-assistant[data-open="true"] .strength-tracker__error {
-  grid-column: 1 / -1;
+  grid-column: 1;
+  min-width: 0;
 }
 
 .whis-assistant[data-open="true"]
@@ -2126,7 +2255,7 @@ body {
 }
 
 .whis-assistant[data-open="true"] .whis-assistant__summary {
-  grid-template-columns: 1.25fr 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
 }
 
@@ -2151,15 +2280,7 @@ body {
 }
 
 .whis-assistant__focus {
-  padding-top: 0.75rem;
-  border-top: 1px solid rgb(190 164 211 / 10%);
-}
-
-.whis-assistant[data-open="true"] .whis-assistant__focus {
-  padding-top: 0;
-  padding-left: 0.9rem;
-  border-top: 0;
-  border-left: 1px solid rgb(190 164 211 / 10%);
+  display: none;
 }
 
 .whis-assistant__summary small {
@@ -2208,6 +2329,60 @@ body {
   color: rgb(193 207 216 / 62%);
   font-size: 0.58rem;
   line-height: 1.6;
+}
+
+.whis-assistant__pulse {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.55rem;
+  margin: 0.85rem 0 0.35rem;
+  color: rgb(191 169 208 / 52%);
+  font-size: 0.52rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.whis-assistant__pulse strong {
+  color: rgb(236 228 244 / 88%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.82rem;
+  font-weight: 450;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.whis-assistant__more {
+  margin-top: 0.35rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid rgb(190 164 211 / 10%);
+}
+
+.whis-assistant__more > summary {
+  display: flex;
+  align-items: center;
+  min-height: 2.2rem;
+  color: rgb(191 169 208 / 58%);
+  font-size: 0.52rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+
+.whis-assistant__more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.whis-assistant__more .strength-tracker__section,
+.whis-assistant__more .strength-session-log {
+  border-top: 0;
+  padding-top: 0.2rem;
+}
+
+.strength-split-section {
+  padding-top: 0;
 }
 
 .destination-panel {
@@ -2578,10 +2753,250 @@ body {
   outline-color: rgb(171 236 228 / 66%);
 }
 
-.time-chamber-dashboard__header-actions {
+.time-chamber-dashboard {
+  width: min(52rem, calc(100vw - 7rem));
+  max-height: calc(100svh - 7.4rem);
+}
+
+.time-chamber-dashboard__header {
+  align-items: center;
+  padding-bottom: 0.55rem;
+}
+
+.time-chamber-dashboard__pulse {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.1rem;
+  margin: 0 0 1rem;
+  padding: 0.15rem 0.2rem 0.85rem;
+  border-bottom: 1px solid rgb(151 198 188 / 10%);
+  color: rgb(155 184 177 / 52%);
+  font-size: 0.52rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.time-chamber-dashboard__pulse strong {
+  margin-right: 0.28rem;
+  color: rgb(225 240 235 / 88%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.82rem;
+  font-weight: 450;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.time-chamber-dashboard__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 1.35rem 1.6rem;
+}
+
+.time-chamber-dashboard__calendar > header,
+.time-chamber-dashboard__sessions > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.7rem;
+}
+
+.time-chamber-dashboard__calendar > header span,
+.time-chamber-dashboard__sessions > header span,
+.time-chamber-dashboard__details summary {
+  color: rgb(157 197 188 / 58%);
+  font-size: 0.5rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.time-chamber-dashboard__calendar > header strong {
+  color: rgb(214 232 226 / 74%);
+  font-size: 0.58rem;
+  font-weight: 500;
+}
+
+.time-chamber-dashboard__calendar > p,
+.time-chamber-dashboard__sessions > p,
+.time-chamber-dashboard__details p {
+  margin: 0;
+  color: rgb(184 205 199 / 56%);
+  font-size: 0.57rem;
+  line-height: 1.55;
+}
+
+.training-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.28rem;
+}
+
+.training-calendar__weekday {
+  padding-bottom: 0.25rem;
+  color: rgb(145 179 172 / 42%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.44rem;
+  text-align: center;
+}
+
+.training-calendar__day {
+  position: relative;
+  display: grid;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 0.42rem;
+  color: rgb(166 191 185 / 42%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.48rem;
+}
+
+.training-calendar__day[data-active="true"] {
+  border-color: rgb(138 221 205 / 18%);
+  background: rgb(80 175 158 / 12%);
+  color: rgb(221 245 238 / 88%);
+}
+
+.training-calendar__day i {
+  position: absolute;
+  right: 0.2rem;
+  bottom: 0.18rem;
+  width: 0.18rem;
+  height: 0.18rem;
+  border-radius: 50%;
+  background: rgb(149 230 214 / 74%);
+}
+
+.time-chamber-dashboard__mobility {
+  margin-top: 0.75rem !important;
+  color: rgb(163 194 187 / 48%) !important;
+  font-size: 0.5rem !important;
+  letter-spacing: 0.04em;
+}
+
+.time-chamber-dashboard__session-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.time-chamber-dashboard__session-list li {
+  display: grid;
+  grid-template-columns: 3.6rem 1fr;
+  gap: 0.55rem;
+  align-items: baseline;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgb(149 194 185 / 7%);
+}
+
+.time-chamber-dashboard__session-list time {
+  color: rgb(148 183 175 / 46%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.48rem;
+}
+
+.time-chamber-dashboard__session-list div {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.time-chamber-dashboard__session-list strong {
+  color: rgb(218 233 228 / 82%);
+  font-size: 0.6rem;
+  font-weight: 500;
+}
+
+.time-chamber-dashboard__session-list span {
+  color: rgb(157 183 176 / 48%);
+  font-size: 0.5rem;
+}
+
+.time-chamber-dashboard__details {
+  display: grid;
+  gap: 0.35rem;
+  margin-top: 1.1rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgb(151 198 188 / 10%);
+}
+
+.time-chamber-dashboard__details details {
+  min-width: 0;
+}
+
+.time-chamber-dashboard__details summary {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.time-chamber-dashboard__details summary::-webkit-details-marker {
+  display: none;
+}
+
+.time-chamber-dashboard__details summary span {
+  color: rgb(166 191 185 / 48%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.54rem;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.time-chamber-dashboard__details details[open] summary {
+  color: rgb(214 232 226 / 72%);
+}
+
+.time-chamber-dashboard__details > details > *:not(summary) {
+  padding-bottom: 0.85rem;
+}
+
+.technique-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.technique-cloud li {
+  padding: 0.32rem 0.5rem;
+  border: 1px solid rgb(145 204 192 / 10%);
+  border-radius: 0.4rem;
+  color: rgb(192 220 213 / 68%);
+  font-size: 0.51rem;
+}
+
+.time-chamber-dashboard__notes {
+  display: grid;
   gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.time-chamber-dashboard__notes li {
+  padding-left: 0.7rem;
+  border-left: 1px solid rgb(142 201 189 / 13%);
+}
+
+.time-chamber-dashboard__notes time {
+  color: rgb(148 183 175 / 46%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.48rem;
+}
+
+.time-chamber-dashboard__notes p {
+  margin: 0.2rem 0 0;
+  color: rgb(184 204 198 / 64%);
+  font-size: 0.56rem;
+  line-height: 1.55;
 }
 
 .immersive-dashboard__close {
@@ -3330,13 +3745,7 @@ select {
   }
 
   .whis-assistant[data-open="true"] .strength-tracker__panel {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .whis-assistant[data-open="true"]
-    .strength-tracker__panel
-    > .strength-tracker__section:last-of-type {
-    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -3575,31 +3984,16 @@ select {
     align-items: start;
   }
 
-  .time-chamber-dashboard__header-actions {
-    display: grid;
-    gap: 0.7rem;
-  }
-
   .immersive-dashboard__close {
     justify-self: end;
   }
 
-  .immersive-metrics {
-    grid-auto-flow: row;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .immersive-metrics > span {
-    min-width: 0;
-  }
-
-  .time-chamber-dashboard__grid {
+  .time-chamber-dashboard__layout {
     grid-template-columns: 1fr;
   }
 
-  .training-calendar-panel {
-    grid-column: auto;
-    grid-row: auto;
+  .time-chamber-dashboard__pulse {
+    gap: 0.45rem 0.9rem;
   }
 
   .library-add-form,

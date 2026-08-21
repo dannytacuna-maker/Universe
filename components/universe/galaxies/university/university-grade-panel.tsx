@@ -114,42 +114,24 @@ export function UniversityGradePanel({
     >
       <header className={styles.sectionHeading}>
         <div>
-          <span>Academic signal</span>
-          <h3 id="university-grades-title">Grade trajectory</h3>
+          <span>Grades</span>
+          <h3 id="university-grades-title">Trajectory</h3>
         </div>
         <strong className={styles.trajectoryValue}>
           {trajectory.averagePercent === null
-            ? "No data"
+            ? "—"
             : formatPercent(trajectory.averagePercent)}
         </strong>
       </header>
 
-      <div className={styles.trajectorySummary}>
-        <span>
-          <small>Basis</small>
-          <strong>
-            {trajectory.averagePercent === null
-              ? "Awaiting assessment"
-              : trajectory.method === "weighted"
-                ? "Weighted trajectory"
-                : "Recorded average"}
-          </strong>
-        </span>
-        <span>
-          <small>Latest movement</small>
-          <strong>
-            {trajectory.deltaFromPrevious === null
-              ? "Not enough history"
-              : `${trajectory.deltaFromPrevious >= 0 ? "+" : ""}${scoreFormatter.format(trajectory.deltaFromPrevious)} pts`}
-          </strong>
-        </span>
-        {trajectory.recordedWeightPercent !== null ? (
-          <span>
-            <small>Weight recorded</small>
-            <strong>{formatPercent(trajectory.recordedWeightPercent)}</strong>
-          </span>
-        ) : null}
-      </div>
+      {trajectory.averagePercent === null ? null : (
+        <p className={styles.trajectoryLine}>
+          {trajectory.method === "weighted" ? "Weighted" : "Average"}
+          {trajectory.deltaFromPrevious === null
+            ? ""
+            : ` · ${trajectory.deltaFromPrevious >= 0 ? "+" : ""}${scoreFormatter.format(trajectory.deltaFromPrevious)} pts`}
+        </p>
+      )}
 
       <details className={styles.composer} open={grades.length === 0}>
         <summary>Add an assessment</summary>

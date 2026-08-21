@@ -32,7 +32,7 @@ export function WorkoutSplit({
     try {
       await onToggleWorkout(dayId, !isCompleted);
       setFeedback(
-        isCompleted ? "Workout marked incomplete." : "Workout completed.",
+        isCompleted ? "Marked incomplete." : "Marked complete.",
       );
     } catch (error: unknown) {
       setFeedback(
@@ -48,14 +48,13 @@ export function WorkoutSplit({
   return (
     <section
       aria-labelledby="strength-split-title"
-      className="strength-tracker__section"
+      className="strength-tracker__section strength-split-section"
     >
       <header className="strength-tracker__section-heading">
         <div>
-          <span>Weekly rhythm</span>
-          <strong id="strength-split-title">Six-day PPL split</strong>
+          <span>Week</span>
+          <strong id="strength-split-title">PPL rhythm</strong>
         </div>
-        <p>Choose movements that suit the gym and your body that day.</p>
       </header>
 
       <ol className="strength-split">
@@ -76,14 +75,6 @@ export function WorkoutSplit({
                 <span>{day.focus}</span>
                 <i aria-hidden="true">{isCompleted ? "Done" : "Mark"}</i>
               </button>
-              <ul aria-label={`${day.name} exercise overview`}>
-                {day.groups.map((group) => (
-                  <li key={group.muscleGroup}>
-                    <span>{group.muscleGroup}</span>
-                    <span>{group.exerciseCount}</span>
-                  </li>
-                ))}
-              </ul>
             </li>
           );
         })}

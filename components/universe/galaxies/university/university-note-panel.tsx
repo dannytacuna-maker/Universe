@@ -111,8 +111,8 @@ export function UniversityNotePanel({
     >
       <header className={styles.sectionHeading}>
         <div>
-          <span>Course memory</span>
-          <h3 id="university-notes-title">Notes & reflections</h3>
+          <span>Memory</span>
+          <h3 id="university-notes-title">Notes</h3>
         </div>
         <span className={styles.recordCount}>{notes.length}</span>
       </header>

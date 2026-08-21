@@ -72,24 +72,15 @@ export function WhisTrainingAssistant({
     (workout) => !progress.completedDayIds.includes(workout.id),
   );
   const focusName = isLoading
-    ? "Preparing your session"
+    ? "Preparing"
     : nextWorkout === undefined
       ? "Recovery"
       : nextWorkout.name;
-  const focusDescription = isLoading
-    ? "Reviewing your training records"
-    : nextWorkout === undefined
-      ? "This week's training is complete"
-      : nextWorkout.focus;
 
   useEffect(
     () =>
       subscribeToInterfaceSurfaces((surfaceId) => {
-        if (surfaceId === "strength-whis") {
-          return;
-        }
-
-        setIsOpen(false);
+        if (surfaceId !== "strength-whis") setIsOpen(false);
       }),
     [],
   );
@@ -106,20 +97,14 @@ export function WhisTrainingAssistant({
     >
       <div className="strength-tracker__summary whis-assistant__summary">
         <div className="whis-assistant__welcome">
-          <span>Whis · Angel attendant</span>
-          <strong>Welcome back, Daniel.</strong>
-          <p>Your discipline is taking shape. Let us continue.</p>
-        </div>
-        <div className="whis-assistant__focus">
-          <span>Today&apos;s focus</span>
+          <span>Whis</span>
           <strong>{focusName}</strong>
-          <p>{focusDescription}</p>
-          <small>
-            {progress.weeklyCompleted}/6 sessions
+          <p>
+            {progress.weeklyCompleted}/6 this week
             {progress.latestWeightKg === null
               ? ""
               : ` · ${progress.latestWeightKg.toFixed(1)} kg`}
-          </small>
+          </p>
         </div>
         <button
           aria-controls={panelId}
@@ -127,46 +112,57 @@ export function WhisTrainingAssistant({
           onClick={() => {
             setIsOpen((current) => {
               const next = !current;
-              if (next) {
-                activateInterfaceSurface("strength-whis");
-              }
+              if (next) activateInterfaceSurface("strength-whis");
               return next;
             });
           }}
           type="button"
         >
-          {isOpen ? "Close" : "Train with Whis"}
+          {isOpen ? "Close" : "Train"}
         </button>
       </div>
 
       {isOpen ? (
         <div className="strength-tracker__panel" id={panelId}>
-          <p className="whis-assistant__guidance">
-            Consistency first. Select movements that suit today&apos;s equipment
-            and execute the intended muscle-group volume with control.
+          <p className="whis-assistant__pulse" aria-label="Training summary">
+            <strong>{progress.weeklyCompleted}</strong> week
+            <span aria-hidden="true">·</span>
+            <strong>{trainingSessions.length}</strong> logged
+            {progress.latestWeightKg === null ? null : (
+              <>
+                <span aria-hidden="true">·</span>
+                <strong>{progress.latestWeightKg.toFixed(1)}</strong> kg
+              </>
+            )}
           </p>
-          <WorkoutSplit
-            completedDayIds={progress.completedDayIds}
-            onToggleWorkout={onToggleWorkout}
-          />
+
           <StrengthSessionLog
             onAdd={onAddTrainingSession}
             onEdit={onEditTrainingSession}
             onRemove={onRemoveTrainingSession}
             sessions={trainingSessions}
           />
-          <StrengthRecords
-            bodyWeightEntries={bodyWeightEntries}
-            liftHistory={liftHistory}
-            onAddBodyWeight={onAddBodyWeight}
-            onRemoveBodyWeight={onRemoveBodyWeight}
-            onUpdatePersonalRecord={onUpdatePersonalRecord}
-            personalRecords={personalRecords}
-          />
-          <p className="strength-tracker__storage">
-            Saved locally first and synchronized through Daniel&apos;s Google
-            identity.
-          </p>
+
+          <details className="whis-assistant__more">
+            <summary>Weekly split</summary>
+            <WorkoutSplit
+              completedDayIds={progress.completedDayIds}
+              onToggleWorkout={onToggleWorkout}
+            />
+          </details>
+
+          <details className="whis-assistant__more">
+            <summary>Records &amp; body weight</summary>
+            <StrengthRecords
+              bodyWeightEntries={bodyWeightEntries}
+              liftHistory={liftHistory}
+              onAddBodyWeight={onAddBodyWeight}
+              onRemoveBodyWeight={onRemoveBodyWeight}
+              onUpdatePersonalRecord={onUpdatePersonalRecord}
+              personalRecords={personalRecords}
+            />
+          </details>
+
           {storageError !== null ? (
             <p className="strength-tracker__error">{storageError}</p>
           ) : null}

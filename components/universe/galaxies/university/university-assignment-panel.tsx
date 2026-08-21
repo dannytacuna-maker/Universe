@@ -154,7 +154,7 @@ export function UniversityAssignmentPanel({
     >
       <header className={styles.sectionHeading}>
         <div>
-          <span>Course work</span>
+          <span>Work</span>
           <h3 id="university-assignments-title">Assignments</h3>
         </div>
         <button
@@ -162,7 +162,7 @@ export function UniversityAssignmentPanel({
           onClick={openNewAssignment}
           type="button"
         >
-          Add assignment
+          Add
         </button>
       </header>
 
@@ -218,13 +218,13 @@ export function UniversityAssignmentPanel({
             </select>
           </label>
           <label className={styles.wideField}>
-            <span>Context</span>
+            <span>Context · optional</span>
             <textarea
               defaultValue={editingAssignment?.details ?? ""}
               maxLength={1600}
               name="details"
-              placeholder="Deliverable, next step, or useful context"
-              rows={3}
+              placeholder="Deliverable or next step"
+              rows={2}
             />
           </label>
           <button

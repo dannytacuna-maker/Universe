@@ -57,6 +57,7 @@ export function JiuJitsuTrainingLog({
   const [pendingRemovalId, setPendingRemovalId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState("");
   const submissionLockRef = useRef(false);
+  const removalLockRef = useRef(false);
 
   useEffect(
     () =>
@@ -65,7 +66,6 @@ export function JiuJitsuTrainingLog({
       }),
     [],
   );
-  const removalLockRef = useRef(false);
 
   if (!isVisible) {
     return null;
@@ -73,6 +73,13 @@ export function JiuJitsuTrainingLog({
 
   const editingSession =
     sessions.find((session) => session.id === editingSessionId) ?? null;
+  const recentSessions = sessions.slice(0, 4);
+  const hasDetails =
+    editingSession !== null &&
+    (editingSession.techniques.length > 0 ||
+      editingSession.reflection.length > 0 ||
+      editingSession.notes.length > 0 ||
+      editingSession.mobilityWork);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -105,11 +112,11 @@ export function JiuJitsuTrainingLog({
       if (editingSession === null) {
         await onAddSession(input);
         form.reset();
-        setFeedback("Training session logged.");
+        setFeedback("Session saved.");
       } else {
         await onEditSession({ ...input, id: editingSession.id });
         setEditingSessionId(null);
-        setFeedback("Training session updated.");
+        setFeedback("Session updated.");
       }
     } catch (error: unknown) {
       setFeedback(
@@ -140,7 +147,7 @@ export function JiuJitsuTrainingLog({
       if (editingSessionId === sessionId) {
         setEditingSessionId(null);
       }
-      setFeedback("Training session removed.");
+      setFeedback("Session removed.");
     } catch (error: unknown) {
       setFeedback(
         error instanceof Error
@@ -157,7 +164,12 @@ export function JiuJitsuTrainingLog({
     setEditingSessionId(sessionId);
     activateInterfaceSurface("jiu-jitsu-training-log");
     setIsOpen(true);
-    setFeedback("Editing training session.");
+    setFeedback("");
+  };
+
+  const cancelEdit = () => {
+    setEditingSessionId(null);
+    setFeedback("");
   };
 
   return (
@@ -167,7 +179,7 @@ export function JiuJitsuTrainingLog({
           <span>Jiu-Jitsu</span>
           <strong>
             {isLoading
-              ? "Loading training history"
+              ? "Opening log"
               : `${progress.weeklySessions} this week`}
           </strong>
         </div>
@@ -183,26 +195,25 @@ export function JiuJitsuTrainingLog({
           }
           type="button"
         >
-          {isOpen ? "Close" : "Log training"}
+          {isOpen ? "Close" : "Log"}
         </button>
       </div>
 
       {isOpen ? (
         <div className="jiu-jitsu-log__panel" id={panelId}>
-          <div className="jiu-jitsu-log__metrics" aria-label="Training summary">
-            <span>
-              <strong>{progress.totalSessions}</strong>Total sessions
-            </span>
-            <span>
-              <strong>{progress.totalRounds}</strong>Sparring rounds
-            </span>
-          </div>
+          <p className="jiu-jitsu-log__pulse" aria-label="Training summary">
+            <strong>{progress.totalSessions}</strong> sessions
+            <span aria-hidden="true">·</span>
+            <strong>{progress.totalRounds}</strong> rounds
+          </p>
 
           {editingSession !== null ? (
-            <p className="jiu-jitsu-log__feedback">
-              Editing the {formatSessionDate(editingSession.occurredOn)}{" "}
-              session.
-            </p>
+            <div className="jiu-jitsu-log__editing">
+              <span>Editing {formatSessionDate(editingSession.occurredOn)}</span>
+              <button disabled={isSaving} onClick={cancelEdit} type="button">
+                Cancel
+              </button>
+            </div>
           ) : null}
 
           <form
@@ -247,7 +258,7 @@ export function JiuJitsuTrainingLog({
               />
             </label>
             <label>
-              Sparring rounds
+              Rounds
               <input
                 defaultValue={editingSession?.sparringRounds ?? 0}
                 max="50"
@@ -257,40 +268,51 @@ export function JiuJitsuTrainingLog({
                 type="number"
               />
             </label>
-            <label className="jiu-jitsu-log__wide-field">
-              Techniques <span>separate with commas</span>
-              <input
-                defaultValue={editingSession?.techniques.join(", ") ?? ""}
-                name="techniques"
-                type="text"
-              />
-            </label>
-            <label className="jiu-jitsu-log__wide-field">
-              Reflection
-              <textarea
-                defaultValue={editingSession?.reflection ?? ""}
-                maxLength={1200}
-                name="reflection"
-                rows={2}
-              />
-            </label>
-            <label className="jiu-jitsu-log__wide-field">
-              Notes <span>optional details to remember later</span>
-              <textarea
-                defaultValue={editingSession?.notes ?? ""}
-                maxLength={1200}
-                name="notes"
-                rows={2}
-              />
-            </label>
-            <label className="jiu-jitsu-log__check">
-              <input
-                defaultChecked={editingSession?.mobilityWork ?? false}
-                name="mobilityWork"
-                type="checkbox"
-              />
-              Mobility work completed
-            </label>
+
+            <details
+              className="jiu-jitsu-log__more"
+              open={hasDetails}
+            >
+              <summary>Notes &amp; details</summary>
+              <div className="jiu-jitsu-log__more-body">
+                <label className="jiu-jitsu-log__wide-field">
+                  Techniques
+                  <input
+                    defaultValue={editingSession?.techniques.join(", ") ?? ""}
+                    name="techniques"
+                    placeholder="Comma-separated"
+                    type="text"
+                  />
+                </label>
+                <label className="jiu-jitsu-log__wide-field">
+                  Reflection
+                  <textarea
+                    defaultValue={editingSession?.reflection ?? ""}
+                    maxLength={1200}
+                    name="reflection"
+                    rows={2}
+                  />
+                </label>
+                <label className="jiu-jitsu-log__wide-field">
+                  Notes
+                  <textarea
+                    defaultValue={editingSession?.notes ?? ""}
+                    maxLength={1200}
+                    name="notes"
+                    rows={2}
+                  />
+                </label>
+                <label className="jiu-jitsu-log__check">
+                  <input
+                    defaultChecked={editingSession?.mobilityWork ?? false}
+                    name="mobilityWork"
+                    type="checkbox"
+                  />
+                  Mobility done
+                </label>
+              </div>
+            </details>
+
             <button
               className="jiu-jitsu-log__save"
               disabled={isSaving}
@@ -302,34 +324,30 @@ export function JiuJitsuTrainingLog({
                   ? "Save session"
                   : "Save changes"}
             </button>
-            {editingSession !== null ? (
-              <button
-                disabled={isSaving}
-                onClick={() => {
-                  setEditingSessionId(null);
-                  setFeedback("Editing cancelled.");
-                }}
-                type="button"
-              >
-                Cancel edit
-              </button>
-            ) : null}
           </form>
 
-          <div className="jiu-jitsu-log__history">
-            <strong>Recent training</strong>
-            {sessions.length === 0 ? (
-              <p>No sessions logged yet.</p>
+          <details className="jiu-jitsu-log__history" open={sessions.length > 0}>
+            <summary>
+              Recent
+              <span>{sessions.length}</span>
+            </summary>
+            {recentSessions.length === 0 ? (
+              <p>No sessions yet.</p>
             ) : (
               <ul>
-                {sessions.slice(0, 3).map((session) => (
+                {recentSessions.map((session) => (
                   <li key={session.id}>
-                    <span>
+                    <div>
                       <strong>{formatSessionDate(session.occurredOn)}</strong>
-                      {jiuJitsuClassTypeLabels[session.classType]} ·{" "}
-                      {session.durationMinutes} min
-                    </span>
-                    <span>
+                      <span>
+                        {jiuJitsuClassTypeLabels[session.classType]} ·{" "}
+                        {session.durationMinutes}m
+                        {session.sparringRounds > 0
+                          ? ` · ${session.sparringRounds}r`
+                          : ""}
+                      </span>
+                    </div>
+                    <div className="jiu-jitsu-log__history-actions">
                       <button
                         disabled={pendingRemovalId !== null}
                         onClick={() => handleEdit(session.id)}
@@ -346,16 +364,13 @@ export function JiuJitsuTrainingLog({
                           ? "Removing"
                           : "Delete"}
                       </button>
-                    </span>
+                    </div>
                   </li>
                 ))}
               </ul>
             )}
-          </div>
+          </details>
 
-          <p className="jiu-jitsu-log__storage">
-            Saved locally first. Cloud sync status is shown in Mission.
-          </p>
           {storageError !== null ? (
             <p className="jiu-jitsu-log__error">{storageError}</p>
           ) : null}
