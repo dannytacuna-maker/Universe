@@ -16,6 +16,7 @@ const fragmentShader = /* glsl */ `
 
   void main() {
     vec3 direction = normalize(vDirection);
+
     float upperField = pow(
       max(dot(direction, normalize(vec3(-0.58, 0.36, -0.73))), 0.0),
       4.8
@@ -28,6 +29,23 @@ const fragmentShader = /* glsl */ `
       max(1.0 - abs(dot(direction, normalize(vec3(0.24, 0.91, 0.34)))), 0.0),
       12.0
     );
+
+    // Soft diagonal galactic band, inspired by dense milky star haze.
+    float galacticPlane = pow(
+      max(
+        1.0 - abs(
+          dot(direction, normalize(vec3(0.42, 0.78, 0.46))) -
+          sin(direction.x * 1.9 - direction.z * 1.35) * 0.08
+        ),
+        0.0
+      ),
+      9.4
+    );
+    float galacticCore = pow(
+      max(dot(direction, normalize(vec3(-0.52, -0.18, -0.84))), 0.0),
+      5.6
+    );
+
     float blueCurrent = pow(
       max(
         1.0 - abs(
@@ -49,28 +67,46 @@ const fragmentShader = /* glsl */ `
       22.0
     );
 
-    vec3 base = vec3(0.0020, 0.0040, 0.0100);
-    vec3 coolVariation = vec3(0.0140, 0.0280, 0.0600) * upperField;
-    vec3 deepVariation = vec3(0.0100, 0.0180, 0.0380) * lowerField;
-    vec3 planeVariation = vec3(0.0050, 0.0100, 0.0200) * distantPlane;
-    vec3 blueCurrentColor = vec3(0.0140, 0.0400, 0.0820) * blueCurrent;
-    vec3 violetCurrentColor = vec3(0.0220, 0.0200, 0.0580) * violetCurrent;
-    float roseVeil = pow(
-      max(dot(direction, normalize(vec3(0.42, 0.12, -0.9))), 0.0),
-      6.2
+    // Warm amber dust lane and magenta emission pocket.
+    float amberDust = pow(
+      max(dot(direction, normalize(vec3(-0.68, -0.34, -0.64))), 0.0),
+      4.2
+    ) * (0.55 + galacticCore * 0.7);
+    float magentaBloom = pow(
+      max(dot(direction, normalize(vec3(-0.46, -0.22, -0.86))), 0.0),
+      18.0
     );
-    vec3 roseCurrentColor = vec3(0.0280, 0.0140, 0.0360) * roseVeil;
+    float copperVeil = pow(
+      max(dot(direction, normalize(vec3(-0.34, -0.48, -0.8))), 0.0),
+      7.8
+    );
+
+    vec3 base = vec3(0.0014, 0.0026, 0.0072);
+    vec3 coolVariation = vec3(0.0120, 0.0240, 0.0540) * upperField;
+    vec3 deepVariation = vec3(0.0080, 0.0140, 0.0320) * lowerField;
+    vec3 planeVariation = vec3(0.0040, 0.0080, 0.0160) * distantPlane;
+    vec3 galacticHaze =
+      vec3(0.0180, 0.0200, 0.0280) * galacticPlane +
+      vec3(0.0280, 0.0220, 0.0180) * galacticCore * 0.55;
+    vec3 blueCurrentColor = vec3(0.0120, 0.0340, 0.0720) * blueCurrent;
+    vec3 violetCurrentColor = vec3(0.0180, 0.0160, 0.0500) * violetCurrent;
+    vec3 amberDustColor = vec3(0.0480, 0.0240, 0.0120) * amberDust;
+    vec3 copperDustColor = vec3(0.0320, 0.0160, 0.0100) * copperVeil;
+    vec3 magentaNebula = vec3(0.0620, 0.0180, 0.0420) * magentaBloom;
 
     vec3 background =
       base +
       coolVariation +
       deepVariation +
       planeVariation +
+      galacticHaze +
       blueCurrentColor +
       violetCurrentColor +
-      roseCurrentColor;
+      amberDustColor +
+      copperDustColor +
+      magentaNebula;
 
-    gl_FragColor = vec4(max(background, vec3(0.0007, 0.0013, 0.0031)), 1.0);
+    gl_FragColor = vec4(max(background, vec3(0.0005, 0.0009, 0.0022)), 1.0);
   }
 `;
 

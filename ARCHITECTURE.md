@@ -88,14 +88,16 @@ camera distance while their static typed arrays preserve close-range depth.
 
 The surrounding cosmos is composed from static, deterministic layers rather
 than textures or post-processing. Regionally biased star shells provide varied
-density and stellar temperature, while a small number of low-contrast
-non-interactive formations imply celestial structure far beyond navigable
-destinations. Broad shader fields create spatial depth without particle haze,
-blotchy point volumes, textures, or time-based uniforms. These layers share the
-existing on-demand scheduler solely through camera parallax and introduce no
-independent animation loop. Large-scale deterministic stellar filaments add
-coherent directional structure at extreme distance; they rotate only through
-the shared ambient scheduler and remain static for reduced-motion users.
+density and stellar temperature—including warmer amber and cooler blue points—
+while a small number of low-contrast non-interactive formations imply celestial
+structure far beyond navigable destinations. Broad shader fields create spatial
+depth with a soft diagonal galactic haze, warm dust lanes, and restrained
+magenta emission accents inspired by photographic deep-space ambience, without
+particle blotches, textures, or an independent animation loop. These layers share
+the existing on-demand scheduler solely through camera parallax. Large-scale
+deterministic stellar filaments add coherent directional structure at extreme
+distance in mixed cool and warm spectra; they rotate only through the shared
+ambient scheduler and remain static for reduced-motion users.
 
 The universe origin also contains one non-interactive celestial guardian at
 background depth. It is an original astronomical figure rather than a literal

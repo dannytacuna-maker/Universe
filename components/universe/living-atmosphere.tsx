@@ -23,38 +23,47 @@ type LivingAtmosphereProps = Readonly<{
   motionEnabled: boolean;
 }>;
 
-const dustCount = 220;
+const dustCount = 280;
 const meteorPointCount = 7;
 const meteorIntervalSeconds = 16;
 const meteorDurationSeconds = 0.95;
 
 const nebulaDefinitions = [
   {
-    color: "#6f8fb8",
-    opacity: 0.028,
+    color: "#8a6a4a",
+    opacity: 0.034,
     phase: 0.4,
-    position: [-38, 18, -92] as const,
-    rotation: [0.42, -0.28, 0.16] as const,
-    scale: [48, 28, 1] as const,
-    speed: 0.018,
-  },
-  {
-    color: "#7a6ea0",
-    opacity: 0.022,
-    phase: 1.7,
-    position: [44, -22, -110] as const,
-    rotation: [-0.3, 0.36, -0.12] as const,
-    scale: [56, 34, 1] as const,
+    position: [-42, -16, -88] as const,
+    rotation: [0.36, -0.22, 0.42] as const,
+    scale: [58, 34, 1] as const,
     speed: 0.014,
   },
   {
-    color: "#5d8a9c",
+    color: "#9a4a6e",
+    opacity: 0.026,
+    phase: 1.1,
+    position: [-28, -8, -102] as const,
+    rotation: [0.18, 0.24, -0.2] as const,
+    scale: [28, 18, 1] as const,
+    speed: 0.016,
+  },
+  {
+    color: "#6f8fb8",
+    opacity: 0.022,
+    phase: 1.9,
+    position: [36, 14, -118] as const,
+    rotation: [-0.28, 0.32, -0.1] as const,
+    scale: [52, 30, 1] as const,
+    speed: 0.012,
+  },
+  {
+    color: "#7a6ea0",
     opacity: 0.018,
     phase: 2.9,
-    position: [-12, -28, -128] as const,
-    rotation: [0.18, 0.12, 0.4] as const,
-    scale: [42, 26, 1] as const,
-    speed: 0.011,
+    position: [18, -26, -132] as const,
+    rotation: [0.14, 0.1, 0.36] as const,
+    scale: [44, 26, 1] as const,
+    speed: 0.01,
   },
 ] as const;
 
@@ -77,9 +86,14 @@ const nebulaFragmentShader = /* glsl */ `
   void main() {
     vec2 centered = vUv * 2.0 - 1.0;
     float radius = length(centered);
-    float soft = smoothstep(1.0, 0.08, radius);
-    float filament = exp(-pow(abs(centered.x * 0.72 + centered.y * 0.34), 2.0) * 3.4);
-    float glow = soft * (0.55 + filament * 0.45) * (0.92 + uBreath * 0.08);
+    float soft = smoothstep(1.0, 0.06, radius);
+    float filament = exp(-pow(abs(centered.x * 0.68 + centered.y * 0.42), 2.0) * 2.8);
+    float lane = exp(-pow(abs(centered.x * 0.22 - centered.y * 0.9), 2.0) * 4.6);
+    float grain = exp(-pow(length(centered * vec2(1.35, 0.85)) - 0.42, 2.0) * 8.0);
+    float glow =
+      soft *
+      (0.42 + filament * 0.34 + lane * 0.28 + grain * 0.16) *
+      (0.9 + uBreath * 0.1);
     gl_FragColor = vec4(uColor, glow * uOpacity);
   }
 `;
@@ -99,10 +113,21 @@ function createDustField() {
     positions[offset + 1] = y * radius * 0.72;
     positions[offset + 2] = Math.sin(azimuth) * horizontal * radius - 18;
 
-    const brightness = 0.28 + Math.pow(random(), 2.2) * 0.42;
-    colors[offset] = brightness * 0.78;
-    colors[offset + 1] = brightness * 0.86;
-    colors[offset + 2] = brightness;
+    const brightness = 0.24 + Math.pow(random(), 2.1) * 0.48;
+    const warmth = random();
+    if (warmth < 0.28) {
+      colors[offset] = brightness;
+      colors[offset + 1] = brightness * 0.72;
+      colors[offset + 2] = brightness * 0.48;
+    } else if (warmth < 0.48) {
+      colors[offset] = brightness * 0.92;
+      colors[offset + 1] = brightness * 0.58;
+      colors[offset + 2] = brightness * 0.7;
+    } else {
+      colors[offset] = brightness * 0.74;
+      colors[offset + 1] = brightness * 0.84;
+      colors[offset + 2] = brightness;
+    }
   }
 
   return { colors, positions };
@@ -201,8 +226,8 @@ function DriftingDust({ motionEnabled }: LivingAtmosphereProps) {
           blending={AdditiveBlending}
           depthWrite={false}
           fog
-          opacity={motionEnabled ? 0.22 : 0.14}
-          size={0.038}
+          opacity={motionEnabled ? 0.26 : 0.16}
+          size={0.034}
           sizeAttenuation
           toneMapped={false}
           transparent

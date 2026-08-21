@@ -31,48 +31,48 @@ type ProceduralStarfieldProps = Readonly<{
 
 const starLayers: readonly StarLayerConfiguration[] = [
   {
-    colorFloor: 0.48,
-    count: 420,
-    densityBias: 0.05,
+    colorFloor: 0.5,
+    count: 480,
+    densityBias: 0.07,
     innerRadius: 13,
-    opacity: 0.9,
+    opacity: 0.92,
     outerRadius: 34,
     rotation: [0.08, 0.16, -0.04],
     seed: 104729,
-    size: 0.045,
+    size: 0.042,
   },
   {
     colorFloor: 0.34,
-    count: 900,
-    densityBias: 0.08,
+    count: 1080,
+    densityBias: 0.11,
     innerRadius: 31,
-    opacity: 0.72,
+    opacity: 0.74,
     outerRadius: 76,
     rotation: [-0.14, 0.05, 0.11],
     seed: 130363,
-    size: 0.065,
+    size: 0.06,
   },
   {
-    colorFloor: 0.24,
-    count: 1600,
-    densityBias: 0.11,
+    colorFloor: 0.22,
+    count: 1900,
+    densityBias: 0.14,
     innerRadius: 68,
-    opacity: 0.55,
+    opacity: 0.58,
     outerRadius: 148,
     rotation: [0.03, -0.12, 0.07],
     seed: 155921,
-    size: 0.1,
+    size: 0.094,
   },
   {
-    colorFloor: 0.7,
-    count: 148,
-    densityBias: 0.03,
+    colorFloor: 0.72,
+    count: 168,
+    densityBias: 0.04,
     innerRadius: 19,
-    opacity: 0.92,
+    opacity: 0.94,
     outerRadius: 104,
     rotation: [-0.06, -0.08, -0.03],
     seed: 196613,
-    size: 0.105,
+    size: 0.11,
   },
 ];
 
@@ -80,6 +80,8 @@ const densityAnchors = [
   [-0.62, 0.18, -0.76],
   [0.48, -0.38, -0.79],
   [0.08, 0.72, -0.68],
+  [-0.54, -0.28, -0.79],
+  [-0.22, -0.12, -0.96],
 ] as const;
 
 function createStarDirection(random: () => number, densityBias: number) {
@@ -117,21 +119,28 @@ function writeStarColor(
 ) {
   const temperature = random();
 
-  if (temperature < 0.07) {
+  if (temperature < 0.12) {
     colors[offset] = brightness;
-    colors[offset + 1] = brightness * 0.78;
-    colors[offset + 2] = brightness * 0.62;
+    colors[offset + 1] = brightness * 0.74;
+    colors[offset + 2] = brightness * 0.52;
     return;
   }
 
-  if (temperature < 0.34) {
+  if (temperature < 0.22) {
+    colors[offset] = brightness * 0.96;
+    colors[offset + 1] = brightness * 0.82;
+    colors[offset + 2] = brightness * 0.58;
+    return;
+  }
+
+  if (temperature < 0.42) {
     colors[offset] = brightness * 0.66;
     colors[offset + 1] = brightness * 0.82;
     colors[offset + 2] = brightness;
     return;
   }
 
-  if (temperature < 0.58) {
+  if (temperature < 0.64) {
     colors[offset] = brightness * 0.82;
     colors[offset + 1] = brightness * 0.91;
     colors[offset + 2] = brightness;
