@@ -71,25 +71,22 @@ body {
 
 .universe-viewport::after {
   background:
-    radial-gradient(circle at 14% 72%, rgb(118 74 42 / 8%), transparent 32%),
-    radial-gradient(circle at 24% 64%, rgb(132 54 92 / 5%), transparent 26%),
+    radial-gradient(circle at 14% 72%, rgb(90 70 52 / 3%), transparent 28%),
     radial-gradient(circle at 78% 28%, rgb(55 88 150 / 6%), transparent 34%),
     radial-gradient(circle at 88% 68%, rgb(71 58 131 / 4%), transparent 38%);
-  opacity: 0.78;
+  opacity: 0.72;
   transition: opacity 1.4s var(--universe-ease);
 }
 
 .universe-viewport[data-navigation-level="galaxy"]::after {
   background:
-    radial-gradient(circle at 18% 68%, rgb(110 70 40 / 6%), transparent 30%),
     radial-gradient(circle at 38% 44%, rgb(61 113 171 / 7%), transparent 36%),
     radial-gradient(circle at 77% 28%, rgb(79 66 145 / 4%), transparent 40%);
-  opacity: 0.84;
+  opacity: 0.82;
 }
 
 .universe-viewport[data-navigation-level="system"]::after {
   background:
-    radial-gradient(circle at 22% 62%, rgb(104 64 40 / 5%), transparent 28%),
     radial-gradient(circle at 50% 48%, rgb(57 115 169 / 6%), transparent 31%),
     radial-gradient(circle at 12% 22%, rgb(62 67 129 / 4%), transparent 38%);
   opacity: 0.9;
@@ -111,9 +108,8 @@ body {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 18% 74%, rgb(62 34 18 / 16%), transparent 42%),
-    radial-gradient(circle at 28% 62%, rgb(58 22 42 / 10%), transparent 36%),
-    radial-gradient(circle at 82% 28%, rgb(16 29 58 / 12%), transparent 44%),
+    radial-gradient(circle at 18% 22%, rgb(16 29 58 / 13%), transparent 44%),
+    radial-gradient(circle at 82% 72%, rgb(13 25 48 / 10%), transparent 48%),
     #01030a;
 }
 

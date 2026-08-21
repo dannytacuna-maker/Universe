@@ -30,21 +30,21 @@ const meteorDurationSeconds = 0.95;
 
 const nebulaDefinitions = [
   {
-    color: "#8a6a4a",
-    opacity: 0.034,
+    color: "#6a5a48",
+    opacity: 0.014,
     phase: 0.4,
     position: [-42, -16, -88] as const,
     rotation: [0.36, -0.22, 0.42] as const,
-    scale: [58, 34, 1] as const,
+    scale: [48, 28, 1] as const,
     speed: 0.014,
   },
   {
-    color: "#9a4a6e",
-    opacity: 0.026,
+    color: "#6a4a58",
+    opacity: 0.01,
     phase: 1.1,
     position: [-28, -8, -102] as const,
     rotation: [0.18, 0.24, -0.2] as const,
-    scale: [28, 18, 1] as const,
+    scale: [22, 14, 1] as const,
     speed: 0.016,
   },
   {

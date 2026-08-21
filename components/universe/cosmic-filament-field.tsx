@@ -27,10 +27,10 @@ type FilamentData = Readonly<{
 
 const filamentDefinitions: readonly FilamentDefinition[] = [
   {
-    color: "#8a6b4e",
+    color: "#6d7a8a",
     count: 960,
     length: 44,
-    opacity: 0.22,
+    opacity: 0.14,
     phase: 0.4,
     position: [-11, -4, -34],
     rotation: [0.18, 0.28, -0.42],
@@ -51,10 +51,10 @@ const filamentDefinitions: readonly FilamentDefinition[] = [
     width: 1.55,
   },
   {
-    color: "#8a5574",
+    color: "#6a5a72",
     count: 680,
     length: 36,
-    opacity: 0.14,
+    opacity: 0.08,
     phase: 3.4,
     position: [-16, -8, -64],
     rotation: [0.26, 0.14, 0.2],
