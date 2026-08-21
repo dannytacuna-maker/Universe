@@ -50,7 +50,6 @@ import { TrainingProgramArchive } from "./galaxies/personal-growth/strength-phys
 import { useStrengthPhysique } from "./galaxies/personal-growth/strength-physique/use-strength-physique";
 import { WhisTrainingAssistant } from "./galaxies/personal-growth/strength-physique/whis-training-assistant";
 import { LazyUniverseCanvas } from "./lazy-universe-canvas";
-import { UniverseSpaceBackground } from "./universe-space-background";
 import {
   PlanetArrivalTransition,
   type PlanetArrivalPhase,
@@ -985,7 +984,6 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
       data-webgl-state={webglSupport}
     >
       <div aria-hidden="true" className="universe-fallback" />
-      <UniverseSpaceBackground />
 
       {webglSupport === "available" ? (
         <WebGLBoundary>
