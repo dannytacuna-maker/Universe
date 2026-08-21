@@ -22,7 +22,11 @@ export function UniverseCanvas({
       dpr={[1, 1.35]}
       fallback={null}
       frameloop="demand"
-      gl={{ antialias: true, powerPreference: "high-performance" }}
+      gl={{
+        alpha: true,
+        antialias: true,
+        powerPreference: "high-performance",
+      }}
     >
       {children}
     </Canvas>

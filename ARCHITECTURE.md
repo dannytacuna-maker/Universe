@@ -43,10 +43,13 @@ a code-splitting point, so the Three.js stack is not part of routes that do not
 render the universe. Scene contents will be composed as children rather than
 embedded in the canvas component.
 
-`UniverseViewport` keeps an intentional CSS space background mounted beneath
-the canvas, preflights WebGL support, and contains rendering failures without
-removing the semantic page structure. The scene uses deterministic static star
-layers and a static shader backdrop. Only the camera rig is animated: an
+`UniverseViewport` mounts a project-owned cinematic space reel beneath the
+canvas, preflights WebGL support, and contains rendering failures without
+removing the semantic page structure. The canvas clears transparently so galaxies
+and star layers read over the looping video; reduced-motion users keep the
+deterministic shader backdrop and a still poster instead of playback. The scene
+uses deterministic static star layers over that background. Only the camera rig
+is animated: an
 on-demand scheduler invalidates at 30 frames per second while ambient motion is
 allowed and is removed entirely for reduced-motion users. The canvas caps DPR at
 1.35 so the smoother camera cadence does not increase GPU fill cost on dense

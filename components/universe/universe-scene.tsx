@@ -150,10 +150,14 @@ export function UniverseScene({
 
   return (
     <>
-      <color attach="background" args={["#01030a"]} />
+      {motionEnabled ? null : (
+        <>
+          <color attach="background" args={["#01030a"]} />
+          <DeepSpaceBackdrop />
+        </>
+      )}
       <fog attach="fog" args={["#01030a", 72, 168]} />
 
-      <DeepSpaceBackdrop />
       <LivingAtmosphere motionEnabled={motionEnabled} />
       <CosmicFilamentField
         insightIntensity={constellationIntensity}
