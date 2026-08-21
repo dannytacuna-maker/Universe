@@ -2,6 +2,7 @@ import {
   missionOperatingStoreNames,
   personalGrowthStoreNames,
   universityStoreNames,
+  websitesProductionStoreNames,
   type MissionRecordStoreName,
 } from "@/lib/mission-control-database";
 
@@ -11,6 +12,7 @@ export const missionRecordCollections = [
   ...Object.values(personalGrowthStoreNames),
   ...Object.values(missionOperatingStoreNames),
   ...Object.values(universityStoreNames),
+  ...Object.values(websitesProductionStoreNames),
 ] as const satisfies readonly MissionRecordStoreName[];
 
 const missionRecordCollectionSet = new Set<string>(missionRecordCollections);

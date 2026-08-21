@@ -5,6 +5,7 @@ import {
   missionOperatingStoreNames,
   personalGrowthStoreNames,
   universityStoreNames,
+  websitesProductionStoreNames,
   type MissionRecordStoreName,
 } from "@/lib/mission-control-database";
 import { listMissionRecords } from "@/lib/server/mission-record-database";
@@ -18,9 +19,11 @@ const areaCollections = {
   overview: [
     ...Object.values(missionOperatingStoreNames),
     ...Object.values(universityStoreNames),
+    ...Object.values(websitesProductionStoreNames),
     ...Object.values(personalGrowthStoreNames),
   ],
   university: Object.values(universityStoreNames),
+  websites: Object.values(websitesProductionStoreNames),
   identity: Object.values(missionOperatingStoreNames),
   strength: [
     personalGrowthStoreNames.bodyWeight,
@@ -168,6 +171,7 @@ export function createJarvisTools(ownerId: string) {
         area: z.enum([
           "overview",
           "university",
+          "websites",
           "identity",
           "strength",
           "jiu-jitsu",

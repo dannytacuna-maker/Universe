@@ -30,13 +30,16 @@ import {
 import { universityCourseSystems } from "./galaxies/university/university-course-systems";
 import { UniversityOperationsDashboard } from "./galaxies/university/university-operations-dashboard";
 import { useUniversityRecords } from "./galaxies/university/use-university-records";
+import { getForgePlanet } from "./galaxies/forge/firmus-planets";
+import { websitesSystem } from "./galaxies/forge/forge-systems";
+import { useWebsitesProductionCenter } from "./galaxies/forge/use-websites-production-center";
+import { WebsitesProductionCenter } from "./galaxies/forge/websites-production-center";
 import { hyperbolicTimeChamberDefinition } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-planets";
 import { JiuJitsuReviewDashboard } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-review-dashboard";
 import { JiuJitsuTrainingLog } from "./galaxies/personal-growth/jiu-jitsu/jiu-jitsu-training-log";
 import { useJiuJitsuSessions } from "./galaxies/personal-growth/jiu-jitsu/use-jiu-jitsu-sessions";
 import { personalGrowthSystems } from "./galaxies/personal-growth/personal-growth-systems";
 import { CelestialLibraryDashboard } from "./galaxies/personal-growth/reading/celestial-library-dashboard";
-import { getForgePlanet } from "./galaxies/forge/firmus-planets";
 import { celestialLibraryDefinition } from "./galaxies/personal-growth/reading/reading-planets";
 import { useReadingLibrary } from "./galaxies/personal-growth/reading/use-reading-library";
 import { beerusPlanetDefinition } from "./galaxies/personal-growth/strength-physique/beerus-planet-definition";
@@ -168,6 +171,7 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
     summary: readingSummary,
   } = useReadingLibrary();
   const universityRecords = useUniversityRecords();
+  const websitesProduction = useWebsitesProductionCenter();
   const cloudSync = useMissionCloudSync();
   const { attention: observatoryAttention, markBriefingSeen } =
     useObservatoryAttention(navigationLevel === "universe");
@@ -933,6 +937,10 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
   const isViewSettled = webglSupport !== "available" || isCameraSettled;
   const isUniversityOperationsVisible =
     selectedGalaxyId === universityGalaxyId && navigationLevel === "galaxy";
+  const isWebsitesProductionVisible =
+    selectedGalaxyId === forgeGalaxyId &&
+    navigationLevel === "system" &&
+    activeSystemId === websitesSystem.id;
   const isJiuJitsuActive =
     navigationLevel === "system" &&
     selectedGalaxyId === personalGrowthGalaxyId &&
@@ -1073,6 +1081,11 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
         isVisible={isUniversityOperationsVisible && isViewSettled}
         key={activeCourse?.id ?? "university-overview"}
         records={universityRecords}
+      />
+
+      <WebsitesProductionCenter
+        isVisible={isWebsitesProductionVisible && isViewSettled}
+        records={websitesProduction}
       />
 
       <JiuJitsuTrainingLog

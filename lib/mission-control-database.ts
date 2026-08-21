@@ -1,5 +1,5 @@
 const databaseName = "mission-control";
-const databaseVersion = 6;
+const databaseVersion = 7;
 
 export const personalGrowthStoreNames = {
   bodyWeight: "strength-body-weight",
@@ -21,6 +21,12 @@ export const universityStoreNames = {
   notes: "university-notes",
 } as const;
 
+export const websitesProductionStoreNames = {
+  clients: "websites-clients",
+  opportunities: "websites-opportunities",
+  projects: "websites-projects",
+} as const;
+
 export const missionOperatingStoreNames = {
   captures: "mission-captures",
   cycleEvidence: "mission-cycle-evidence",
@@ -39,6 +45,7 @@ export const missionSyncStoreNames = {
 export const missionRecordStoreNames = {
   ...personalGrowthStoreNames,
   ...universityStoreNames,
+  ...websitesProductionStoreNames,
   ...missionOperatingStoreNames,
 } as const;
 
@@ -187,6 +194,21 @@ export async function openMissionControlDatabase() {
     ]);
     createIndexedStore(database, universityStoreNames.notes, "id", [
       "courseId",
+      "updatedAt",
+    ]);
+    createIndexedStore(database, websitesProductionStoreNames.clients, "id", [
+      "status",
+      "updatedAt",
+    ]);
+    createIndexedStore(
+      database,
+      websitesProductionStoreNames.opportunities,
+      "id",
+      ["clientId", "status", "updatedAt"],
+    );
+    createIndexedStore(database, websitesProductionStoreNames.projects, "id", [
+      "clientId",
+      "stage",
       "updatedAt",
     ]);
     createIndexedStore(database, missionSyncStoreNames.outbox, "id", [

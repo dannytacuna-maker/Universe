@@ -262,8 +262,9 @@ clarity without letting the scene read persistence directly.
 
 Operating records use the same local-first `mission-control` IndexedDB database
 through the shared `lib/mission-control-database.ts` migration boundary. Schema
-version 6 preserves all existing records, adds the French learning profile,
-practice-session, and progress-snapshot stores, and retains independent stores for
+version 7 preserves all existing records, adds Websites Production Center stores
+(clients, opportunities, projects), retains the French learning profile,
+practice-session, and progress-snapshot stores, and keeps independent stores for
 identity, growth cycles, cycle evidence, captures, weekly reviews, and
 experiments, University operations, Strength sessions and lift history, the sync
 outbox, sync state, and recoverable form drafts. Repositories enforce the
@@ -271,6 +272,16 @@ three-active-cycle limit and the one-piece-of-evidence-per-cycle-per-local-day
 invariant. Instrumented domain activity is folded into Current Vector by date, so
 Daniel does not have to log the same evidence twice. Zustand remains
 navigation-only.
+
+### Forge Websites Production Center
+
+The Forge Websites system maps live shipped sites as planets. Inside Websites
+system orbit, the Production Center instrument (semantic DOM outside WebGL) owns
+clients, opportunities (interested leads), and projects on a fixed production
+pipeline: discovery → design → build → review → launch → shipped. Projects may
+optionally link to an existing Forge planet definition; the center never creates
+planets. Records sync through the shared mission-record path under Daniel’s
+identity. Live planet click-to-launch behavior is unchanged.
 
 ### Personal Growth and real-world visual state
 
@@ -298,9 +309,10 @@ those markers while recorded lifts modestly strengthen the surrounding structure
 visualization never reads storage and never owns authoritative records.
 
 Personal Growth records are stored in the shared local IndexedDB database named
-`mission-control`. Schema version 6 preserves the original Jiu-Jitsu, Strength, and
-Reading stores while adding the French learning stores and the independent Mission, University, and sync stores
-described above.
+`mission-control`. Schema version 7 preserves prior stores and adds Websites
+Production Center collections (`websites-clients`, `websites-opportunities`,
+`websites-projects`) alongside the French learning stores and the independent Mission,
+University, and sync stores described above.
 The Strength plan describes muscle
 groups and bounded exercise counts rather than prescribing exercises: Push covers chest,
 shoulders, and triceps; Pull covers back, rear delts, and biceps; Legs covers legs and
