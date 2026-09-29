@@ -2,6 +2,13 @@
 
 import { useState } from "react";
 
+import {
+  MissionWorkspace,
+  useArrivalWorkspace,
+  WorkspaceGrid,
+  WorkspacePanel,
+} from "@/components/ui/mission-workspace";
+
 import { archivedTrainingProgram } from "./archived-training-program";
 
 const programRotations = [1, 2] as const;
@@ -13,6 +20,7 @@ type TrainingProgramArchiveProps = Readonly<{
 export function TrainingProgramArchive({
   isVisible,
 }: TrainingProgramArchiveProps) {
+  const [isOpen, setIsOpen] = useArrivalWorkspace(isVisible);
   const [rotation, setRotation] = useState<1 | 2>(1);
 
   if (!isVisible) {
@@ -22,76 +30,93 @@ export function TrainingProgramArchive({
   const sessions = archivedTrainingProgram.sessions.filter(
     (session) => session.rotation === rotation,
   );
+  const movementCount = sessions.reduce(
+    (total, session) => total + session.exercises.length,
+    0,
+  );
 
   return (
-    <aside
-      aria-label="Archived powerbuilding program"
-      className="destination-panel destination-panel--workspace training-archive"
-      data-open="true"
-    >
-      <header className="destination-panel__summary">
-        <div>
-          <span>Daniel&apos;s program · Archived</span>
-          <strong>{archivedTrainingProgram.title}</strong>
-          <p>Four weeks · Four-day split · Two rotations</p>
-        </div>
-      </header>
-
-      <div className="destination-panel__body">
-        <p className="destination-panel__intro">
-          {archivedTrainingProgram.description}
-        </p>
-
-        <ul className="training-archive__progression">
-          {archivedTrainingProgram.progression.map((note) => (
-            <li key={note}>{note}</li>
-          ))}
-        </ul>
-
-        <div
-          aria-label="Program rotation"
-          className="training-archive__rotation"
-          role="group"
-        >
-          {programRotations.map((value) => (
-            <button
-              aria-pressed={rotation === value}
-              key={value}
-              onClick={() => setRotation(value)}
-              type="button"
-            >
-              Rotation {value}
-            </button>
-          ))}
-        </div>
-
-        <div className="training-archive__sessions">
-          {sessions.map((session, index) => (
-            <details key={session.id} open={index === 0}>
-              <summary>
-                <span>Day {index + 1}</span>
-                <strong>{session.name}</strong>
-                <small>{session.exercises.length} movements</small>
-              </summary>
-              <ol>
-                {session.exercises.map((exercise) => (
-                  <li key={exercise}>{exercise}</li>
-                ))}
-              </ol>
-            </details>
-          ))}
-        </div>
-
+    <MissionWorkspace
+      accent="214 186 132"
+      actions={
         <a
-          className="destination-panel__link"
           href={archivedTrainingProgram.originalDocumentPath}
           rel="noopener noreferrer"
           target="_blank"
         >
-          Open original PDF
-          <span aria-hidden="true">↗</span>
+          Original PDF <span aria-hidden="true">↗</span>
         </a>
-      </div>
-    </aside>
+      }
+      description={archivedTrainingProgram.description}
+      eyebrow="Daniel's program · Archived"
+      isOpen={isOpen}
+      launcherLabel="Program"
+      metrics={[
+        { id: "length", label: "Length", value: "4 weeks" },
+        { id: "split", label: "Split", value: "4 days" },
+        { id: "rotation", label: "Rotation", value: `${rotation} of 2` },
+        {
+          hint: `across ${sessions.length} days`,
+          id: "movements",
+          label: "Movements",
+          value: movementCount,
+        },
+      ]}
+      onOpenChange={setIsOpen}
+      status={archivedTrainingProgram.title}
+      surfaceId="training-archive"
+      title={archivedTrainingProgram.title}
+    >
+      <WorkspaceGrid className="training-archive">
+        <WorkspacePanel
+          actions={
+            <div
+              aria-label="Program rotation"
+              className="training-archive__rotation"
+              role="group"
+            >
+              {programRotations.map((value) => (
+                <button
+                  aria-pressed={rotation === value}
+                  key={value}
+                  onClick={() => setRotation(value)}
+                  type="button"
+                >
+                  Rotation {value}
+                </button>
+              ))}
+            </div>
+          }
+          eyebrow="Sessions"
+          span={12}
+          title="Weekly split"
+        >
+          <div className="training-archive__sessions">
+            {sessions.map((session, index) => (
+              <article key={session.id}>
+                <header>
+                  <span>Day {index + 1}</span>
+                  <strong>{session.name}</strong>
+                  <small>{session.exercises.length} movements</small>
+                </header>
+                <ol>
+                  {session.exercises.map((exercise) => (
+                    <li key={exercise}>{exercise}</li>
+                  ))}
+                </ol>
+              </article>
+            ))}
+          </div>
+        </WorkspacePanel>
+
+        <WorkspacePanel eyebrow="Method" span={12} title="Progression">
+          <ul className="training-archive__progression">
+            {archivedTrainingProgram.progression.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        </WorkspacePanel>
+      </WorkspaceGrid>
+    </MissionWorkspace>
   );
 }

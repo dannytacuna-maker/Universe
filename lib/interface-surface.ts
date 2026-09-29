@@ -1,4 +1,5 @@
 export type InterfaceSurfaceId =
+  | "gym-playlist"
   | "jarvis"
   | "jiu-jitsu-review"
   | "jiu-jitsu-training-log"
@@ -6,6 +7,7 @@ export type InterfaceSurfaceId =
   | "observatory"
   | "reading-library"
   | "strength-whis"
+  | "training-archive"
   | "university-operations"
   | "university-schedule"
   | "websites-production";

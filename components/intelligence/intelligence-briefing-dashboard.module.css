@@ -1,41 +1,8 @@
 .dashboard {
-  position: absolute;
-  top: 54%;
-  left: 50%;
-  z-index: 17;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  width: min(74rem, calc(100% - 2rem));
-  height: min(78vh, 46rem);
-  overflow: hidden;
   color: rgb(232 240 241 / 92%);
-  background:
-    linear-gradient(90deg, rgb(255 255 255 / 1.2%) 1px, transparent 1px) 0 0 /
-      5rem 100%,
-    radial-gradient(circle at 87% 7%, rgb(182 127 66 / 9%), transparent 28%),
-    linear-gradient(145deg, rgb(8 12 16 / 96%), rgb(3 7 10 / 94%));
-  border: 1px solid rgb(174 195 198 / 13%);
-  border-radius: 1.05rem;
-  box-shadow:
-    0 2.5rem 9rem rgb(0 0 0 / 66%),
-    inset 0 1px rgb(255 255 255 / 3%);
-  backdrop-filter: blur(24px) saturate(110%);
-  transform: translate(-50%, -50%);
 }
 
-.header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1.5rem;
-  min-height: 6rem;
-  padding: 1rem 1.25rem 1.05rem;
-  border-bottom: 1px solid rgb(172 198 201 / 10%);
-  background: rgb(3 7 10 / 58%);
-}
-
-.eyebrow,
-.edition span,
 .overview > span,
 .sectionHeading span,
 .itemMeta,
@@ -48,45 +15,8 @@
   text-transform: uppercase;
 }
 
-.header h1 {
-  margin: 0.26rem 0 0;
-  color: rgb(244 248 247 / 96%);
-  font-size: clamp(1.35rem, 1.05rem + 1.1vw, 2.05rem);
-  font-weight: 420;
-  letter-spacing: -0.04em;
-}
-
-.header p {
-  max-width: 34rem;
-  margin: 0.25rem 0 0;
-  color: rgb(184 204 205 / 57%);
-  font-size: 0.68rem;
-  line-height: 1.55;
-}
-
-.edition {
-  display: grid;
-  justify-items: end;
-  gap: 0.2rem;
-  text-align: right;
-}
-
-.edition time {
-  color: rgb(226 234 234 / 80%);
-  font-size: 0.74rem;
-}
-
-.edition small {
-  color: rgb(148 173 175 / 46%);
-  font-size: 0.52rem;
-}
-
 .content {
-  min-height: 0;
-  padding: 1.2rem clamp(1rem, 2.2vw, 2rem) 2rem;
-  overflow: auto;
-  overscroll-behavior: contain;
-  scrollbar-color: rgb(129 160 162 / 24%) transparent;
+  min-width: 0;
 }
 
 .overview {
@@ -590,14 +520,6 @@
 }
 
 @media (max-width: 52rem) {
-  .dashboard {
-    top: 5.2rem;
-    left: 0.65rem;
-    width: calc(100% - 1.3rem);
-    height: calc(100% - 5.85rem);
-    transform: none;
-  }
-
   .pulseGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -612,20 +534,6 @@
 }
 
 @media (max-width: 36rem) {
-  .dashboard {
-    border-radius: 0.8rem;
-  }
-
-  .header {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .edition {
-    justify-items: start;
-    text-align: left;
-  }
-
   .pulseGrid {
     grid-template-columns: minmax(0, 1fr);
   }

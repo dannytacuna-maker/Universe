@@ -2,12 +2,35 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import {
+  MissionWorkspace,
+  useArrivalWorkspace,
+} from "@/components/ui/mission-workspace";
 import type { IntelligenceBriefing } from "@/lib/intelligence/contracts";
 import type { WeeklyIntelligenceBriefing } from "@/lib/intelligence/weekly-briefing";
-import { activateInterfaceSurface } from "@/lib/interface-surface";
 
 import type { IntelligenceBriefingDashboardState } from "./intelligence-briefing";
-import { IntelligenceBriefingDashboard } from "./intelligence-briefing-dashboard";
+import {
+  deriveBriefingEdition,
+  IntelligenceBriefingDashboard,
+} from "./intelligence-briefing-dashboard";
+
+function briefingStatusLabel(state: IntelligenceBriefingDashboardState) {
+  switch (state.status) {
+    case "loading":
+      return "Receiving today's brief";
+    case "error":
+      return "Brief unavailable";
+    case "ready":
+      return "Daily analysis ready";
+    case "source-ready":
+      return "Source watch live";
+    default: {
+      const exhaustive: never = state;
+      return exhaustive;
+    }
+  }
+}
 
 type ObservatoryExperienceProps = Readonly<{
   isVisible: boolean;
@@ -22,14 +45,7 @@ export function ObservatoryExperience({
     status: "loading",
   });
   const markedBriefingId = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (!isVisible) {
-      return;
-    }
-
-    activateInterfaceSurface("observatory");
-  }, [isVisible]);
+  const [isOpen, setIsOpen] = useArrivalWorkspace(isVisible);
 
   useEffect(() => {
     if (!isVisible) return;
@@ -106,5 +122,59 @@ export function ObservatoryExperience({
     }
   }, [isVisible, onBriefingSeen, state]);
 
-  return isVisible ? <IntelligenceBriefingDashboard state={state} /> : null;
+  if (!isVisible) return null;
+
+  const edition = deriveBriefingEdition(state);
+
+  return (
+    <MissionWorkspace
+      accent="222 176 112"
+      description="A concise daily view of the world developments most worth understanding."
+      eyebrow="Global intelligence station"
+      isBusy={state.status === "loading"}
+      isOpen={isOpen}
+      launcherLabel="Brief"
+      metrics={
+        edition === null
+          ? undefined
+          : [
+              {
+                id: "edition",
+                kind: "text",
+                label: "Edition",
+                value: (
+                  <time dateTime={edition.editionDateIso}>
+                    {edition.editionDateLabel}
+                  </time>
+                ),
+              },
+              {
+                id: "compiled",
+                kind: "text",
+                label: "Compiled",
+                value: edition.generatedAtLabel,
+              },
+              {
+                id: "developments",
+                label: "Developments",
+                value: edition.developmentCount,
+              },
+              {
+                id: "layer",
+                kind: "text",
+                label: "Layer",
+                tone: edition.kind === "analysis" ? "positive" : "neutral",
+                value: edition.kind === "analysis" ? "Analysed" : "Source feed",
+              },
+            ]
+      }
+      onOpenChange={setIsOpen}
+      placement="center"
+      status={briefingStatusLabel(state)}
+      surfaceId="observatory"
+      title="The Observatory"
+    >
+      <IntelligenceBriefingDashboard state={state} />
+    </MissionWorkspace>
+  );
 }

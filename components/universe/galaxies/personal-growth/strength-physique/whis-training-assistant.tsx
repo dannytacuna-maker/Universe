@@ -1,13 +1,16 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useState } from "react";
 
 import {
-  activateInterfaceSurface,
-  subscribeToInterfaceSurfaces,
-} from "@/lib/interface-surface";
+  MissionWorkspace,
+  WorkspaceColumn,
+  WorkspaceGrid,
+  WorkspacePanel,
+} from "@/components/ui/mission-workspace";
 
 import {
+  strengthLiftLabels,
   strengthWorkoutSplit,
   type StrengthWorkoutDayId,
 } from "./strength-physique-plan";
@@ -66,7 +69,6 @@ export function WhisTrainingAssistant({
   storageError,
   trainingSessions,
 }: WhisTrainingAssistantProps) {
-  const panelId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const nextWorkout = strengthWorkoutSplit.find(
     (workout) => !progress.completedDayIds.includes(workout.id),
@@ -77,82 +79,92 @@ export function WhisTrainingAssistant({
       ? "Recovery"
       : nextWorkout.name;
 
-  useEffect(
-    () =>
-      subscribeToInterfaceSurfaces((surfaceId) => {
-        if (surfaceId !== "strength-whis") setIsOpen(false);
-      }),
-    [],
-  );
-
   if (!isVisible) {
     return null;
   }
 
+  const bestLift = personalRecords.reduce<StrengthPersonalRecord | null>(
+    (best, record) =>
+      best === null || record.weightKg > best.weightKg ? record : best,
+    null,
+  );
+
   return (
-    <aside
-      aria-label="Whis training guidance"
-      className="strength-tracker whis-assistant"
-      data-open={isOpen}
+    <MissionWorkspace
+      accent="196 164 238"
+      description="Log sessions, keep the Push · Pull · Legs rhythm, and track the big three."
+      eyebrow="Whis · Training assistant"
+      isBusy={isLoading}
+      isOpen={isOpen}
+      launcherDetail={
+        <p>
+          {progress.weeklyCompleted}/6 this week
+          {progress.latestWeightKg === null
+            ? ""
+            : ` · ${progress.latestWeightKg.toFixed(1)} kg`}
+        </p>
+      }
+      launcherLabel="Train"
+      metrics={[
+        {
+          hint: "Push · Pull · Legs ×2",
+          id: "week",
+          label: "This week",
+          tone: progress.weeklyCompleted >= 6 ? "positive" : "neutral",
+          value: `${progress.weeklyCompleted}/6`,
+        },
+        {
+          id: "next",
+          kind: "text",
+          label: "Next focus",
+          value: focusName,
+        },
+        {
+          id: "sessions",
+          label: "Sessions logged",
+          value: trainingSessions.length,
+        },
+        {
+          hint:
+            bestLift === null ? undefined : strengthLiftLabels[bestLift.liftId],
+          id: "best",
+          label: "Heaviest record",
+          value: bestLift === null ? "—" : `${bestLift.weightKg} kg`,
+        },
+        {
+          hint: `${bodyWeightEntries.length} entries`,
+          id: "weight",
+          label: "Body weight",
+          value:
+            progress.latestWeightKg === null
+              ? "—"
+              : `${progress.latestWeightKg.toFixed(1)} kg`,
+        },
+      ]}
+      onOpenChange={setIsOpen}
+      placement="start"
+      status={nextWorkout === undefined ? focusName : `Next: ${focusName}`}
+      surfaceId="strength-whis"
+      title="Beerus' training grounds"
     >
-      <div className="strength-tracker__summary whis-assistant__summary">
-        <div className="whis-assistant__welcome">
-          <span>Whis</span>
-          <strong>{focusName}</strong>
-          <p>
-            {progress.weeklyCompleted}/6 this week
-            {progress.latestWeightKg === null
-              ? ""
-              : ` · ${progress.latestWeightKg.toFixed(1)} kg`}
-          </p>
-        </div>
-        <button
-          aria-controls={panelId}
-          aria-expanded={isOpen}
-          onClick={() => {
-            setIsOpen((current) => {
-              const next = !current;
-              if (next) activateInterfaceSurface("strength-whis");
-              return next;
-            });
-          }}
-          type="button"
-        >
-          {isOpen ? "Close" : "Train"}
-        </button>
-      </div>
-
-      {isOpen ? (
-        <div className="strength-tracker__panel" id={panelId}>
-          <p className="whis-assistant__pulse" aria-label="Training summary">
-            <strong>{progress.weeklyCompleted}</strong> week
-            <span aria-hidden="true">·</span>
-            <strong>{trainingSessions.length}</strong> logged
-            {progress.latestWeightKg === null ? null : (
-              <>
-                <span aria-hidden="true">·</span>
-                <strong>{progress.latestWeightKg.toFixed(1)}</strong> kg
-              </>
-            )}
-          </p>
-
+      <WorkspaceGrid className="strength-tracker whis-assistant">
+        <WorkspacePanel span={7}>
           <StrengthSessionLog
             onAdd={onAddTrainingSession}
             onEdit={onEditTrainingSession}
             onRemove={onRemoveTrainingSession}
             sessions={trainingSessions}
           />
+        </WorkspacePanel>
 
-          <details className="whis-assistant__more">
-            <summary>Weekly split</summary>
+        <WorkspaceColumn span={5}>
+          <WorkspacePanel>
             <WorkoutSplit
               completedDayIds={progress.completedDayIds}
               onToggleWorkout={onToggleWorkout}
             />
-          </details>
-
-          <details className="whis-assistant__more">
-            <summary>Records &amp; body weight</summary>
+          </WorkspacePanel>
+          <WorkspacePanel>
             <StrengthRecords
               bodyWeightEntries={bodyWeightEntries}
               liftHistory={liftHistory}
@@ -161,13 +173,13 @@ export function WhisTrainingAssistant({
               onUpdatePersonalRecord={onUpdatePersonalRecord}
               personalRecords={personalRecords}
             />
-          </details>
+          </WorkspacePanel>
+        </WorkspaceColumn>
 
-          {storageError !== null ? (
-            <p className="strength-tracker__error">{storageError}</p>
-          ) : null}
-        </div>
-      ) : null}
-    </aside>
+        {storageError !== null ? (
+          <p className="strength-tracker__error">{storageError}</p>
+        ) : null}
+      </WorkspaceGrid>
+    </MissionWorkspace>
   );
 }

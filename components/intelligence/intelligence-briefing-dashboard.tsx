@@ -42,8 +42,15 @@ const topicLabels: Readonly<Record<IntelligenceTopic, string>> = {
 };
 
 export type IntelligenceBriefingDashboardProps = Readonly<{
-  headingId?: string;
   state: IntelligenceBriefingDashboardState;
+}>;
+
+export type IntelligenceBriefingEdition = Readonly<{
+  developmentCount: number;
+  editionDateIso: string;
+  editionDateLabel: string;
+  generatedAtLabel: string;
+  kind: "analysis" | "source-feed";
 }>;
 
 function SourceLink({ source }: Readonly<{ source: IntelligenceSource }>) {
@@ -53,46 +60,6 @@ function SourceLink({ source }: Readonly<{ source: IntelligenceSource }>) {
       <small>{source.kind}</small>
       <span aria-hidden="true">↗</span>
     </a>
-  );
-}
-
-function BriefingHeader({
-  edition,
-  headingId,
-}: Readonly<{
-  edition: Readonly<{
-    editionDateIso: string;
-    editionDateLabel: string;
-    generatedAtIso: string;
-    generatedAtLabel: string;
-  }> | null;
-  headingId: string;
-}>) {
-  return (
-    <header className={styles.header}>
-      <div>
-        <span className={styles.eyebrow}>Global intelligence station</span>
-        <h1 id={headingId}>The Observatory</h1>
-        <p>
-          A concise daily view of the world developments most worth
-          understanding.
-        </p>
-      </div>
-      {edition === null ? null : (
-        <div className={styles.edition}>
-          <span>Daily brief</span>
-          <time dateTime={edition.editionDateIso}>
-            {edition.editionDateLabel}
-          </time>
-          <small>
-            Compiled{" "}
-            <time dateTime={edition.generatedAtIso}>
-              {edition.generatedAtLabel}
-            </time>
-          </small>
-        </div>
-      )}
-    </header>
   );
 }
 
@@ -340,35 +307,43 @@ function SourceFeedBriefing({
   );
 }
 
+export function deriveBriefingEdition(
+  state: IntelligenceBriefingDashboardState,
+): IntelligenceBriefingEdition | null {
+  if (state.status === "ready" && state.briefing !== null) {
+    return {
+      developmentCount: Math.min(
+        state.briefing.items.length,
+        MAX_BRIEFING_ITEMS,
+      ),
+      editionDateIso: state.briefing.editionDateIso,
+      editionDateLabel: state.briefing.editionDateLabel,
+      generatedAtLabel: state.briefing.generatedAtLabel,
+      kind: "analysis",
+    };
+  }
+
+  if (state.status === "source-ready" && state.briefing !== null) {
+    return {
+      developmentCount: Math.min(
+        state.briefing.items.length,
+        MAX_BRIEFING_ITEMS,
+      ),
+      editionDateIso: state.briefing.briefingDate,
+      editionDateLabel: state.briefing.briefingDate,
+      generatedAtLabel: publicationLabel(state.briefing.generatedAt),
+      kind: "source-feed",
+    };
+  }
+
+  return null;
+}
+
 export function IntelligenceBriefingDashboard({
-  headingId = "observatory-title",
   state,
 }: IntelligenceBriefingDashboardProps) {
-  const edition =
-    state.status === "ready" && state.briefing !== null
-      ? {
-          editionDateIso: state.briefing.editionDateIso,
-          editionDateLabel: state.briefing.editionDateLabel,
-          generatedAtIso: state.briefing.generatedAtIso,
-          generatedAtLabel: state.briefing.generatedAtLabel,
-        }
-      : state.status === "source-ready" && state.briefing !== null
-        ? {
-            editionDateIso: state.briefing.briefingDate,
-            editionDateLabel: state.briefing.briefingDate,
-            generatedAtIso: state.briefing.generatedAt,
-            generatedAtLabel: publicationLabel(state.briefing.generatedAt),
-          }
-        : null;
-
   return (
-    <section
-      aria-busy={state.status === "loading"}
-      aria-labelledby={headingId}
-      className={styles.dashboard}
-    >
-      <BriefingHeader edition={edition} headingId={headingId} />
-
+    <div className={styles.dashboard}>
       {state.status === "loading" ? (
         <div className={styles.state} role="status">
           <span className={styles.stateMark} aria-hidden="true" />
@@ -395,6 +370,6 @@ export function IntelligenceBriefingDashboard({
       ) : (
         <ReadyBriefing briefing={state.briefing} />
       )}
-    </section>
+    </div>
   );
 }

@@ -2,8 +2,13 @@
 
 import { useReducedMotion } from "framer-motion";
 import { useThree } from "@react-three/fiber";
-import { Suspense } from "react";
+import { Suspense, useSyncExternalStore } from "react";
 
+import {
+  isAnyWorkspaceOpen,
+  isAnyWorkspaceOpenOnServer,
+  subscribeToWorkspacePresence,
+} from "@/lib/workspace-presence";
 import type { NavigationLevel } from "@/store/navigation-store";
 
 import { AmbientFrameScheduler } from "./ambient-frame-scheduler";
@@ -101,6 +106,11 @@ export function UniverseScene({
 }: UniverseSceneProps) {
   const shouldReduceMotion = useReducedMotion();
   const motionEnabled = shouldReduceMotion === false;
+  const isWorkspaceOpen = useSyncExternalStore(
+    subscribeToWorkspacePresence,
+    isAnyWorkspaceOpen,
+    isAnyWorkspaceOpenOnServer,
+  );
   const viewportSize = useThree((state) => state.size);
   const isPortrait = viewportSize.height > viewportSize.width;
   const starfieldPresence =
@@ -431,7 +441,7 @@ export function UniverseScene({
         selectedPlanetId={selectedPlanetId}
         selectedSystemId={activeSystemId}
       />
-      <AmbientFrameScheduler active={motionEnabled} />
+      <AmbientFrameScheduler active={motionEnabled && !isWorkspaceOpen} />
     </>
   );
 }

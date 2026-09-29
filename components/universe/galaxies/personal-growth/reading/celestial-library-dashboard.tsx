@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  useEffect,
   useId,
   useMemo,
   useRef,
@@ -10,7 +9,12 @@ import {
   type FormEvent,
 } from "react";
 
-import { activateInterfaceSurface } from "@/lib/interface-surface";
+import {
+  MissionWorkspace,
+  useArrivalWorkspace,
+  WorkspaceGrid,
+  WorkspacePanel,
+} from "@/components/ui/mission-workspace";
 
 import {
   parseReadingShelfId,
@@ -151,6 +155,7 @@ export function CelestialLibraryDashboard({
   summary,
 }: CelestialLibraryDashboardProps) {
   const addBookFormId = useId();
+  const [isOpen, setIsOpen] = useArrivalWorkspace(isVisible);
   const [isSaving, setIsSaving] = useState(false);
   const [isAddingBook, setIsAddingBook] = useState(false);
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
@@ -166,14 +171,6 @@ export function CelestialLibraryDashboard({
         : sessions.filter((session) => session.bookId === selectedBook.id),
     [selectedBook, sessions],
   );
-
-  useEffect(() => {
-    if (!isVisible) {
-      return;
-    }
-
-    activateInterfaceSurface("reading-library");
-  }, [isVisible]);
 
   if (!isVisible) {
     return null;
@@ -339,149 +336,177 @@ export function CelestialLibraryDashboard({
   };
 
   return (
-    <aside
-      aria-label="Celestial reading library"
-      className="immersive-dashboard celestial-library-dashboard"
-    >
-      <header className="immersive-dashboard__header library-dashboard__header">
-        <div>
-          {selectedBook === null ? (
-            <>
-              <span>Reading · Celestial Library</span>
-              <strong>Your shelves</strong>
-              <p>
-                {currentBook === null
-                  ? "See what you have finished, what you are reading, and what comes next."
-                  : `${currentBook.title} · page ${currentBook.currentPage} of ${currentBook.totalPages}`}
-              </p>
-            </>
-          ) : (
-            <>
-              <span>{selectedShelfLabel}</span>
-              <strong>{selectedBook.title}</strong>
-              <p>
-                {selectedBook.author || "Unknown author"} · page{" "}
-                {selectedBook.currentPage} of {selectedBook.totalPages}
-              </p>
-            </>
-          )}
-        </div>
-        <div className="library-dashboard__header-actions">
-          {selectedBook !== null ? (
-            <button
-              disabled={isSaving}
-              onClick={() => setSelectedBookId(null)}
-              type="button"
-            >
-              Back to shelves
-            </button>
-          ) : (
-            <button
-              aria-controls={addBookFormId}
-              aria-expanded={isAddingBook}
-              disabled={isSaving}
-              onClick={() => setIsAddingBook((current) => !current)}
-              type="button"
-            >
-              {isAddingBook ? "Close" : "Add a book"}
-            </button>
-          )}
-        </div>
-      </header>
-
-      {selectedBook === null && isAddingBook ? (
-        <form
-          className="library-action library-add-form"
-          id={addBookFormId}
-          onSubmit={handleAddBook}
-        >
-          <label>
-            Title
-            <input autoFocus name="title" required type="text" />
-          </label>
-          <label>
-            Author
-            <input name="author" type="text" />
-          </label>
-          <label>
-            Pages
-            <input min="1" name="totalPages" required type="number" />
-          </label>
-          <label>
-            Shelf
-            <select defaultValue="want-to-read" name="shelf">
-              {shelfOrder.map((shelf) => (
-                <option key={shelf} value={shelf}>
-                  {readingShelfLabels[shelf]}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button disabled={isSaving} type="submit">
-            Add to library
+    <MissionWorkspace
+      accent="214 184 132"
+      actions={
+        selectedBook !== null ? (
+          <button
+            disabled={isSaving}
+            onClick={() => setSelectedBookId(null)}
+            type="button"
+          >
+            All shelves
           </button>
-        </form>
-      ) : null}
+        ) : (
+          <button
+            aria-controls={addBookFormId}
+            aria-expanded={isAddingBook}
+            disabled={isSaving}
+            onClick={() => setIsAddingBook((current) => !current)}
+            type="button"
+          >
+            {isAddingBook ? "Close form" : "Add a book"}
+          </button>
+        )
+      }
+      description={
+        selectedBook === null
+          ? currentBook === null
+            ? "See what you have finished, what you are reading, and what comes next."
+            : `Now reading ${currentBook.title} · page ${currentBook.currentPage} of ${currentBook.totalPages}`
+          : `${selectedBook.author || "Unknown author"} · page ${selectedBook.currentPage} of ${selectedBook.totalPages}`
+      }
+      eyebrow={
+        selectedBook === null
+          ? "Reading · Celestial Library"
+          : `Celestial Library · ${selectedShelfLabel}`
+      }
+      isBusy={isLoading || isSaving}
+      isOpen={isOpen}
+      launcherLabel="Library"
+      metrics={[
+        {
+          id: "reading",
+          label: "Reading now",
+          value: summary.currentlyReading.length,
+        },
+        {
+          id: "finished",
+          label: "Finished",
+          tone: summary.completed.length > 0 ? "positive" : "neutral",
+          value: summary.completed.length,
+        },
+        { id: "queue", label: "Up next", value: summary.wantToRead.length },
+        {
+          id: "time",
+          label: "Time this week",
+          value: formatMinutes(summary.timeThisWeekMinutes),
+        },
+        {
+          id: "pages",
+          label: "Pages this week",
+          value: summary.pagesThisWeek,
+        },
+      ]}
+      onOpenChange={setIsOpen}
+      status={
+        currentBook === null ? "Your shelves" : `Reading ${currentBook.title}`
+      }
+      surfaceId="reading-library"
+      title={selectedBook === null ? "Your shelves" : selectedBook.title}
+    >
+      <WorkspaceGrid className="celestial-library-dashboard">
+        {selectedBook === null && isAddingBook ? (
+          <WorkspacePanel eyebrow="New volume" span={12} title="Add a book">
+            <form
+              className="library-action library-add-form"
+              id={addBookFormId}
+              onSubmit={handleAddBook}
+            >
+              <label>
+                Title
+                <input autoFocus name="title" required type="text" />
+              </label>
+              <label>
+                Author
+                <input name="author" type="text" />
+              </label>
+              <label>
+                Pages
+                <input min="1" name="totalPages" required type="number" />
+              </label>
+              <label>
+                Shelf
+                <select defaultValue="want-to-read" name="shelf">
+                  {shelfOrder.map((shelf) => (
+                    <option key={shelf} value={shelf}>
+                      {readingShelfLabels[shelf]}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button disabled={isSaving} type="submit">
+                Add to library
+              </button>
+            </form>
+          </WorkspacePanel>
+        ) : null}
 
-      {selectedBook === null ? (
-        <div className="library-shelves">
-          {isLoading ? <p>Opening the library.</p> : null}
-          {shelfOrder.map((shelf) => (
+        {selectedBook === null ? (
+          shelfOrder.map((shelf) => (
             <LibraryShelf
               books={shelves[shelf]}
+              isLoading={isLoading}
               key={shelf}
               onSelect={setSelectedBookId}
               selectedBookId={selectedBookId}
               shelf={shelf}
             />
-          ))}
-        </div>
-      ) : (
-        <LibraryBookDesk
-          book={selectedBook}
-          checkInRevision={checkInRevision}
-          isSaving={isSaving}
-          onCheckIn={handleCheckIn}
-          onMoveToShelf={(shelf) => void handleMoveToShelf(selectedBook, shelf)}
-          onRemoveBook={() => void handleRemoveBook(selectedBook)}
-          onRemoveSession={(session) => void handleRemoveSession(session)}
-          sessions={selectedSessions}
-        />
-      )}
+          ))
+        ) : (
+          <LibraryBookDesk
+            book={selectedBook}
+            checkInRevision={checkInRevision}
+            isSaving={isSaving}
+            onCheckIn={handleCheckIn}
+            onMoveToShelf={(shelf) =>
+              void handleMoveToShelf(selectedBook, shelf)
+            }
+            onRemoveBook={() => void handleRemoveBook(selectedBook)}
+            onRemoveSession={(session) => void handleRemoveSession(session)}
+            sessions={selectedSessions}
+          />
+        )}
 
-      <p className="immersive-dashboard__feedback">
-        {summary.timeThisWeekMinutes > 0
-          ? `${formatMinutes(summary.timeThisWeekMinutes)} recorded this week.`
-          : "Saved locally first. Cloud sync status is shown in Mission."}
-      </p>
-      {storageError !== null ? (
-        <p className="immersive-dashboard__error">{storageError}</p>
-      ) : null}
-      <p aria-live="polite" className="immersive-dashboard__feedback">
-        {feedback}
-      </p>
-    </aside>
+        <div className="library-dashboard__footer">
+          <p className="immersive-dashboard__feedback">
+            Saved locally first. Cloud sync status is shown in Mission.
+          </p>
+          {storageError !== null ? (
+            <p className="immersive-dashboard__error">{storageError}</p>
+          ) : null}
+          <p aria-live="polite" className="immersive-dashboard__feedback">
+            {feedback}
+          </p>
+        </div>
+      </WorkspaceGrid>
+    </MissionWorkspace>
   );
 }
 
 function LibraryShelf({
   books,
+  isLoading,
   onSelect,
   selectedBookId,
   shelf,
 }: Readonly<{
   books: readonly ReadingBook[];
+  isLoading: boolean;
   onSelect: (bookId: string) => void;
   selectedBookId: string | null;
   shelf: ReadingShelfId;
 }>) {
   return (
-    <section className="library-shelf" data-shelf={shelf}>
-      <header>
-        <span>{readingShelfLabels[shelf]}</span>
-        <strong>{books.length}</strong>
-      </header>
-      {books.length === 0 ? (
+    <WorkspacePanel
+      count={books.length}
+      eyebrow="Shelf"
+      span={shelf === "reading" ? 12 : 6}
+      title={readingShelfLabels[shelf]}
+    >
+      {isLoading && books.length === 0 ? (
+        <p className="library-shelf__empty">Opening the library.</p>
+      ) : books.length === 0 ? (
         <p className="library-shelf__empty">
           {shelf === "reading"
             ? "No book open yet."
@@ -512,7 +537,7 @@ function LibraryShelf({
           )}
         </ul>
       )}
-    </section>
+    </WorkspacePanel>
   );
 }
 
@@ -606,72 +631,95 @@ function LibraryBookDesk({
   const progress = bookProgress(book);
 
   return (
-    <div className="library-desk">
-      <div className="library-desk__progress">
-        <span>Progress</span>
-        <i aria-hidden="true">
-          <b style={{ width: `${progress * 100}%` }} />
-        </i>
-        <strong>{Math.round(progress * 100)}%</strong>
-      </div>
-
-      <div
-        className="library-desk__shelves"
-        role="group"
-        aria-label="Move book"
-      >
-        {shelfOrder.map((shelf) => (
-          <button
-            aria-pressed={currentShelf === shelf}
-            disabled={isSaving || currentShelf === shelf}
-            key={shelf}
-            onClick={() => onMoveToShelf(shelf)}
-            type="button"
+    <>
+      <WorkspacePanel
+        actions={
+          <div
+            aria-label="Move book"
+            className="library-desk__shelves"
+            role="group"
           >
-            {readingShelfLabels[shelf]}
-          </button>
-        ))}
-      </div>
-
-      <form
-        className="library-action library-desk__check-in"
-        key={`${book.id}:${checkInRevision}:${book.currentPage}`}
-        onSubmit={onCheckIn}
+            {shelfOrder.map((shelf) => (
+              <button
+                aria-pressed={currentShelf === shelf}
+                disabled={isSaving || currentShelf === shelf}
+                key={shelf}
+                onClick={() => onMoveToShelf(shelf)}
+                type="button"
+              >
+                {readingShelfLabels[shelf]}
+              </button>
+            ))}
+          </div>
+        }
+        eyebrow="Progress"
+        span={12}
+        title={`${book.currentPage} of ${book.totalPages} pages`}
       >
-        <label>
-          Page
-          <input
-            defaultValue={book.currentPage}
-            max={book.totalPages}
-            min="0"
-            name="page"
-            required
-            type="number"
-          />
-        </label>
-        <label>
-          Minutes
-          <input min="0" name="durationMinutes" placeholder="0" type="number" />
-        </label>
-        <label className="library-action__wide">
-          Note
-          <textarea
-            maxLength={1600}
-            name="reflection"
-            placeholder="What stayed with you?"
-            rows={3}
-          />
-        </label>
-        <button disabled={isSaving} type="submit">
-          {isSaving ? "Saving" : "Record"}
-        </button>
-      </form>
+        <div className="library-desk__progress">
+          <i aria-hidden="true">
+            <b style={{ width: `${progress * 100}%` }} />
+          </i>
+          <strong>{Math.round(progress * 100)}%</strong>
+        </div>
+      </WorkspacePanel>
 
-      <section className="library-timeline">
-        <header>
-          <span>Recorded updates</span>
-          <strong>{sessions.length}</strong>
-        </header>
+      <WorkspacePanel eyebrow="Check in" span={5} title="Record reading">
+        <form
+          className="library-action library-desk__check-in"
+          key={`${book.id}:${checkInRevision}:${book.currentPage}`}
+          onSubmit={onCheckIn}
+        >
+          <label>
+            Page
+            <input
+              defaultValue={book.currentPage}
+              max={book.totalPages}
+              min="0"
+              name="page"
+              required
+              type="number"
+            />
+          </label>
+          <label>
+            Minutes
+            <input
+              min="0"
+              name="durationMinutes"
+              placeholder="0"
+              type="number"
+            />
+          </label>
+          <label className="library-action__wide">
+            Note
+            <textarea
+              maxLength={1600}
+              name="reflection"
+              placeholder="What stayed with you?"
+              rows={3}
+            />
+          </label>
+          <button disabled={isSaving} type="submit">
+            {isSaving ? "Saving" : "Record"}
+          </button>
+        </form>
+        <button
+          className="library-desk__remove"
+          disabled={isSaving}
+          onClick={onRemoveBook}
+          type="button"
+        >
+          Remove from library
+        </button>
+      </WorkspacePanel>
+
+      <WorkspacePanel
+        className="library-timeline"
+        count={sessions.length}
+        eyebrow="Timeline"
+        span={7}
+        title="Recorded updates"
+      >
         {sessions.length === 0 ? (
           <p>Page, time, and notes from this book will collect here.</p>
         ) : (
@@ -703,16 +751,7 @@ function LibraryBookDesk({
             ))}
           </ul>
         )}
-      </section>
-
-      <button
-        className="library-desk__remove"
-        disabled={isSaving}
-        onClick={onRemoveBook}
-        type="button"
-      >
-        Remove from library
-      </button>
-    </div>
+      </WorkspacePanel>
+    </>
   );
 }

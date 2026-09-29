@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 
 import {
-  activateInterfaceSurface,
-  subscribeToInterfaceSurfaces,
-} from "@/lib/interface-surface";
+  MissionWorkspace,
+  WorkspaceGrid,
+  WorkspacePanel,
+} from "@/components/ui/mission-workspace";
 
 import { formatCourseScheduleSummary } from "./course-schedule";
 import { UniversityAssignmentPanel } from "./university-assignment-panel";
@@ -15,7 +16,11 @@ import { UniversityNotePanel } from "./university-note-panel";
 import type { UniversityCourseId } from "./university-record";
 import { formatUniversityDeadline } from "./university-record-format";
 import styles from "./university-operations-dashboard.module.css";
-import { deriveUniversityOperationsSummary } from "./university-operations-summary";
+import {
+  deriveUniversityGradeTrajectory,
+  deriveUniversityOperationsSummary,
+  isAssignmentResolved,
+} from "./university-operations-summary";
 import { universityCourseSystems } from "./university-course-systems";
 import type { UniversityRecordsController } from "./use-university-records";
 
@@ -52,6 +57,10 @@ export function UniversityOperationsDashboard({
       ),
     [records.assignments, summaryReferenceDate],
   );
+  const overallTrajectory = useMemo(
+    () => deriveUniversityGradeTrajectory(records.grades),
+    [records.grades],
+  );
   const courseAssignments = useMemo(
     () =>
       records.assignments.filter(
@@ -67,17 +76,32 @@ export function UniversityOperationsDashboard({
     () => records.notes.filter((note) => note.courseId === activeCourse.id),
     [activeCourse.id, records.notes],
   );
+  const openAssignmentsByCourse = useMemo(() => {
+    const counts = new Map<UniversityCourseId, number>();
+    for (const assignment of records.assignments) {
+      if (isAssignmentResolved(assignment)) continue;
+      counts.set(
+        assignment.courseId,
+        (counts.get(assignment.courseId) ?? 0) + 1,
+      );
+    }
+    return counts;
+  }, [records.assignments]);
+  const overdueCourseIds = useMemo(
+    () =>
+      new Set(
+        summary.deadlines
+          .filter((deadline) => deadline.urgency === "overdue")
+          .map((deadline) => deadline.assignment.courseId),
+      ),
+    [summary.deadlines],
+  );
   const activeDeadline = summary.deadlines.find(
     ({ assignment }) => assignment.courseId === activeCourse.id,
   );
-
-  useEffect(
-    () =>
-      subscribeToInterfaceSurfaces((surfaceId) => {
-        if (surfaceId !== "university-operations") setIsExpanded(false);
-      }),
-    [],
-  );
+  const dueThisWeek = summary.deadlines.filter(
+    (deadline) => deadline.urgency === "upcoming" && deadline.daysFromNow <= 7,
+  ).length;
 
   if (!isVisible) {
     return null;
@@ -92,96 +116,94 @@ export function UniversityOperationsDashboard({
   const statusLine = records.isLoading
     ? "Opening records"
     : summary.overdueCount > 0
-      ? `${summary.overdueCount} overdue`
+      ? `${summary.overdueCount} overdue · ${summary.upcomingCount} upcoming`
       : summary.upcomingCount > 0
-        ? `${summary.upcomingCount} upcoming`
-        : "Clear";
+        ? `${summary.upcomingCount} upcoming deadlines`
+        : "All coursework clear";
 
   return (
-    <aside
-      aria-label="University operations"
-      aria-busy={records.isLoading}
-      className={styles.dashboard}
-      data-expanded={isExpanded}
+    <MissionWorkspace
+      accent="120 199 225"
+      description="Deadlines, coursework, results, and notes across every course system."
+      eyebrow="University · Operations"
+      isBusy={records.isLoading}
+      isOpen={isExpanded}
+      metrics={[
+        {
+          hint: summary.overdueCount > 0 ? "needs attention" : "none late",
+          id: "overdue",
+          label: "Overdue",
+          tone: summary.overdueCount > 0 ? "alert" : "positive",
+          value: summary.overdueCount,
+        },
+        {
+          hint: `${summary.upcomingCount} open in total`,
+          id: "week",
+          label: "Due in 7 days",
+          value: dueThisWeek,
+        },
+        {
+          hint:
+            overallTrajectory.method === "weighted" ? "weighted" : "recorded",
+          id: "average",
+          label: "Average result",
+          value:
+            overallTrajectory.averagePercent === null
+              ? "—"
+              : `${overallTrajectory.averagePercent.toFixed(1)}%`,
+        },
+        {
+          hint: `${records.notes.length} notes`,
+          id: "results",
+          label: "Results logged",
+          value: records.grades.length,
+        },
+      ]}
+      onOpenChange={setIsExpanded}
+      status={statusLine}
+      surfaceId="university-operations"
+      title="Academic command"
     >
-      <header className={styles.dashboardHeader}>
-        <div className={styles.headingIdentity}>
-          <div>
-            <span>University</span>
-            <strong>{statusLine}</strong>
-          </div>
+      {records.storageError !== null ? (
+        <div className={styles.errorState} role="alert">
+          <strong>University records are unavailable</strong>
+          <p>{records.storageError}</p>
         </div>
+      ) : null}
 
-        <button
-          aria-controls="university-operations-content"
-          aria-expanded={isExpanded}
-          className={styles.toggleButton}
-          onClick={() =>
-            setIsExpanded((current) => {
-              const next = !current;
-              if (next) activateInterfaceSurface("university-operations");
-              return next;
-            })
-          }
-          type="button"
+      <WorkspaceGrid>
+        <WorkspacePanel
+          count={summary.deadlines.length}
+          eyebrow="Across all courses"
+          span={12}
+          title="Deadline radar"
         >
-          {isExpanded ? "Close" : "Open"}
-        </button>
-      </header>
+          <UniversityDeadlineOverview
+            onSelectCourse={selectCourse}
+            summary={summary}
+          />
+        </WorkspacePanel>
 
-      {isExpanded ? (
-        <div
-          className={styles.dashboardContent}
-          id="university-operations-content"
-        >
-          {records.storageError !== null ? (
-            <div className={styles.errorState} role="alert">
-              <strong>University records are unavailable</strong>
-              <p>{records.storageError}</p>
-            </div>
-          ) : null}
-
-          <p className={styles.pulse} aria-label="University summary">
-            <strong>{summary.overdueCount}</strong> overdue
-            <span aria-hidden="true">·</span>
-            <strong>{summary.upcomingCount}</strong> upcoming
-            <span aria-hidden="true">·</span>
-            <strong>{records.grades.length}</strong> results
-          </p>
-
-          <details
-            className={styles.attention}
-            open={summary.deadlines.length > 0}
-          >
-            <summary>
-              Attention
-              <span>{summary.deadlines.length}</span>
-            </summary>
-            <UniversityDeadlineOverview
-              onSelectCourse={selectCourse}
-              summary={summary}
-            />
-          </details>
-
-          <nav aria-label="University courses" className={styles.courseNav}>
+        <WorkspacePanel eyebrow="Systems" span={3} title="Courses">
+          <nav aria-label="University courses" className={styles.courseRail}>
             {universityCourseSystems.map((course) => {
-              const openAssignments = records.assignments.filter(
-                (assignment) =>
-                  assignment.courseId === course.id &&
-                  assignment.status !== "complete" &&
-                  assignment.status !== "submitted",
-              ).length;
+              const openAssignments =
+                openAssignmentsByCourse.get(course.id) ?? 0;
+              const isActive = course.id === activeCourse.id;
 
               return (
                 <button
-                  aria-current={
-                    course.id === activeCourse.id ? "page" : undefined
-                  }
-                  data-active={course.id === activeCourse.id}
+                  aria-current={isActive ? "page" : undefined}
+                  data-active={isActive}
+                  data-overdue={overdueCourseIds.has(course.id)}
                   key={course.id}
                   onClick={() => selectCourse(course.id)}
+                  style={
+                    { "--course-color": course.palette.halo } as CSSProperties
+                  }
                   type="button"
                 >
+                  <i aria-hidden="true" />
                   <span>{course.displayName}</span>
                   <small>
                     {openAssignments === 0
@@ -192,67 +214,58 @@ export function UniversityOperationsDashboard({
               );
             })}
           </nav>
+        </WorkspacePanel>
 
-          <section
-            aria-labelledby="active-university-course-title"
-            className={styles.courseWorkspace}
-          >
-            <header className={styles.courseHeader}>
-              <div>
-                <span>
-                  {formatCourseScheduleSummary(activeCourse.schedule)}
-                </span>
-                <h2 id="active-university-course-title">
-                  {activeCourse.displayName}
-                </h2>
-                {activeDeadline === undefined ? null : (
-                  <p>
-                    Next deadline{" "}
-                    {formatUniversityDeadline(activeDeadline.assignment.dueAt)}
-                  </p>
-                )}
-              </div>
-            </header>
-
-            <div className={styles.courseGrid}>
-              <UniversityAssignmentPanel
-                assignments={courseAssignments}
-                courseId={activeCourse.id}
-                key={`assignments-${activeCourse.id}`}
-                onAdd={records.addAssignment}
-                onEdit={records.editAssignment}
-                onRemove={records.removeAssignment}
-              />
-              <details className={styles.secondaryPanel} open={courseGrades.length > 0}>
-                <summary>
-                  Grades
-                  <span>{courseGrades.length}</span>
-                </summary>
-                <UniversityGradePanel
-                  courseId={activeCourse.id}
-                  grades={courseGrades}
-                  key={`grades-${activeCourse.id}`}
-                  onAdd={records.addGrade}
-                  onRemove={records.removeGrade}
-                />
-              </details>
-              <details className={styles.secondaryPanel} open={courseNotes.length > 0}>
-                <summary>
-                  Notes
-                  <span>{courseNotes.length}</span>
-                </summary>
-                <UniversityNotePanel
-                  courseId={activeCourse.id}
-                  key={`notes-${activeCourse.id}`}
-                  notes={courseNotes}
-                  onAdd={records.addNote}
-                  onRemove={records.removeNote}
-                />
-              </details>
+        <section
+          aria-labelledby="active-university-course-title"
+          className={styles.courseStage}
+          style={
+            { "--course-color": activeCourse.palette.halo } as CSSProperties
+          }
+        >
+          <header className={styles.courseHeader}>
+            <div>
+              <span>{formatCourseScheduleSummary(activeCourse.schedule)}</span>
+              <h2 id="active-university-course-title">
+                {activeCourse.displayName}
+              </h2>
             </div>
-          </section>
-        </div>
-      ) : null}
-    </aside>
+            <div className={styles.nextDeadline}>
+              <span>Next deadline</span>
+              <strong>
+                {activeDeadline === undefined
+                  ? "Nothing due"
+                  : formatUniversityDeadline(activeDeadline.assignment.dueAt)}
+              </strong>
+            </div>
+          </header>
+
+          <div className={styles.courseGrid}>
+            <UniversityAssignmentPanel
+              assignments={courseAssignments}
+              courseId={activeCourse.id}
+              key={`assignments-${activeCourse.id}`}
+              onAdd={records.addAssignment}
+              onEdit={records.editAssignment}
+              onRemove={records.removeAssignment}
+            />
+            <UniversityGradePanel
+              courseId={activeCourse.id}
+              grades={courseGrades}
+              key={`grades-${activeCourse.id}`}
+              onAdd={records.addGrade}
+              onRemove={records.removeGrade}
+            />
+            <UniversityNotePanel
+              courseId={activeCourse.id}
+              key={`notes-${activeCourse.id}`}
+              notes={courseNotes}
+              onAdd={records.addNote}
+              onRemove={records.removeNote}
+            />
+          </div>
+        </section>
+      </WorkspaceGrid>
+    </MissionWorkspace>
   );
 }

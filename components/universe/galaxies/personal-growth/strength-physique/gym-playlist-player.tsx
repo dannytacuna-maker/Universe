@@ -1,5 +1,12 @@
 "use client";
 
+import {
+  MissionWorkspace,
+  useArrivalWorkspace,
+  WorkspaceGrid,
+  WorkspacePanel,
+} from "@/components/ui/mission-workspace";
+
 const gymPlaylists = [
   {
     id: "primary",
@@ -22,49 +29,53 @@ type GymPlaylistPlayerProps = Readonly<{
 }>;
 
 export function GymPlaylistPlayer({ isVisible }: GymPlaylistPlayerProps) {
+  const [isOpen, setIsOpen] = useArrivalWorkspace(isVisible);
+
   if (!isVisible) {
     return null;
   }
 
   return (
-    <aside
-      aria-label="Daniel's gym playlists"
-      className="destination-panel destination-panel--workspace gym-playlist"
-      data-open="true"
+    <MissionWorkspace
+      accent="103 201 165"
+      description="Two training soundtracks, ready without leaving the planet."
+      eyebrow="Training audio · Spotify"
+      isOpen={isOpen}
+      launcherLabel="Listen"
+      onOpenChange={setIsOpen}
+      status="Daniel's Gym Playlists"
+      surfaceId="gym-playlist"
+      title="Daniel's Gym Playlists"
     >
-      <header className="destination-panel__summary">
-        <div>
-          <span>Training audio · Spotify</span>
-          <strong>Daniel&apos;s Gym Playlists</strong>
-          <p>Two training soundtracks, ready without leaving the planet.</p>
-        </div>
-      </header>
-      <div className="destination-panel__body">
-        <div className="gym-playlist__grid">
-          {gymPlaylists.map((playlist) => (
-            <section className="gym-playlist__item" key={playlist.id}>
-              <h2>{playlist.name}</h2>
-              <iframe
-                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                allowFullScreen
-                className="gym-playlist__embed"
-                loading="lazy"
-                src={playlist.embedUrl}
-                title={`${playlist.name} on Spotify`}
-              />
+      <WorkspaceGrid className="gym-playlist">
+        {gymPlaylists.map((playlist) => (
+          <WorkspacePanel
+            actions={
               <a
-                className="destination-panel__link"
+                className="gym-playlist__link"
                 href={playlist.spotifyUrl}
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                Open {playlist.name} in Spotify
-                <span aria-hidden="true">↗</span>
+                Spotify <span aria-hidden="true">↗</span>
               </a>
-            </section>
-          ))}
-        </div>
-      </div>
-    </aside>
+            }
+            eyebrow="Playlist"
+            key={playlist.id}
+            span={6}
+            title={playlist.name}
+          >
+            <iframe
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              allowFullScreen
+              className="gym-playlist__embed"
+              loading="lazy"
+              src={playlist.embedUrl}
+              title={`${playlist.name} on Spotify`}
+            />
+          </WorkspacePanel>
+        ))}
+      </WorkspaceGrid>
+    </MissionWorkspace>
   );
 }

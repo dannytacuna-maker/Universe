@@ -14,6 +14,7 @@ import { MissionOperatingDeck } from "@/components/mission-control/mission-opera
 import { useMissionCloudSync } from "@/components/mission-control/use-mission-cloud-sync";
 import { CommandDock } from "@/components/ui/command-dock";
 import { rememberMissionDestination } from "@/lib/living-universe";
+import { isAnyWorkspaceOpen } from "@/lib/workspace-presence";
 import type { NavigationState } from "@/store/navigation-store";
 import { useNavigationStore } from "@/store/navigation-store-provider";
 
@@ -920,6 +921,8 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
 
       if (
         event.key === "Escape" &&
+        !event.defaultPrevented &&
+        !isAnyWorkspaceOpen() &&
         document.querySelector("dialog[open]") === null &&
         !isEditingOrInsideWorkspace &&
         navigationLevel !== "universe"
@@ -1173,7 +1176,7 @@ export function UniverseViewport({ ownerEmail }: UniverseViewportProps) {
               ? "Three Personal Growth systems and one independent French station are mapped: Jiu-Jitsu, Strength and Physique, Reading, and Lumière Station."
               : selectedGalaxyId === forgeGalaxyId
                 ? "The Forge maps the Websites system, containing every live Vercel project."
-                : "Five University systems are mapped: four scheduled courses and Final Project. Logistics and Distribution is available to explore."
+                : "Seven University systems are mapped: six scheduled courses and Final Project. Logistics and Distribution is available to explore."
             : navigationLevel === "planet"
               ? activeDestination === null
                 ? "Destination surface."

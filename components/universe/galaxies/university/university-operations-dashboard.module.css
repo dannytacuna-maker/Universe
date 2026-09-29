@@ -1,286 +1,14 @@
-.dashboard {
-  position: fixed;
-  z-index: 14;
-  right: max(1rem, calc(env(safe-area-inset-right) + 0.7rem));
-  bottom: max(1rem, calc(env(safe-area-inset-bottom) + 0.7rem));
-  left: max(4.8rem, calc(env(safe-area-inset-left) + 4.2rem));
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  width: min(72rem, calc(100vw - 6rem));
-  height: min(72svh, 49rem);
-  max-height: min(72svh, 49rem);
-  margin-inline: auto;
-  overflow: hidden;
-  border: 1px solid rgb(151 197 221 / 14%);
-  border-radius: 1.1rem;
-  background:
-    radial-gradient(circle at 15% 0%, rgb(55 118 161 / 9%), transparent 32%),
-    linear-gradient(145deg, rgb(4 10 18 / 94%), rgb(2 6 13 / 91%));
-  box-shadow:
-    0 2.4rem 8rem rgb(0 0 0 / 52%),
-    inset 0 1px rgb(255 255 255 / 4%);
-  color: rgb(229 239 245 / 91%);
-  backdrop-filter: blur(24px) saturate(116%);
-  transition:
-    height 520ms var(--universe-ease),
-    max-height 520ms var(--universe-ease),
-    width 520ms var(--universe-ease),
-    border-color 280ms ease;
-}
-
-.dashboard[data-expanded="false"] {
-  left: auto;
-  width: min(22rem, calc(100vw - 2rem));
-  height: 4.4rem;
-  max-height: 4.4rem;
-}
-
-.dashboard button,
-.dashboard input,
-.dashboard select,
-.dashboard textarea,
-.dashboard summary {
+:where(.courseStage, .courseRail, .deadlineList)
+  :where(button, input, select, textarea, summary) {
   font: inherit;
-}
-
-.dashboard button,
-.dashboard summary {
   -webkit-tap-highlight-color: transparent;
 }
 
-.dashboard button:focus-visible,
-.dashboard input:focus-visible,
-.dashboard select:focus-visible,
-.dashboard textarea:focus-visible,
-.dashboard summary:focus-visible {
+.courseStage :is(button, input, select, textarea, summary):focus-visible,
+.courseRail button:focus-visible,
+.deadlineList button:focus-visible {
   outline: 1px solid rgb(120 199 225 / 72%);
   outline-offset: 0.18rem;
-}
-
-.dashboardHeader {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 1rem;
-  min-height: 4.4rem;
-  padding: 0.75rem 0.9rem;
-  border-bottom: 1px solid rgb(148 190 212 / 10%);
-  background: rgb(2 7 14 / 54%);
-}
-
-.dashboard[data-expanded="false"] .dashboardHeader {
-  border-bottom-color: transparent;
-}
-
-.headingIdentity {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  min-width: 0;
-}
-
-.headingIdentity > div {
-  display: grid;
-  gap: 0.18rem;
-  min-width: 0;
-}
-
-.headingIdentity > div > span,
-.sectionHeading span,
-.courseHeader > div > span,
-.nextDeadline span,
-.trajectorySummary small {
-  color: rgb(145 181 200 / 55%);
-  font-size: 0.56rem;
-  font-weight: 590;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-}
-
-.headingIdentity > div > strong {
-  overflow: hidden;
-  color: rgb(238 247 251 / 92%);
-  font-size: 0.78rem;
-  font-weight: 530;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.orbitMark {
-  position: relative;
-  display: grid;
-  flex: 0 0 auto;
-  width: 2.35rem;
-  height: 2.35rem;
-  place-items: center;
-  border: 1px solid rgb(115 184 214 / 24%);
-  border-radius: 50%;
-}
-
-.orbitMark::before,
-.orbitMark::after {
-  position: absolute;
-  border: 1px solid rgb(115 184 214 / 17%);
-  border-radius: 50%;
-  content: "";
-}
-
-.orbitMark::before {
-  width: 1.35rem;
-  height: 1.35rem;
-}
-
-.orbitMark::after {
-  width: 0.55rem;
-  height: 0.55rem;
-}
-
-.orbitMark i {
-  width: 0.2rem;
-  height: 0.2rem;
-  border-radius: 50%;
-  background: rgb(205 239 250 / 90%);
-  box-shadow: 0 0 0.8rem rgb(80 185 224 / 82%);
-}
-
-.headerMetrics {
-  display: grid;
-  grid-auto-flow: column;
-  gap: 0.45rem;
-}
-
-.headerMetrics > span {
-  display: grid;
-  gap: 0.12rem;
-  min-width: 4.7rem;
-  padding: 0.5rem 0.65rem;
-  border: 1px solid rgb(145 186 207 / 9%);
-  border-radius: 0.68rem;
-  background: rgb(255 255 255 / 2%);
-  color: rgb(143 173 190 / 54%);
-  font-size: 0.5rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.headerMetrics strong {
-  color: rgb(220 238 246 / 82%);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 0.85rem;
-  font-weight: 470;
-}
-
-.headerMetrics > span[data-alert="true"] strong {
-  color: rgb(242 177 164 / 90%);
-}
-
-.toggleButton,
-.secondaryButton,
-.primaryButton,
-.recordActions button,
-.formHeading button {
-  min-height: 2.35rem;
-  padding: 0.55rem 0.78rem;
-  border: 1px solid rgb(145 193 213 / 14%);
-  border-radius: 0.62rem;
-  background: rgb(255 255 255 / 2.5%);
-  color: rgb(201 221 231 / 71%);
-  font-size: 0.61rem;
-  font-weight: 570;
-  letter-spacing: 0.055em;
-  cursor: pointer;
-  transition:
-    border-color 180ms ease,
-    background 180ms ease,
-    color 180ms ease;
-}
-
-.toggleButton:hover,
-.toggleButton:focus-visible,
-.secondaryButton:hover,
-.secondaryButton:focus-visible,
-.recordActions button:hover,
-.recordActions button:focus-visible,
-.formHeading button:hover,
-.formHeading button:focus-visible {
-  border-color: rgb(129 200 224 / 31%);
-  background: rgb(94 169 198 / 8%);
-  color: rgb(236 247 250 / 92%);
-}
-
-.dashboardContent {
-  min-height: 0;
-  padding: 0.9rem;
-  overflow: auto;
-  overscroll-behavior: contain;
-  scrollbar-color: rgb(105 171 196 / 25%) transparent;
-}
-
-.pulse {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.35rem 0.55rem;
-  margin: 0 0 0.85rem;
-  color: rgb(143 173 190 / 52%);
-  font-size: 0.52rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.pulse strong {
-  color: rgb(220 238 246 / 88%);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 0.82rem;
-  font-weight: 450;
-  letter-spacing: 0.02em;
-  text-transform: none;
-}
-
-.attention {
-  margin-bottom: 0.7rem;
-  border: 1px solid rgb(139 185 207 / 9%);
-  border-radius: 0.88rem;
-  background: rgb(255 255 255 / 1.5%);
-  padding: 0.2rem 0.82rem 0.82rem;
-}
-
-.attention > summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  min-height: 2.4rem;
-  color: rgb(145 181 200 / 58%);
-  font-size: 0.52rem;
-  font-weight: 590;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  cursor: pointer;
-  list-style: none;
-}
-
-.attention > summary::-webkit-details-marker {
-  display: none;
-}
-
-.attention > summary span {
-  color: rgb(169 194 206 / 48%);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 0.54rem;
-  letter-spacing: 0.02em;
-  text-transform: none;
-}
-
-.attention .deadlineOverview,
-.attention .emptyState {
-  margin-top: 0.15rem;
-}
-
-.attention .deadlineOverview {
-  border: 0;
-  background: transparent;
-  padding: 0;
 }
 
 .errorState {
@@ -302,15 +30,303 @@
   font-size: 0.62rem;
 }
 
-.deadlineOverview,
-.courseWorkspace {
-  border: 1px solid rgb(139 185 207 / 9%);
-  border-radius: 0.88rem;
-  background: rgb(255 255 255 / 1.5%);
+/* ------------------------------------------------------------ deadline radar */
+
+.deadlineList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-.deadlineOverview {
-  padding: 0;
+.deadlineList li {
+  min-width: 0;
+}
+
+.deadlineList button {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.62rem;
+  width: 100%;
+  min-height: 3.5rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid rgb(139 185 207 / 9%);
+  border-radius: 0.72rem;
+  background: linear-gradient(
+    150deg,
+    rgb(69 164 204 / 6%),
+    rgb(1 6 12 / 40%) 60%
+  );
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    transform 260ms var(--universe-ease);
+}
+
+.deadlineList button:hover,
+.deadlineList button:focus-visible {
+  border-color: rgb(117 190 219 / 30%);
+  background: linear-gradient(
+    150deg,
+    rgb(69 164 204 / 12%),
+    rgb(1 6 12 / 40%) 60%
+  );
+  transform: translateY(-1px);
+}
+
+.deadlineList li[data-urgency="overdue"] button {
+  border-color: rgb(232 139 121 / 20%);
+  background: linear-gradient(
+    150deg,
+    rgb(202 91 73 / 12%),
+    rgb(1 6 12 / 40%) 60%
+  );
+}
+
+.deadlineList button > span:nth-child(2) {
+  display: grid;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.deadlineList small {
+  overflow: hidden;
+  color: rgb(133 170 190 / 62%);
+  font-size: 0.49rem;
+  letter-spacing: 0.06em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.deadlineList button > span:nth-child(2) > strong {
+  overflow: hidden;
+  color: rgb(223 237 243 / 90%);
+  font-size: 0.64rem;
+  font-weight: 540;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.deadlineMarker {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: rgb(103 194 224 / 80%);
+  box-shadow: 0 0 0.8rem rgb(69 176 217 / 50%);
+}
+
+.deadlineList li[data-urgency="overdue"] .deadlineMarker {
+  background: rgb(232 139 121 / 92%);
+  box-shadow: 0 0 0.8rem rgb(202 91 73 / 55%);
+  animation: overdue-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes overdue-pulse {
+  50% {
+    box-shadow: 0 0 0.2rem rgb(202 91 73 / 20%);
+  }
+}
+
+.deadlineTime {
+  display: grid;
+  gap: 0.18rem;
+  justify-items: end;
+}
+
+.deadlineTime strong {
+  color: rgb(184 207 218 / 76%);
+  font-size: 0.5rem;
+  font-weight: 570;
+}
+
+.deadlineList li[data-urgency="overdue"] .deadlineTime strong {
+  color: rgb(237 164 149 / 90%);
+}
+
+.deadlineTime time {
+  color: rgb(123 153 170 / 58%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.46rem;
+}
+
+/* -------------------------------------------------------------- course rail */
+
+.courseRail {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.courseRail button {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.6rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid transparent;
+  border-radius: 0.62rem;
+  background: transparent;
+  color: rgb(165 192 206 / 70%);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.courseRail button:hover,
+.courseRail button:focus-visible {
+  background: rgb(255 255 255 / 3%);
+  color: rgb(228 241 247 / 92%);
+}
+
+.courseRail button[data-active="true"] {
+  border-color: color-mix(in srgb, var(--course-color) 30%, transparent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--course-color) 16%, transparent),
+    transparent
+  );
+  color: rgb(240 248 252);
+}
+
+.courseRail button[data-active="true"]::before {
+  position: absolute;
+  top: 0.55rem;
+  bottom: 0.55rem;
+  left: -1px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--course-color);
+  box-shadow: 0 0 0.6rem var(--course-color);
+  content: "";
+}
+
+.courseRail i {
+  width: 0.46rem;
+  height: 0.46rem;
+  border-radius: 50%;
+  background: var(--course-color);
+  box-shadow: 0 0 0.55rem var(--course-color);
+}
+
+.courseRail span {
+  overflow: hidden;
+  font-size: 0.6rem;
+  font-weight: 540;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.courseRail small {
+  color: rgb(124 161 180 / 60%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.47rem;
+}
+
+.courseRail button[data-overdue="true"] small {
+  color: rgb(237 164 149 / 86%);
+}
+
+/* ------------------------------------------------------------- course stage */
+
+.courseStage {
+  grid-column: span 9;
+  min-width: 0;
+  padding: 0.95rem;
+  border: 1px solid color-mix(in srgb, var(--course-color) 16%, transparent);
+  border-radius: 0.95rem;
+  background:
+    radial-gradient(
+      ellipse 60% 50% at 100% 0%,
+      color-mix(in srgb, var(--course-color) 10%, transparent),
+      transparent 70%
+    ),
+    rgb(3 7 13 / 55%);
+  animation: stage-rise 620ms 120ms var(--universe-ease) both;
+}
+
+@keyframes stage-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.7rem);
+  }
+}
+
+.courseHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.1rem 0.1rem 0.9rem;
+}
+
+.courseHeader > div:first-child {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.courseHeader > div:first-child > span,
+.nextDeadline span,
+.sectionHeading span,
+.trajectorySummary small {
+  color: rgb(145 181 200 / 62%);
+  font-size: 0.5rem;
+  font-weight: 590;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.courseHeader h2 {
+  margin: 0;
+  color: rgb(242 248 251);
+  font-size: 1.3rem;
+  font-weight: 470;
+  letter-spacing: -0.03em;
+}
+
+.nextDeadline {
+  display: grid;
+  gap: 0.2rem;
+  justify-items: end;
+  text-align: right;
+}
+
+.nextDeadline strong {
+  color: rgb(220 236 243 / 86%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.66rem;
+  font-weight: 460;
+}
+
+.courseGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 0.65rem;
+  align-items: start;
+}
+
+.courseGrid > .recordPanel:first-child {
+  grid-row: span 2;
+}
+
+/* ------------------------------------------------------------- record panels */
+
+.recordPanel {
+  min-width: 0;
+  padding: 0.8rem;
+  border: 1px solid rgb(143 184 204 / 9%);
+  border-radius: 0.8rem;
+  background: rgb(1 6 12 / 50%);
 }
 
 .sectionHeading {
@@ -325,422 +341,66 @@
   gap: 0.22rem;
 }
 
-.sectionHeading h3,
-.courseHeader h2 {
+.sectionHeading h3 {
   margin: 0;
-  color: rgb(235 244 248 / 91%);
-  font-size: 0.9rem;
+  color: rgb(235 244 248 / 92%);
+  font-size: 0.78rem;
   font-weight: 540;
   letter-spacing: -0.015em;
 }
 
 .sectionHeading > p {
   margin: 0;
-  color: rgb(169 194 206 / 55%);
+  color: rgb(169 194 206 / 60%);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 0.56rem;
 }
 
-.deadlineList,
 .recordList,
 .noteList {
   display: grid;
   gap: 0.45rem;
+  max-height: 26rem;
   margin: 0.72rem 0 0;
   padding: 0;
-  list-style: none;
-}
-
-.deadlineList {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.deadlineList li {
-  min-width: 0;
-}
-
-.deadlineList button {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.58rem;
-  width: 100%;
-  min-height: 3.6rem;
-  padding: 0.58rem;
-  border: 1px solid rgb(139 185 207 / 8%);
-  border-radius: 0.66rem;
-  background: rgb(1 6 12 / 38%);
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition:
-    border-color 180ms ease,
-    background 180ms ease;
-}
-
-.deadlineList button:hover,
-.deadlineList button:focus-visible {
-  border-color: rgb(117 190 219 / 24%);
-  background: rgb(51 113 144 / 8%);
-}
-
-.deadlineList button > span:nth-child(2) {
-  display: grid;
-  gap: 0.18rem;
-  min-width: 0;
-}
-
-.deadlineList small {
-  overflow: hidden;
-  color: rgb(133 170 190 / 54%);
-  font-size: 0.49rem;
-  letter-spacing: 0.06em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.deadlineList button > span:nth-child(2) > strong {
-  overflow: hidden;
-  color: rgb(223 237 243 / 86%);
-  font-size: 0.64rem;
-  font-weight: 540;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.deadlineMarker {
-  width: 0.38rem;
-  height: 0.38rem;
-  border-radius: 50%;
-  background: rgb(103 194 224 / 72%);
-  box-shadow: 0 0 0.8rem rgb(69 176 217 / 40%);
-}
-
-.deadlineList li[data-urgency="overdue"] .deadlineMarker {
-  background: rgb(232 139 121 / 88%);
-  box-shadow: 0 0 0.8rem rgb(202 91 73 / 44%);
-}
-
-.deadlineTime {
-  display: grid;
-  gap: 0.18rem;
-  justify-items: end;
-}
-
-.deadlineTime strong {
-  color: rgb(184 207 218 / 67%);
-  font-size: 0.5rem;
-  font-weight: 570;
-}
-
-.deadlineList li[data-urgency="overdue"] .deadlineTime strong {
-  color: rgb(237 164 149 / 80%);
-}
-
-.deadlineTime time {
-  color: rgb(123 153 170 / 48%);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 0.46rem;
-}
-
-.courseNav {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.38rem;
-  margin-block: 0.7rem;
-  padding: 0.34rem;
-  border: 1px solid rgb(136 179 201 / 8%);
-  border-radius: 0.78rem;
-  background: rgb(0 4 10 / 40%);
-}
-
-.courseNav button {
-  display: grid;
-  gap: 0.2rem;
-  min-width: 0;
-  min-height: 2.9rem;
-  padding: 0.45rem 0.5rem;
-  border: 1px solid transparent;
-  border-radius: 0.58rem;
-  background: transparent;
-  color: rgb(151 181 197 / 58%);
-  text-align: left;
-  cursor: pointer;
-  transition:
-    border-color 180ms ease,
-    background 180ms ease,
-    color 180ms ease;
-}
-
-.courseNav button:hover,
-.courseNav button:focus-visible,
-.courseNav button[data-active="true"] {
-  border-color: rgb(117 188 217 / 16%);
-  background: rgb(64 131 161 / 8%);
-  color: rgb(228 241 247 / 88%);
-}
-
-.courseNav button > span {
-  overflow: hidden;
-  font-size: 0.58rem;
-  font-weight: 560;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.courseNav small {
-  color: rgb(124 161 180 / 47%);
-  font-size: 0.48rem;
-}
-
-.courseWorkspace {
-  padding: 0.82rem;
-}
-
-.courseHeader {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.15rem 0.12rem 0.78rem;
-}
-
-.courseHeader > div:first-child {
-  display: grid;
-  gap: 0.23rem;
-}
-
-.courseHeader h2 {
-  font-size: 1.16rem;
-}
-
-.courseHeader p {
-  margin: 0;
-  color: rgb(151 180 194 / 56%);
-  font-size: 0.59rem;
-}
-
-.nextDeadline {
-  display: grid;
-  gap: 0.2rem;
-  justify-items: end;
-  text-align: right;
-}
-
-.nextDeadline strong {
-  color: rgb(206 226 235 / 76%);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 0.62rem;
-  font-weight: 480;
-}
-
-.courseGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
-  gap: 0.62rem;
-  align-items: start;
-}
-
-.courseGrid > .recordPanel {
-  grid-column: 1 / -1;
-}
-
-.secondaryPanel {
-  min-width: 0;
-  border: 1px solid rgb(143 184 204 / 9%);
-  border-radius: 0.76rem;
-  background: rgb(1 6 12 / 45%);
-  padding: 0.2rem 0.72rem 0.72rem;
-}
-
-.secondaryPanel > summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  min-height: 2.4rem;
-  color: rgb(145 181 200 / 58%);
-  font-size: 0.52rem;
-  font-weight: 590;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
-  cursor: pointer;
-  list-style: none;
-}
-
-.secondaryPanel > summary::-webkit-details-marker {
-  display: none;
-}
-
-.secondaryPanel > summary span {
-  color: rgb(169 194 206 / 48%);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 0.54rem;
-  letter-spacing: 0.02em;
-  text-transform: none;
-}
-
-.secondaryPanel .recordPanel {
-  border: 0;
-  background: transparent;
-  padding: 0;
-}
-
-.trajectoryLine {
-  margin: 0.35rem 0 0;
-  color: rgb(151 180 194 / 52%);
-  font-size: 0.55rem;
-}
-
-.recordPanel {
-  min-width: 0;
-  padding: 0.72rem;
-  border: 1px solid rgb(143 184 204 / 9%);
-  border-radius: 0.76rem;
-  background: rgb(1 6 12 / 45%);
-}
-
-.secondaryButton {
-  min-height: 2rem;
-  padding-block: 0.4rem;
-}
-
-.recordCount,
-.trajectoryValue {
-  color: rgb(207 229 238 / 76%);
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
-  font-size: 0.7rem;
-  font-weight: 480;
-}
-
-.recordForm {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.55rem;
-  margin-top: 0.7rem;
-  padding: 0.68rem;
-  border: 1px solid rgb(124 180 204 / 11%);
-  border-radius: 0.68rem;
-  background: rgb(36 88 113 / 5%);
-}
-
-.formHeading,
-.wideField,
-.recordForm > .primaryButton {
-  grid-column: 1 / -1;
-}
-
-.formHeading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.formHeading strong {
-  color: rgb(215 232 239 / 78%);
-  font-size: 0.65rem;
-  font-weight: 560;
-}
-
-.formHeading button {
-  min-height: 1.9rem;
-  padding: 0.35rem 0.55rem;
-}
-
-.recordForm label {
-  display: grid;
-  gap: 0.3rem;
-  min-width: 0;
-  color: rgb(145 177 192 / 58%);
-  font-size: 0.53rem;
-  letter-spacing: 0.045em;
-}
-
-.recordForm input,
-.recordForm select,
-.recordForm textarea {
-  width: 100%;
-  min-height: 2.45rem;
-  padding: 0.56rem 0.62rem;
-  border: 1px solid rgb(143 190 211 / 12%);
-  border-radius: 0.55rem;
-  background: rgb(0 4 10 / 62%);
-  color: rgb(230 241 246 / 88%);
-  font-size: 0.68rem;
-}
-
-.recordForm textarea {
-  min-height: 4.8rem;
-  resize: vertical;
-  line-height: 1.5;
-}
-
-.recordForm input::placeholder,
-.recordForm textarea::placeholder {
-  color: rgb(131 163 180 / 35%);
-}
-
-.primaryButton {
-  border-color: rgb(104 187 219 / 24%);
-  background: linear-gradient(
-    135deg,
-    rgb(48 133 169 / 22%),
-    rgb(23 82 112 / 18%)
-  );
-  color: rgb(224 242 248 / 91%);
-}
-
-.primaryButton:hover,
-.primaryButton:focus-visible {
-  border-color: rgb(111 201 233 / 40%);
-  background: linear-gradient(
-    135deg,
-    rgb(53 151 190 / 29%),
-    rgb(27 97 130 / 23%)
-  );
-}
-
-.primaryButton:disabled,
-.recordActions button:disabled {
-  cursor: wait;
-  opacity: 0.5;
-}
-
-.recordList,
-.noteList {
-  max-height: 17rem;
   overflow: auto;
   overscroll-behavior: contain;
+  list-style: none;
 }
 
 .recordList > li,
 .noteList > li {
-  padding: 0.62rem;
+  padding: 0.66rem;
   border: 1px solid rgb(138 180 201 / 8%);
   border-radius: 0.62rem;
-  background: rgb(255 255 255 / 1.4%);
+  background: rgb(255 255 255 / 1.6%);
+  transition: border-color 180ms ease;
+}
+
+.recordList > li:hover,
+.noteList > li:hover {
+  border-color: rgb(138 180 201 / 16%);
 }
 
 .recordList > li[data-overdue="true"] {
-  border-color: rgb(221 126 110 / 17%);
-  background: rgb(104 37 29 / 6%);
+  border-color: rgb(221 126 110 / 20%);
+  background: rgb(104 37 29 / 8%);
 }
 
 .recordList > li > strong {
   display: block;
   margin-top: 0.35rem;
-  color: rgb(220 235 241 / 84%);
-  font-size: 0.67rem;
+  color: rgb(220 235 241 / 90%);
+  font-size: 0.66rem;
   font-weight: 550;
 }
 
 .recordList > li > p,
 .noteList > li > p {
   margin: 0.34rem 0 0;
-  color: rgb(155 184 198 / 57%);
+  color: rgb(165 192 205 / 66%);
   font-size: 0.58rem;
-  line-height: 1.5;
+  line-height: 1.55;
   white-space: pre-wrap;
 }
 
@@ -749,20 +409,87 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.55rem;
-  color: rgb(123 157 174 / 47%);
+  color: rgb(123 157 174 / 58%);
   font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 0.48rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
+.recordTopline span[data-status] {
+  padding: 0.12rem 0.36rem;
+  border: 1px solid rgb(138 180 201 / 12%);
+  border-radius: 999px;
+}
+
 .recordTopline span[data-status="in-progress"] {
-  color: rgb(130 202 226 / 70%);
+  border-color: rgb(130 202 226 / 26%);
+  color: rgb(150 214 235 / 86%);
 }
 
 .recordTopline span[data-status="complete"],
 .recordTopline span[data-status="submitted"] {
-  color: rgb(137 202 174 / 67%);
+  border-color: rgb(137 202 174 / 24%);
+  color: rgb(152 218 188 / 84%);
+}
+
+.secondaryButton,
+.primaryButton,
+.recordActions button,
+.formHeading button {
+  min-height: 2.2rem;
+  padding: 0.5rem 0.78rem;
+  border: 1px solid rgb(145 193 213 / 16%);
+  border-radius: 0.62rem;
+  background: rgb(255 255 255 / 3%);
+  color: rgb(210 228 237 / 80%);
+  font-size: 0.58rem;
+  font-weight: 570;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.secondaryButton:hover,
+.recordActions button:hover,
+.formHeading button:hover {
+  border-color: rgb(129 200 224 / 34%);
+  background: rgb(94 169 198 / 10%);
+  color: rgb(240 248 251);
+}
+
+.secondaryButton {
+  min-height: 2rem;
+  padding-block: 0.38rem;
+}
+
+.primaryButton {
+  border-color: rgb(104 187 219 / 34%);
+  background: linear-gradient(
+    135deg,
+    rgb(48 133 169 / 30%),
+    rgb(23 82 112 / 22%)
+  );
+  color: rgb(236 248 252);
+}
+
+.primaryButton:hover {
+  border-color: rgb(111 201 233 / 52%);
+  background: linear-gradient(
+    135deg,
+    rgb(53 151 190 / 38%),
+    rgb(27 97 130 / 28%)
+  );
+  box-shadow: 0 0 1.4rem rgb(69 176 217 / 18%);
+}
+
+.primaryButton:disabled,
+.recordActions button:disabled {
+  cursor: wait;
+  opacity: 0.5;
 }
 
 .recordActions {
@@ -773,9 +500,9 @@
 }
 
 .recordActions button {
-  min-height: 1.85rem;
-  padding: 0.32rem 0.5rem;
-  font-size: 0.52rem;
+  min-height: 1.8rem;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.5rem;
 }
 
 .recordActions .dangerButton {
@@ -784,59 +511,18 @@
   color: rgb(244 183 170 / 86%);
 }
 
-.feedback {
-  min-height: 1rem;
-  margin: 0.5rem 0 0;
-  color: rgb(140 193 209 / 66%);
-  font-size: 0.54rem;
+.recordCount,
+.trajectoryValue {
+  color: rgb(207 229 238 / 82%);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  font-weight: 480;
 }
 
-.feedback:empty {
-  display: none;
-}
-
-.emptyState {
-  margin-top: 0.7rem;
-  padding: 0.75rem;
-  border: 1px dashed rgb(137 180 201 / 11%);
-  border-radius: 0.65rem;
-  background: rgb(255 255 255 / 1%);
-}
-
-.emptyState strong {
-  color: rgb(199 219 228 / 72%);
-  font-size: 0.64rem;
-  font-weight: 530;
-}
-
-.emptyState p {
-  margin: 0.25rem 0 0;
-  color: rgb(135 164 180 / 47%);
+.trajectoryLine {
+  margin: 0.35rem 0 0;
+  color: rgb(151 180 194 / 60%);
   font-size: 0.55rem;
-  line-height: 1.45;
-}
-
-.composer {
-  margin-top: 0.7rem;
-  border: 1px solid rgb(133 181 203 / 9%);
-  border-radius: 0.65rem;
-  background: rgb(255 255 255 / 1%);
-}
-
-.composer > summary {
-  min-height: 2.35rem;
-  padding: 0.58rem 0.68rem;
-  color: rgb(173 199 211 / 65%);
-  font-size: 0.58rem;
-  font-weight: 540;
-  cursor: pointer;
-}
-
-.composer .recordForm {
-  margin: 0;
-  border: 0;
-  border-top: 1px solid rgb(133 181 203 / 8%);
-  border-radius: 0;
 }
 
 .trajectorySummary {
@@ -856,104 +542,190 @@
 }
 
 .trajectorySummary strong {
-  color: rgb(197 220 230 / 73%);
+  color: rgb(207 228 237 / 84%);
   font-size: 0.56rem;
   font-weight: 520;
 }
 
-@media (max-width: 70rem) {
-  .deadlineList {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+.recordForm {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 0.7rem;
+  padding: 0.7rem;
+  border: 1px solid rgb(124 180 204 / 12%);
+  border-radius: 0.7rem;
+  background: rgb(36 88 113 / 6%);
+}
 
+.formHeading,
+.wideField,
+.recordForm > .primaryButton {
+  grid-column: 1 / -1;
+}
+
+.formHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.formHeading strong {
+  color: rgb(215 232 239 / 84%);
+  font-size: 0.64rem;
+  font-weight: 560;
+}
+
+.formHeading button {
+  min-height: 1.9rem;
+  padding: 0.35rem 0.55rem;
+}
+
+.recordForm label {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  color: rgb(155 187 202 / 66%);
+  font-size: 0.52rem;
+  letter-spacing: 0.045em;
+}
+
+.recordForm input,
+.recordForm select,
+.recordForm textarea {
+  width: 100%;
+  min-height: 2.35rem;
+  padding: 0.52rem 0.62rem;
+  border: 1px solid rgb(143 190 211 / 14%);
+  border-radius: 0.55rem;
+  background: rgb(0 4 10 / 66%);
+  color: rgb(234 244 248 / 92%);
+  font-size: 0.64rem;
+  transition: border-color 180ms ease;
+}
+
+.recordForm input:hover,
+.recordForm select:hover,
+.recordForm textarea:hover {
+  border-color: rgb(143 190 211 / 26%);
+}
+
+.recordForm textarea {
+  min-height: 4.8rem;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.recordForm input::placeholder,
+.recordForm textarea::placeholder {
+  color: rgb(131 163 180 / 42%);
+}
+
+.feedback {
+  min-height: 1rem;
+  margin: 0.5rem 0 0;
+  color: rgb(140 193 209 / 76%);
+  font-size: 0.54rem;
+}
+
+.feedback:empty {
+  display: none;
+}
+
+.emptyState {
+  margin-top: 0.7rem;
+  padding: 0.85rem;
+  border: 1px dashed rgb(137 180 201 / 14%);
+  border-radius: 0.65rem;
+  background: rgb(255 255 255 / 1%);
+}
+
+.emptyState strong {
+  color: rgb(205 224 232 / 80%);
+  font-size: 0.62rem;
+  font-weight: 530;
+}
+
+.emptyState p {
+  margin: 0.25rem 0 0;
+  color: rgb(145 174 190 / 58%);
+  font-size: 0.55rem;
+  line-height: 1.45;
+}
+
+.deadlineList + .emptyState,
+.emptyState:first-child {
+  margin-top: 0;
+}
+
+.composer {
+  margin-top: 0.7rem;
+  border: 1px solid rgb(133 181 203 / 10%);
+  border-radius: 0.65rem;
+  background: rgb(255 255 255 / 1.2%);
+}
+
+.composer > summary {
+  min-height: 2.3rem;
+  padding: 0.58rem 0.68rem;
+  color: rgb(183 208 219 / 76%);
+  font-size: 0.56rem;
+  font-weight: 540;
+  cursor: pointer;
+}
+
+.composer .recordForm {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid rgb(133 181 203 / 8%);
+  border-radius: 0;
+}
+
+/* -------------------------------------------------------------- responsive */
+
+@media (max-width: 80rem) {
+  .courseStage {
+    grid-column: span 7;
+  }
+}
+
+@media (max-width: 70rem) {
   .courseGrid {
     grid-template-columns: 1fr;
   }
 
-  .courseGrid > .recordPanel,
-  .secondaryPanel {
-    grid-column: auto;
+  .courseGrid > .recordPanel:first-child {
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 60rem) {
+  .courseStage {
+    grid-column: 1 / -1;
+  }
+
+  .courseRail {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+  }
+
+  .courseRail button {
+    flex: 0 0 min(12rem, 60vw);
+    scroll-snap-align: start;
   }
 }
 
 @media (max-width: 48rem) {
-  .dashboard,
-  .dashboard[data-expanded="false"] {
-    right: max(0.55rem, env(safe-area-inset-right));
-    bottom: max(0.55rem, env(safe-area-inset-bottom));
-    left: max(0.55rem, env(safe-area-inset-left));
-    width: auto;
-    margin: 0;
-    border-radius: 0.92rem;
-  }
-
-  .dashboard {
-    height: min(76svh, 45rem);
-    max-height: min(76svh, 45rem);
-  }
-
-  .dashboard[data-expanded="false"] {
-    height: 4.4rem;
-    max-height: 4.4rem;
-  }
-
-  .dashboardHeader {
-    grid-template-columns: minmax(0, 1fr) auto;
-    min-height: 4.55rem;
-    padding: 0.65rem;
-  }
-
-  .headerMetrics {
-    display: none;
-  }
-
-  .orbitMark {
-    width: 2rem;
-    height: 2rem;
-  }
-
-  .toggleButton,
-  .secondaryButton,
-  .primaryButton,
-  .recordActions button,
-  .formHeading button,
-  .courseNav button,
-  .deadlineList button,
-  .composer > summary {
-    min-height: 2.75rem;
-  }
-
-  .dashboardContent {
-    padding: 0.65rem;
-  }
-
-  .deadlineList,
-  .courseGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .courseGrid > :last-child {
-    grid-column: auto;
-  }
-
-  .courseNav {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    overscroll-behavior-inline: contain;
-  }
-
-  .courseNav button {
-    flex: 0 0 min(10rem, 42vw);
-    scroll-snap-align: start;
-  }
-
   .courseHeader {
+    display: grid;
     align-items: start;
   }
 
   .nextDeadline {
-    flex: 0 0 auto;
+    justify-items: start;
+    text-align: left;
   }
 
   .recordForm {
@@ -978,40 +750,14 @@
   }
 }
 
-@media (max-width: 24rem) {
-  .headingIdentity > div > strong {
-    max-width: 9rem;
-  }
-
-  .orbitMark {
-    display: none;
-  }
-
-  .toggleButton {
-    padding-inline: 0.58rem;
-  }
-
-  .deadlineTime {
-    display: none;
-  }
-
-  .deadlineList button {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .courseHeader {
-    display: grid;
-  }
-
-  .nextDeadline {
-    justify-items: start;
-    text-align: left;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .dashboard,
-  .dashboard button {
+  .courseStage,
+  .deadlineList li[data-urgency="overdue"] .deadlineMarker {
+    animation: none;
+  }
+
+  .courseRail button,
+  .deadlineList button {
     transition: none;
   }
 }

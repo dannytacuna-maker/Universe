@@ -178,9 +178,8 @@ under `components/universe/galaxies/university/`. A definition owns identity,
 position, camera approach position, palette, scale, deterministic seed,
 responsive label placement, and the user-supplied recurring weekly schedule.
 Semester dates are not inferred when the source timetable does not provide a
-year. Logistics is the first explorable system; the three other real courses and
-one cross-course Final Project system are mapped as visible future destinations
-with subdued incomplete visuals. Final Project deliberately has no fabricated
+year. Seven systems are mapped as explorable destinations: six scheduled courses
+and one cross-course Final Project. Final Project deliberately has no fabricated
 meeting schedule. Course labels remain ordinary DOM buttons outside WebGL,
 surface concise schedule previews on focus or hover, and preserve complete room
 and group details for assistive technology. Every canvas interaction has a
@@ -188,7 +187,7 @@ semantic equivalent that survives WebGL failure.
 
 The University overview also derives one semantic weekly timetable directly from
 the course-system definitions. It groups the existing meetings from Monday to
-Friday, includes the intentionally empty Thursday, and repeats no room, time, or
+Friday from the live student-portal timetable, and repeats no room, time, or
 group configuration. The timetable lives in the DOM overlay rather than WebGL,
 appears only after the University camera settles, and preserves semantic table
 structure while compact screens restack the week into a vertically scannable
@@ -234,8 +233,8 @@ The cross-domain operating layer lives under `components/mission-control/`
 rather than inside the WebGL feature tree. It is a semantic, keyboard-accessible
 DOM instrument that can be opened from every spatial level with one quiet
 launcher or `Command/Ctrl + K`. Its native dialog places the background outside
-the active interaction tree while open, restores focus on close, and becomes a
-full-viewport surface on compact screens. It does not own navigation state or
+the active interaction tree while open, restores focus on close, and always
+opens as a full-viewport surface. It does not own navigation state or
 camera motion: selecting a mapped destination delegates a typed navigation state
 to `UniverseViewport`, which preserves URL reflection, cloud departure from
 planets, and `CameraRig` as the only camera owner.
@@ -273,6 +272,23 @@ invariant. Instrumented domain activity is folded into Current Vector by date, s
 Daniel does not have to log the same evidence twice. Zustand remains
 navigation-only.
 
+### Destination workspaces
+
+Every destination dashboard (University operations, Websites Production Center,
+Jiu-Jitsu log and Time Chamber review, Whis, Training Archive, Gym Playlists,
+Celestial Library, and the Observatory) renders through the shared
+`MissionWorkspace` shell in `components/ui/mission-workspace.tsx`. A compact
+launcher chip stays in the scene; opening it morphs the chip's rectangle into a
+full-viewport workspace with a KPI strip, a 12-column `WorkspaceGrid`, and
+`WorkspacePanel` / `WorkspaceColumn` primitives. `D` opens the workspace, `Esc`
+minimizes it back to the launcher and returns focus, and `useArrivalWorkspace`
+reopens always-on destinations on each arrival. Workspaces take part in the
+exclusive `lib/interface-surface.ts` contract, and while any workspace is open
+`lib/workspace-presence.ts` pauses the ambient WebGL frame loop and suppresses
+spatial `Esc` back-navigation. Legacy dashboard stylesheets used small rem type,
+so the workspace body applies a responsive `--workspace-scale` zoom instead of
+rewriting each domain's typography.
+
 ### Forge Websites Production Center
 
 The Forge Websites system maps live shipped sites as planets. Inside Websites
@@ -285,7 +301,7 @@ identity. Live planet click-to-launch behavior is unchanged.
 
 ### Personal Growth and real-world visual state
 
-University now treats all five course systems as real explorable destinations.
+University now treats all seven course systems as real explorable destinations.
 The operations instrument remains semantic DOM outside WebGL and owns assignments,
 deadlines, status, grades, trajectory, course notes, and reflections. It is available
 only in University galaxy overview, not while orbiting a course system. Its overview
