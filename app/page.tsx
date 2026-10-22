@@ -1,7 +1,7 @@
 import { MissionAuthGate } from "@/components/auth/mission-auth-gate";
-import { UniverseViewport } from "@/components/universe/universe-viewport";
+import { DashboardApp } from "@/components/dashboard/dashboard-app";
 import { getMissionAuthorization } from "@/lib/server/mission-auth";
-import { NavigationStoreProvider } from "@/store/navigation-store-provider";
+import { DashboardNavigationStoreProvider } from "@/store/dashboard-navigation-store-provider";
 
 export const dynamic = "force-dynamic";
 
@@ -17,8 +17,8 @@ export default async function HomePage() {
   }
 
   return (
-    <NavigationStoreProvider>
-      <UniverseViewport ownerEmail={authorization.owner.email} />
-    </NavigationStoreProvider>
+    <DashboardNavigationStoreProvider>
+      <DashboardApp ownerEmail={authorization.owner.email} />
+    </DashboardNavigationStoreProvider>
   );
 }

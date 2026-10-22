@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 
+import { useDashboardChrome } from "@/components/dashboard/dashboard-chrome";
 import {
   activateInterfaceSurface,
   subscribeToInterfaceSurfaces,
@@ -98,29 +99,34 @@ export function MissionWorkspace({
   const titleId = useId();
   const panelId = useId();
   const shouldReduceMotion = useReducedMotion() === true;
+  const { layout } = useDashboardChrome();
+  const isPageLayout = layout === "page";
   const launcherRef = useRef<HTMLDivElement>(null);
   const launchButtonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
   const [originClip, setOriginClip] = useState(bloomClip);
   const onOpenChangeRef = useRef(onOpenChange);
+  const showWorkspace = isPageLayout || isOpen;
 
   useEffect(() => {
     onOpenChangeRef.current = onOpenChange;
   }, [onOpenChange]);
 
   const open = useCallback(() => {
+    if (isPageLayout) return;
     setOriginClip(clipFromElement(launcherRef.current));
     onOpenChangeRef.current(true);
-  }, []);
+  }, [isPageLayout]);
 
   const close = useCallback(() => {
+    if (isPageLayout) return;
     setOriginClip(clipFromElement(launcherRef.current));
     onOpenChangeRef.current(false);
     window.requestAnimationFrame(() => launchButtonRef.current?.focus());
-  }, []);
+  }, [isPageLayout]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!showWorkspace || isPageLayout) return;
 
     activateInterfaceSurface(surfaceId);
     const release = registerOpenWorkspace();
@@ -132,18 +138,18 @@ export function MissionWorkspace({
       window.cancelAnimationFrame(frame);
       release();
     };
-  }, [isOpen, surfaceId]);
-
-  useEffect(
-    () =>
-      subscribeToInterfaceSurfaces((activeSurfaceId) => {
-        if (activeSurfaceId !== surfaceId) onOpenChangeRef.current(false);
-      }),
-    [surfaceId],
-  );
+  }, [isPageLayout, showWorkspace, surfaceId]);
 
   useEffect(() => {
-    if (isOpen) return;
+    if (isPageLayout) return;
+
+    return subscribeToInterfaceSurfaces((activeSurfaceId) => {
+      if (activeSurfaceId !== surfaceId) onOpenChangeRef.current(false);
+    });
+  }, [isPageLayout, surfaceId]);
+
+  useEffect(() => {
+    if (isPageLayout || isOpen) return;
 
     const handleShortcut = (event: KeyboardEvent) => {
       if (
@@ -164,10 +170,10 @@ export function MissionWorkspace({
 
     window.addEventListener("keydown", handleShortcut);
     return () => window.removeEventListener("keydown", handleShortcut);
-  }, [isOpen, open]);
+  }, [isOpen, isPageLayout, open]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (isPageLayout || !isOpen) return;
 
     const handleEscape = (event: KeyboardEvent) => {
       if (
@@ -190,12 +196,115 @@ export function MissionWorkspace({
 
     window.addEventListener("keydown", handleEscape);
     return () => window.removeEventListener("keydown", handleEscape);
-  }, [close, isOpen]);
+  }, [close, isOpen, isPageLayout]);
 
   const accentStyle = { "--ws-accent": accent } as CSSProperties;
   const panelTransition = shouldReduceMotion
     ? { duration: 0 }
     : { duration: 0.64, ease: workspaceEase };
+
+  const workspaceBody = (
+    <>
+      <div aria-hidden="true" className={styles.atmosphere} />
+
+      <header className={styles.bar}>
+        {isPageLayout ? (
+          <div aria-hidden="true" className={styles.pageLayoutSpacer} />
+        ) : (
+          <button
+            aria-label="Minimize dashboard"
+            className={styles.minimize}
+            onClick={close}
+            type="button"
+          >
+            <svg aria-hidden="true" viewBox="0 0 16 16">
+              <path d="M10 3 5 8l5 5" />
+            </svg>
+            <span>Back</span>
+            <kbd aria-hidden="true">Esc</kbd>
+          </button>
+        )}
+
+        <div className={styles.identity}>
+          <span aria-hidden="true" className={styles.identityOrb}>
+            <i />
+          </span>
+          <div>
+            <span className={styles.eyebrow}>{eyebrow}</span>
+            <h2 id={titleId}>{title}</h2>
+            {description === undefined ? null : (
+              <p className={styles.description}>{description}</p>
+            )}
+          </div>
+        </div>
+
+        {actions === undefined ? null : (
+          <div className={styles.actions}>{actions}</div>
+        )}
+      </header>
+
+      {metrics === undefined || metrics.length === 0 ? null : (
+        <motion.dl
+          animate={{ opacity: 1, y: 0 }}
+          className={styles.metrics}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { delay: 0.16, duration: 0.5, ease: workspaceEase }
+          }
+        >
+          {metrics.map((metric) => (
+            <div
+              className={styles.metric}
+              data-kind={metric.kind ?? "number"}
+              data-tone={metric.tone ?? "neutral"}
+              key={metric.id}
+            >
+              <dt>{metric.label}</dt>
+              <dd>
+                <strong>{metric.value}</strong>
+                {metric.hint === undefined ? null : (
+                  <small>{metric.hint}</small>
+                )}
+              </dd>
+            </div>
+          ))}
+        </motion.dl>
+      )}
+
+      <div className={styles.body}>
+        <motion.div
+          animate={{ opacity: 1, y: 0 }}
+          className={styles.bodyInner}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
+          transition={
+            shouldReduceMotion
+              ? { duration: 0 }
+              : { delay: 0.22, duration: 0.56, ease: workspaceEase }
+          }
+        >
+          {children}
+        </motion.div>
+      </div>
+    </>
+  );
+
+  if (isPageLayout) {
+    return (
+      <section
+        aria-busy={isBusy}
+        aria-labelledby={titleId}
+        className={styles.workspace}
+        data-layout="page"
+        id={panelId}
+        ref={panelRef}
+        style={accentStyle}
+      >
+        {workspaceBody}
+      </section>
+    );
+  }
 
   return (
     <>
@@ -241,7 +350,7 @@ export function MissionWorkspace({
       </motion.div>
 
       <AnimatePresence custom={originClip}>
-        {isOpen ? (
+        {showWorkspace ? (
           <motion.section
             animate="open"
             aria-busy={isBusy}
@@ -269,84 +378,7 @@ export function MissionWorkspace({
               open: { clipPath: fullClip, opacity: 1 },
             }}
           >
-            <div aria-hidden="true" className={styles.atmosphere} />
-
-            <header className={styles.bar}>
-              <button
-                aria-label="Minimize dashboard"
-                className={styles.minimize}
-                onClick={close}
-                type="button"
-              >
-                <svg aria-hidden="true" viewBox="0 0 16 16">
-                  <path d="M10 3 5 8l5 5" />
-                </svg>
-                <span>Back</span>
-                <kbd aria-hidden="true">Esc</kbd>
-              </button>
-
-              <div className={styles.identity}>
-                <span aria-hidden="true" className={styles.identityOrb}>
-                  <i />
-                </span>
-                <div>
-                  <span className={styles.eyebrow}>{eyebrow}</span>
-                  <h2 id={titleId}>{title}</h2>
-                  {description === undefined ? null : (
-                    <p className={styles.description}>{description}</p>
-                  )}
-                </div>
-              </div>
-
-              {actions === undefined ? null : (
-                <div className={styles.actions}>{actions}</div>
-              )}
-            </header>
-
-            {metrics === undefined || metrics.length === 0 ? null : (
-              <motion.dl
-                animate={{ opacity: 1, y: 0 }}
-                className={styles.metrics}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
-                transition={
-                  shouldReduceMotion
-                    ? { duration: 0 }
-                    : { delay: 0.16, duration: 0.5, ease: workspaceEase }
-                }
-              >
-                {metrics.map((metric) => (
-                  <div
-                    className={styles.metric}
-                    data-kind={metric.kind ?? "number"}
-                    data-tone={metric.tone ?? "neutral"}
-                    key={metric.id}
-                  >
-                    <dt>{metric.label}</dt>
-                    <dd>
-                      <strong>{metric.value}</strong>
-                      {metric.hint === undefined ? null : (
-                        <small>{metric.hint}</small>
-                      )}
-                    </dd>
-                  </div>
-                ))}
-              </motion.dl>
-            )}
-
-            <div className={styles.body}>
-              <motion.div
-                animate={{ opacity: 1, y: 0 }}
-                className={styles.bodyInner}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
-                transition={
-                  shouldReduceMotion
-                    ? { duration: 0 }
-                    : { delay: 0.22, duration: 0.56, ease: workspaceEase }
-                }
-              >
-                {children}
-              </motion.div>
-            </div>
+            {workspaceBody}
           </motion.section>
         ) : null}
       </AnimatePresence>

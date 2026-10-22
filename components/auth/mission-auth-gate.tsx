@@ -12,12 +12,12 @@ export function MissionAuthGate({ state }: MissionAuthGateProps) {
   return (
     <section className={styles.gate}>
       <div className={styles.content}>
-        <span className={styles.eyebrow}>Daniel&apos;s universe</span>
-        <h1>Mission Control</h1>
+        <span className={styles.eyebrow}>Mission Control</span>
+        <h1>Operations</h1>
         <p>
           {isForbidden
-            ? "This universe belongs to another Google identity. Sign out and continue with Daniel's approved account."
-            : "Continue with your approved Google account to enter your synchronized personal universe."}
+            ? "This dashboard belongs to another Google identity. Sign out and continue with Daniel's approved account."
+            : "Continue with your approved Google account to open your synchronized dashboard."}
         </p>
         {isForbidden ? (
           <SignOutButton>

@@ -39,11 +39,10 @@ export function FrenchStationDashboard({
 
       <div className={styles.content}>
         <span className={styles.eyebrow}>Personal Growth · French</span>
-        <h1 id="french-station-title">Lumière Station</h1>
+        <h1 id="french-station-title">French practice</h1>
         <p className={styles.introduction}>
-          A direct departure point for deliberate French practice. Continue to
-          Duolingo, complete the lesson that matters, then return to your
-          universe.
+          Continue deliberate French practice on Duolingo, complete the lesson
+          that matters, then return here.
         </p>
 
         <a
@@ -63,8 +62,8 @@ export function FrenchStationDashboard({
         </a>
 
         <p className={styles.launchNote} id="duolingo-launch-note">
-          Opens Duolingo in a new tab. Mission Control remains docked here, and
-          your sign-in stays entirely with Duolingo.
+          Opens Duolingo in a new tab. This dashboard stays open, and your
+          sign-in stays entirely with Duolingo.
         </p>
       </div>
 
@@ -74,8 +73,8 @@ export function FrenchStationDashboard({
           <dd>Duolingo · French</dd>
         </div>
         <div>
-          <dt>Mission Control</dt>
-          <dd>Remains at station</dd>
+          <dt>Dashboard</dt>
+          <dd>Remains here</dd>
         </div>
         <div>
           <dt>Account access</dt>

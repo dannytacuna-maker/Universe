@@ -1,15 +1,12 @@
 export type InterfaceSurfaceId =
   | "gym-playlist"
-  | "jarvis"
   | "jiu-jitsu-review"
   | "jiu-jitsu-training-log"
-  | "mission"
   | "observatory"
   | "reading-library"
   | "strength-whis"
   | "training-archive"
   | "university-operations"
-  | "university-schedule"
   | "websites-production";
 
 const interfaceSurfaceEvent = "mission-control:interface-surface";

@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   experimental: {
-    optimizePackageImports: ["@react-three/drei", "framer-motion"],
+    optimizePackageImports: ["framer-motion"],
   },
 };
 

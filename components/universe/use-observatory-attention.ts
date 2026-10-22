@@ -20,11 +20,11 @@ function getIsoWeekId(date = new Date()) {
   return `${utc.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
 }
 
-export function useObservatoryAttention(isUniverseView: boolean) {
+export function useObservatoryAttention(isAttentionView: boolean) {
   const [attention, setAttention] = useState(0);
 
   useEffect(() => {
-    if (!isUniverseView) {
+    if (!isAttentionView) {
       return;
     }
 
@@ -76,7 +76,7 @@ export function useObservatoryAttention(isUniverseView: boolean) {
       });
 
     return () => controller.abort();
-  }, [isUniverseView]);
+  }, [isAttentionView]);
 
   return {
     attention,

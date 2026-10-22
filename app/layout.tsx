@@ -46,7 +46,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
       }}
     >
       <html className={`${GeistSans.variable} ${GeistMono.variable}`} lang="en">
-        <body className={GeistSans.className}>
+        <body className={`${GeistSans.className} antialiased`}>
           <ApplicationShell>{children}</ApplicationShell>
         </body>
       </html>
