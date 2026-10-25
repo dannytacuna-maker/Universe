@@ -54,6 +54,12 @@
   line-height: 1.45;
 }
 
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .action {
   min-height: 2.1rem;
   padding: 0.45rem 0.8rem;

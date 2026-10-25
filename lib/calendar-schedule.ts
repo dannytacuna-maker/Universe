@@ -1,5 +1,12 @@
+export const googleCalendarReadonlyScope =
+  "https://www.googleapis.com/auth/calendar.readonly";
+
 export const googleCalendarEventsReadonlyScope =
   "https://www.googleapis.com/auth/calendar.events.readonly";
+
+export const googleCalendarConnectScopes = [
+  googleCalendarReadonlyScope,
+] as const;
 
 export type CalendarScheduleEvent = Readonly<{
   allDay: boolean;
@@ -22,6 +29,20 @@ export type CalendarSchedulePayload = Readonly<{
   events: readonly CalendarScheduleEvent[];
   status: "ok" | "needs_calendar_access" | "unavailable";
 }>;
+
+export function googleAccountHasCalendarScope(
+  approvedScopes: string | null | undefined,
+) {
+  if (!approvedScopes) return false;
+
+  const scopes = approvedScopes.split(/\s+/);
+  return scopes.some(
+    (scope) =>
+      scope === googleCalendarReadonlyScope ||
+      scope === googleCalendarEventsReadonlyScope ||
+      scope === "https://www.googleapis.com/auth/calendar",
+  );
+}
 
 function toDateKey(date: Date) {
   const year = date.getFullYear();

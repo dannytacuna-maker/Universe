@@ -4,7 +4,8 @@ import { useUser } from "@clerk/nextjs";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
-  googleCalendarEventsReadonlyScope,
+  googleAccountHasCalendarScope,
+  googleCalendarConnectScopes,
   groupCalendarEventsByLocalDay,
   type CalendarScheduleDay,
   type CalendarSchedulePayload,
@@ -124,11 +125,32 @@ export function HomeSchedule() {
 
     setIsConnecting(true);
     try {
-      await googleAccount.reauthorize({
-        additionalScopes: [googleCalendarEventsReadonlyScope],
-        redirectUrl: `${window.location.origin}/`,
+      const reauth = await googleAccount.reauthorize({
+        additionalScopes: [...googleCalendarConnectScopes],
+        oidcPrompt: "consent",
+        redirectUrl: `${window.location.origin}/sso-callback`,
       });
-      return true;
+
+      const redirectUrl =
+        reauth.verification?.externalVerificationRedirectURL?.href;
+
+      if (redirectUrl) {
+        window.location.assign(redirectUrl);
+        return true;
+      }
+
+      const verificationError =
+        reauth.verification?.error?.longMessage ||
+        reauth.verification?.error?.message;
+
+      setState({
+        kind: "error",
+        detail:
+          verificationError ??
+          "Google did not return a calendar connection URL. Confirm custom Google credentials and the calendar.readonly scope are enabled in Clerk.",
+      });
+      setIsConnecting(false);
+      return false;
     } catch (error) {
       setState({
         kind: "error",
@@ -163,6 +185,8 @@ export function HomeSchedule() {
     );
     if (!googleAccount) return;
 
+    // Already granted in Clerk UI metadata but token refresh failed — still reconnect.
+    // Skip auto-redirect only when the user just bounced back without a redirect URL.
     autoConnectAttemptedRef.current = true;
     const frame = window.requestAnimationFrame(() => {
       void connectCalendar();
@@ -183,6 +207,12 @@ export function HomeSchedule() {
       ? groupCalendarEventsByLocalDay(state.payload.events, { now })
       : [];
   const eventCount = days.reduce((total, day) => total + day.events.length, 0);
+  const googleAccount = user?.externalAccounts.find(
+    (account) => account.provider === "google",
+  );
+  const clientHasScope = googleAccountHasCalendarScope(
+    googleAccount?.approvedScopes,
+  );
 
   return (
     <section aria-labelledby="home-schedule-title" className={styles.schedule}>
@@ -200,16 +230,27 @@ export function HomeSchedule() {
 
       {state.kind === "loading" || isConnecting ? (
         <div className={styles.quiet} role="status">
-          {isConnecting ? "Connecting Google Calendar…" : "Loading schedule…"}
+          {isConnecting
+            ? "Opening Google to connect calendar…"
+            : "Loading schedule…"}
         </div>
       ) : null}
 
       {state.kind === "error" ? (
         <div className={styles.panel}>
           <p className={styles.quiet}>{state.detail}</p>
-          <button className={styles.action} onClick={retry} type="button">
-            Retry
-          </button>
+          <div className={styles.actions}>
+            <button
+              className={styles.action}
+              onClick={() => void connectCalendar()}
+              type="button"
+            >
+              Connect calendar
+            </button>
+            <button className={styles.action} onClick={retry} type="button">
+              Retry
+            </button>
+          </div>
         </div>
       ) : null}
 
@@ -220,6 +261,9 @@ export function HomeSchedule() {
           <p className={styles.quiet}>
             {state.payload.detail ??
               "Connect Google Calendar once to show your week here."}
+            {clientHasScope
+              ? " Calendar access looks granted, but the Google token needs a fresh reconnect."
+              : null}
           </p>
           <button
             className={styles.action}

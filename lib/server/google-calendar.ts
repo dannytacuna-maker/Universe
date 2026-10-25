@@ -2,6 +2,7 @@ import { clerkClient } from "@clerk/nextjs/server";
 
 import {
   googleCalendarEventsReadonlyScope,
+  googleCalendarReadonlyScope,
   type CalendarScheduleEvent,
   type CalendarSchedulePayload,
 } from "@/lib/calendar-schedule";
@@ -85,8 +86,8 @@ function hasCalendarScope(scopes: readonly string[] | undefined) {
 
   return scopes.some(
     (scope) =>
+      scope === googleCalendarReadonlyScope ||
       scope === googleCalendarEventsReadonlyScope ||
-      scope === "https://www.googleapis.com/auth/calendar.readonly" ||
       scope === "https://www.googleapis.com/auth/calendar",
   );
 }
