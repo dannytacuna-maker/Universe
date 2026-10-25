@@ -1,8 +1,9 @@
 import { clerkClient } from "@clerk/nextjs/server";
 
-import type {
-  CalendarScheduleEvent,
-  CalendarSchedulePayload,
+import {
+  googleCalendarEventsReadonlyScope,
+  type CalendarScheduleEvent,
+  type CalendarSchedulePayload,
 } from "@/lib/calendar-schedule";
 
 type GoogleEventDate = Readonly<{
@@ -54,7 +55,6 @@ function parseEventInstant(value: GoogleEventDate | undefined, isEnd: boolean) {
 
   const instant = new Date(Date.UTC(year, month - 1, day));
   if (isEnd) {
-    // Google all-day ends are exclusive next-day dates.
     instant.setUTCDate(instant.getUTCDate() - 1);
     instant.setUTCHours(23, 59, 59, 999);
   }
@@ -62,13 +62,81 @@ function parseEventInstant(value: GoogleEventDate | undefined, isEnd: boolean) {
   return { allDay: true as const, instant };
 }
 
+function needsCalendarAccessPayload(
+  detail = "Connect Google Calendar to show your upcoming schedule.",
+): CalendarSchedulePayload {
+  return {
+    detail,
+    events: [],
+    status: "needs_calendar_access",
+  };
+}
+
+function unavailablePayload(detail: string): CalendarSchedulePayload {
+  return {
+    detail,
+    events: [],
+    status: "unavailable",
+  };
+}
+
+function hasCalendarScope(scopes: readonly string[] | undefined) {
+  if (!scopes || scopes.length === 0) return true;
+
+  return scopes.some(
+    (scope) =>
+      scope === googleCalendarEventsReadonlyScope ||
+      scope === "https://www.googleapis.com/auth/calendar.readonly" ||
+      scope === "https://www.googleapis.com/auth/calendar",
+  );
+}
+
+async function readJsonBody<T>(response: Response): Promise<T | null> {
+  const text = await response.text();
+  if (!text.trim()) return null;
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
+
 async function getGoogleAccessToken(userId: string) {
   const client = await clerkClient();
-  const response = await client.users.getUserOauthAccessToken(
-    userId,
-    "oauth_google",
-  );
-  return response.data[0]?.token ?? null;
+
+  try {
+    const response = await client.users.getUserOauthAccessToken(
+      userId,
+      "google",
+    );
+    const token = response.data[0];
+    if (!token?.token) return { kind: "missing" as const };
+    if (!hasCalendarScope(token.scopes)) {
+      return { kind: "missing_scope" as const };
+    }
+
+    return { kind: "ok" as const, token: token.token };
+  } catch (error) {
+    const code =
+      error && typeof error === "object" && "errors" in error
+        ? (
+            error as {
+              errors?: readonly Readonly<{ code?: string }>[];
+            }
+          ).errors?.[0]?.code
+        : undefined;
+
+    if (
+      code === "oauth_token_retrieval_error" ||
+      code === "resource_not_found" ||
+      code === "not_found"
+    ) {
+      return { kind: "missing" as const };
+    }
+
+    throw error;
+  }
 }
 
 function mapGoogleEvent(
@@ -92,9 +160,12 @@ function mapGoogleEvent(
   };
 }
 
-function isAuthFailure(response: Response, payload: GoogleEventsResponse) {
-  const code = payload.error?.code;
-  const status = payload.error?.status;
+function isAuthFailure(
+  response: Response,
+  payload: GoogleEventsResponse | null,
+) {
+  const code = payload?.error?.code;
+  const status = payload?.error?.status;
   return (
     response.status === 401 ||
     response.status === 403 ||
@@ -113,13 +184,13 @@ export async function fetchPrimaryCalendarSchedule(
   const now = options.now ?? new Date();
   const rangeEnd = addDays(now, dayCount);
 
-  const accessToken = await getGoogleAccessToken(userId);
-  if (!accessToken) {
-    return {
-      detail: "Connect Google Calendar to show your upcoming schedule.",
-      events: [],
-      status: "needs_calendar_access",
-    };
+  const access = await getGoogleAccessToken(userId);
+  if (access.kind !== "ok") {
+    return needsCalendarAccessPayload(
+      access.kind === "missing_scope"
+        ? "Google Calendar permission is missing. Reconnect once to show your week."
+        : "Connect Google Calendar once to show your week automatically.",
+    );
   }
 
   const params = new URLSearchParams({
@@ -134,32 +205,27 @@ export async function fetchPrimaryCalendarSchedule(
     `https://www.googleapis.com/calendar/v3/calendars/primary/events?${params}`,
     {
       cache: "no-store",
-      headers: { Authorization: `Bearer ${accessToken}` },
+      headers: { Authorization: `Bearer ${access.token}` },
     },
   );
 
-  const payload = (await response.json()) as GoogleEventsResponse;
+  const payload = await readJsonBody<GoogleEventsResponse>(response);
 
   if (!response.ok) {
     if (isAuthFailure(response, payload)) {
-      return {
-        detail:
-          "Calendar access is not granted yet. Connect Google Calendar to continue.",
-        events: [],
-        status: "needs_calendar_access",
-      };
+      return needsCalendarAccessPayload(
+        "Calendar access expired. Reconnect once to restore your schedule.",
+      );
     }
 
-    return {
-      detail: payload.error?.message ?? "Google Calendar is unavailable.",
-      events: [],
-      status: "unavailable",
-    };
+    return unavailablePayload(
+      payload?.error?.message ?? "Google Calendar is unavailable.",
+    );
   }
 
   return {
     detail: null,
-    events: (payload.items ?? [])
+    events: (payload?.items ?? [])
       .map(mapGoogleEvent)
       .filter((event): event is CalendarScheduleEvent => event !== null),
     status: "ok",

@@ -56,12 +56,26 @@ function isHappeningNow(
   return stamp >= start && stamp < end;
 }
 
+async function readSchedulePayload(
+  response: Response,
+): Promise<CalendarSchedulePayload | null> {
+  const text = await response.text();
+  if (!text.trim()) return null;
+
+  try {
+    return JSON.parse(text) as CalendarSchedulePayload;
+  } catch {
+    return null;
+  }
+}
+
 export function HomeSchedule() {
-  const { user } = useUser();
+  const { isLoaded, user } = useUser();
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   const [isConnecting, setIsConnecting] = useState(false);
   const [now] = useState(() => new Date());
   const requestIdRef = useRef(0);
+  const autoConnectAttemptedRef = useRef(false);
 
   const loadSchedule = useCallback(async () => {
     const requestId = ++requestIdRef.current;
@@ -70,14 +84,14 @@ export function HomeSchedule() {
       const response = await fetch("/api/calendar/schedule", {
         cache: "no-store",
       });
-      const payload = (await response.json()) as CalendarSchedulePayload;
+      const payload = await readSchedulePayload(response);
 
       if (requestId !== requestIdRef.current) return;
 
-      if (!response.ok && payload.status === undefined) {
+      if (payload === null) {
         setState({
           kind: "error",
-          detail: payload.detail ?? "Could not load schedule.",
+          detail: "Could not load schedule.",
         });
         return;
       }
@@ -93,6 +107,41 @@ export function HomeSchedule() {
     }
   }, []);
 
+  const connectCalendar = useCallback(async () => {
+    if (!user || isConnecting) return false;
+
+    const googleAccount = user.externalAccounts.find(
+      (account) => account.provider === "google",
+    );
+
+    if (!googleAccount) {
+      setState({
+        kind: "error",
+        detail: "No Google account is linked to this session.",
+      });
+      return false;
+    }
+
+    setIsConnecting(true);
+    try {
+      await googleAccount.reauthorize({
+        additionalScopes: [googleCalendarEventsReadonlyScope],
+        redirectUrl: `${window.location.origin}/`,
+      });
+      return true;
+    } catch (error) {
+      setState({
+        kind: "error",
+        detail:
+          error instanceof Error
+            ? error.message
+            : "Could not start Google Calendar connection.",
+      });
+      setIsConnecting(false);
+      return false;
+    }
+  }, [isConnecting, user]);
+
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       void loadSchedule();
@@ -104,42 +153,29 @@ export function HomeSchedule() {
     };
   }, [loadSchedule]);
 
-  const retry = () => {
-    setState({ kind: "loading" });
-    void loadSchedule();
-  };
-
-  const connectCalendar = async () => {
-    if (!user || isConnecting) return;
+  useEffect(() => {
+    if (!isLoaded || !user || autoConnectAttemptedRef.current) return;
+    if (state.kind !== "ready") return;
+    if (state.payload.status !== "needs_calendar_access") return;
 
     const googleAccount = user.externalAccounts.find(
       (account) => account.provider === "google",
     );
+    if (!googleAccount) return;
 
-    if (!googleAccount) {
-      setState({
-        kind: "error",
-        detail: "No Google account is linked to this session.",
-      });
-      return;
-    }
+    autoConnectAttemptedRef.current = true;
+    const frame = window.requestAnimationFrame(() => {
+      void connectCalendar();
+    });
 
-    setIsConnecting(true);
-    try {
-      await googleAccount.reauthorize({
-        additionalScopes: [googleCalendarEventsReadonlyScope],
-        redirectUrl: `${window.location.origin}/`,
-      });
-    } catch (error) {
-      setState({
-        kind: "error",
-        detail:
-          error instanceof Error
-            ? error.message
-            : "Could not start Google Calendar connection.",
-      });
-      setIsConnecting(false);
-    }
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [connectCalendar, isLoaded, state, user]);
+
+  const retry = () => {
+    setState({ kind: "loading" });
+    void loadSchedule();
   };
 
   const days =
@@ -162,9 +198,9 @@ export function HomeSchedule() {
         ) : null}
       </div>
 
-      {state.kind === "loading" ? (
+      {state.kind === "loading" || isConnecting ? (
         <div className={styles.quiet} role="status">
-          Loading schedule…
+          {isConnecting ? "Connecting Google Calendar…" : "Loading schedule…"}
         </div>
       ) : null}
 
@@ -178,19 +214,19 @@ export function HomeSchedule() {
       ) : null}
 
       {state.kind === "ready" &&
-      state.payload.status === "needs_calendar_access" ? (
+      state.payload.status === "needs_calendar_access" &&
+      !isConnecting ? (
         <div className={styles.panel}>
           <p className={styles.quiet}>
             {state.payload.detail ??
-              "Connect Google Calendar to surface your week here."}
+              "Connect Google Calendar once to show your week here."}
           </p>
           <button
             className={styles.action}
-            disabled={isConnecting}
             onClick={() => void connectCalendar()}
             type="button"
           >
-            {isConnecting ? "Connecting…" : "Connect calendar"}
+            Connect calendar
           </button>
         </div>
       ) : null}
