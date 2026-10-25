@@ -69,8 +69,6 @@ async function readSchedulePayload(
 
 export function HomeSchedule() {
   const [state, setState] = useState<LoadState>({ kind: "loading" });
-  const [icsUrl, setIcsUrl] = useState("");
-  const [isSaving, setIsSaving] = useState(false);
   const [now] = useState(() => new Date());
   const requestIdRef = useRef(0);
 
@@ -120,49 +118,6 @@ export function HomeSchedule() {
     void loadSchedule();
   };
 
-  const saveFeed = async () => {
-    if (!icsUrl.trim() || isSaving) return;
-
-    setIsSaving(true);
-    try {
-      const response = await fetch("/api/calendar/schedule", {
-        body: JSON.stringify({ icsUrl: icsUrl.trim() }),
-        headers: { "Content-Type": "application/json" },
-        method: "POST",
-      });
-      const payload = await readSchedulePayload(response);
-
-      if (payload === null) {
-        setState({
-          kind: "error",
-          detail: "Could not save calendar feed.",
-        });
-        return;
-      }
-
-      if (payload.status !== "ok") {
-        setState({
-          kind: "error",
-          detail: payload.detail ?? "Could not save calendar feed.",
-        });
-        return;
-      }
-
-      setIcsUrl("");
-      setState({ kind: "ready", payload });
-    } catch (error) {
-      setState({
-        kind: "error",
-        detail:
-          error instanceof Error
-            ? error.message
-            : "Could not save calendar feed.",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const days =
     state.kind === "ready" && state.payload.status === "ok"
       ? groupCalendarEventsByLocalDay(state.payload.events, { now })
@@ -199,42 +154,8 @@ export function HomeSchedule() {
       ) : null}
 
       {state.kind === "ready" &&
-      state.payload.status === "needs_calendar_access" ? (
-        <div className={styles.panel}>
-          <p className={styles.quiet}>
-            {state.payload.detail ??
-              "Paste your Google Calendar secret iCal URL once to show your week."}
-          </p>
-          <ol className={styles.steps}>
-            <li>Open Google Calendar settings for Daniel Acuna</li>
-            <li>Integrate calendar → Secret address in iCal format</li>
-            <li>Copy and paste it below</li>
-          </ol>
-          <label className={styles.feedLabel} htmlFor="calendar-ics-url">
-            Secret iCal URL
-          </label>
-          <input
-            autoComplete="off"
-            className={styles.feedInput}
-            id="calendar-ics-url"
-            onChange={(event) => setIcsUrl(event.target.value)}
-            placeholder="https://calendar.google.com/calendar/ical/…/private-…/basic.ics"
-            spellCheck={false}
-            type="url"
-            value={icsUrl}
-          />
-          <button
-            className={styles.action}
-            disabled={isSaving || !icsUrl.trim()}
-            onClick={() => void saveFeed()}
-            type="button"
-          >
-            {isSaving ? "Connecting…" : "Save calendar feed"}
-          </button>
-        </div>
-      ) : null}
-
-      {state.kind === "ready" && state.payload.status === "unavailable" ? (
+      (state.payload.status === "needs_calendar_access" ||
+        state.payload.status === "unavailable") ? (
         <div className={styles.panel}>
           <p className={styles.quiet}>
             {state.payload.detail ?? "Schedule is unavailable right now."}
