@@ -5,5 +5,5 @@ type ApplicationShellProps = Readonly<{
 }>;
 
 export function ApplicationShell({ children }: ApplicationShellProps) {
-  return <main className="min-h-dvh">{children}</main>;
+  return <main className="dashboard-root">{children}</main>;
 }

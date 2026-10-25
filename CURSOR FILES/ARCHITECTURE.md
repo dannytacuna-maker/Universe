@@ -26,11 +26,11 @@ public/                  Static files
 Authenticated entry is `app/page.tsx` → `DashboardApp` inside
 `DashboardNavigationStoreProvider`. Sections use `?section=` (legacy
 `?destination=` is migrated). Grouped sidebar: University, Personal Growth,
-Forge, plus Home and Observatory.
+plus Home and Observatory.
 
 ## Data
 
-IndexedDB database `mission-control` and `/api/mission/sync` are unchanged.
-Domain repositories under `components/universe/galaxies/**` own CRUD.
-Jarvis and the Mission Operating Deck UI were removed; mission-operating
-IndexedDB stores remain inert and are not wiped.
+IndexedDB database `mission-control` and `/api/mission/sync` sync domain
+collections under `components/universe/galaxies/**`. Home schedule reads Google
+Calendar through Clerk (`/api/calendar/schedule`). Mission-operating IndexedDB
+stores remain inert for compatibility.

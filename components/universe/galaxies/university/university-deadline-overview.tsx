@@ -49,10 +49,7 @@ export function UniversityDeadlineOverview({
               </span>
               <span className={styles.deadlineTime}>
                 <strong>
-                  {describeDeadlineDistance(
-                    daysFromNow,
-                    urgency === "overdue",
-                  )}
+                  {describeDeadlineDistance(daysFromNow, urgency === "overdue")}
                 </strong>
                 <time dateTime={assignment.dueAt}>
                   {formatUniversityDeadline(assignment.dueAt)}

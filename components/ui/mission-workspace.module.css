@@ -226,14 +226,19 @@
 
 .workspace[data-layout="page"] {
   --ws-accent: 45 212 191;
+  --ws-gutter: 1.1rem;
   --ws-dock-space: var(--ws-gutter);
 
   position: relative;
   z-index: 0;
   inset: auto;
-  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 0;
+  height: auto;
   overflow: visible;
-  background: var(--bg-deep);
+  background: transparent;
   color: var(--ink);
   backdrop-filter: none;
   will-change: auto;
@@ -245,41 +250,118 @@
 
 .workspace[data-layout="page"] .bar {
   grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem 1rem;
+  min-height: 0;
+  padding: 0.85rem var(--ws-gutter) 0.7rem;
   border-bottom: 1px solid var(--line);
-  background: var(--bg);
+  background: transparent;
+}
+
+.workspace[data-layout="page"] .identityOrb {
+  display: none;
 }
 
 .workspace[data-layout="page"] .eyebrow {
   color: var(--ink-muted);
+  font-size: 11px;
   letter-spacing: var(--tracking-label);
 }
 
 .workspace[data-layout="page"] .identity h2 {
   color: var(--ink);
+  font-size: var(--text-xl);
   font-weight: 600;
   letter-spacing: var(--tracking-tight);
 }
 
 .workspace[data-layout="page"] .description {
+  max-width: 42rem;
   color: var(--ink-soft);
+  font-size: var(--text-sm);
+  white-space: normal;
 }
 
 .workspace[data-layout="page"] .metrics {
-  border-bottom: 1px solid var(--line);
-  background: var(--bg);
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0.75rem var(--ws-gutter) 0.15rem;
+  border-bottom: none;
+  background: transparent;
 }
 
 .workspace[data-layout="page"] .metric {
-  border-color: var(--line);
+  gap: 0.3rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
   background: var(--panel);
+  box-shadow: none;
+}
+
+.workspace[data-layout="page"] .metric::before {
+  display: none;
+}
+
+.workspace[data-layout="page"] .metric dt {
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.workspace[data-layout="page"] .metric strong {
+  color: var(--ink);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.workspace[data-layout="page"] .metric small {
+  color: var(--ink-soft);
 }
 
 .workspace[data-layout="page"] .pageLayoutSpacer {
   display: none;
 }
 
+.workspace[data-layout="page"] .body {
+  overflow: visible;
+  overscroll-behavior: auto;
+}
+
 .workspace[data-layout="page"] .bodyInner {
-  padding-bottom: max(2rem, calc(env(safe-area-inset-bottom) + 1.25rem));
+  --workspace-scale: 1;
+
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0.85rem var(--ws-gutter) max(1.5rem, env(safe-area-inset-bottom));
+  zoom: 1;
+}
+
+.workspace[data-layout="page"] .panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+  box-shadow: none;
+}
+
+.workspace[data-layout="page"] .actions :where(button, a) {
+  min-height: 2.1rem;
+  border-radius: var(--radius-lg);
+  border-color: rgb(45 212 191 / 30%);
+  background: rgb(45 212 191 / 10%);
+  color: var(--brand);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  transition:
+    border-color 140ms var(--ease-ui),
+    background-color 140ms var(--ease-ui),
+    transform 150ms ease-out;
+}
+
+.workspace[data-layout="page"]
+  .actions
+  :where(button, a):not(:disabled):active {
+  transform: scale(0.96);
 }
 
 .pageLayoutSpacer {

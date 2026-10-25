@@ -9,7 +9,9 @@ import {
 } from "@/lib/dashboard-sections";
 
 export type DashboardNavigationActions = {
-  navigate: (navigation: Partial<DashboardNavigation> & { section: DashboardSectionId }) => void;
+  navigate: (
+    navigation: Partial<DashboardNavigation> & { section: DashboardSectionId },
+  ) => void;
   replaceNavigation: (navigation: DashboardNavigation) => void;
   setJiuJitsuSubview: (subview: JiuJitsuSubview) => void;
   setStrengthSubview: (subview: StrengthSubview) => void;
@@ -28,9 +30,7 @@ export function createDashboardNavigationStore(
         section: navigation.section,
         jiuJitsuSubview:
           navigation.jiuJitsuSubview ??
-          (navigation.section === "jiu-jitsu"
-            ? state.jiuJitsuSubview
-            : "log"),
+          (navigation.section === "jiu-jitsu" ? state.jiuJitsuSubview : "log"),
         strengthSubview:
           navigation.strengthSubview ??
           (navigation.section === "strength-physique"

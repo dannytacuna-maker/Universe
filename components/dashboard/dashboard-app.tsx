@@ -15,8 +15,6 @@ import { GymPlaylistPlayer } from "@/components/universe/galaxies/personal-growt
 import { TrainingProgramArchive } from "@/components/universe/galaxies/personal-growth/strength-physique/training-program-archive";
 import { useStrengthPhysique } from "@/components/universe/galaxies/personal-growth/strength-physique/use-strength-physique";
 import { WhisTrainingAssistant } from "@/components/universe/galaxies/personal-growth/strength-physique/whis-training-assistant";
-import { useWebsitesProductionCenter } from "@/components/universe/galaxies/forge/use-websites-production-center";
-import { WebsitesProductionCenter } from "@/components/universe/galaxies/forge/websites-production-center";
 import { UniversityOperationsDashboard } from "@/components/universe/galaxies/university/university-operations-dashboard";
 import { isAssignmentResolved } from "@/components/universe/galaxies/university/university-operations-summary";
 import { useUniversityRecords } from "@/components/universe/galaxies/university/use-university-records";
@@ -93,7 +91,6 @@ export function DashboardApp({ ownerEmail }: DashboardAppProps) {
     summary: readingSummary,
   } = useReadingLibrary();
   const universityRecords = useUniversityRecords();
-  const websitesProduction = useWebsitesProductionCenter();
   const cloudSync = useMissionCloudSync();
   const { attention: observatoryAttention, markBriefingSeen } =
     useObservatoryAttention(section === "home" || section === "observatory");
@@ -215,9 +212,6 @@ export function DashboardApp({ ownerEmail }: DashboardAppProps) {
               observatoryAttention,
               openUniversityAssignments,
               strengthSessionCount: strengthTrainingSessions.length,
-              websitesActiveProjects: websitesProduction.pulse.activeProjects,
-              websitesOpenOpportunities:
-                websitesProduction.pulse.openOpportunities,
             }}
           />
         ) : null}
@@ -267,8 +261,7 @@ export function DashboardApp({ ownerEmail }: DashboardAppProps) {
           />
         ) : null}
 
-        {section === "strength-physique" &&
-        strengthSubview === "training" ? (
+        {section === "strength-physique" && strengthSubview === "training" ? (
           <WhisTrainingAssistant
             bodyWeightEntries={bodyWeightEntries}
             isLoading={isStrengthLoading}
@@ -312,15 +305,8 @@ export function DashboardApp({ ownerEmail }: DashboardAppProps) {
           />
         ) : null}
 
-        {section === "websites" ? (
-          <WebsitesProductionCenter isVisible records={websitesProduction} />
-        ) : null}
-
         {section === "observatory" ? (
-          <ObservatoryExperience
-            isVisible
-            onBriefingSeen={markBriefingSeen}
-          />
+          <ObservatoryExperience isVisible onBriefingSeen={markBriefingSeen} />
         ) : null}
       </DashboardShell>
     </DashboardChromeProvider>

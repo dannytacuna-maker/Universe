@@ -31,9 +31,7 @@ export function WorkoutSplit({
 
     try {
       await onToggleWorkout(dayId, !isCompleted);
-      setFeedback(
-        isCompleted ? "Marked incomplete." : "Marked complete.",
-      );
+      setFeedback(isCompleted ? "Marked incomplete." : "Marked complete.");
     } catch (error: unknown) {
       setFeedback(
         error instanceof Error

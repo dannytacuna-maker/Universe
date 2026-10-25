@@ -12,6 +12,7 @@ import {
 import type { MissionSyncStatus } from "@/lib/mission-record-sync";
 import { useDashboardNavigationStore } from "@/store/dashboard-navigation-store-provider";
 
+import { DashboardNavIcon } from "./dashboard-nav-icon";
 import styles from "./dashboard-shell.module.css";
 
 type DashboardShellProps = Readonly<{
@@ -21,6 +22,37 @@ type DashboardShellProps = Readonly<{
   subnav?: ReactNode;
   syncStatus: MissionSyncStatus;
 }>;
+
+function NavButton({
+  attention,
+  label,
+  onSelect,
+  section,
+  selected,
+}: Readonly<{
+  attention?: boolean;
+  label: string;
+  onSelect: (section: DashboardSectionId) => void;
+  section: DashboardSectionId;
+  selected: boolean;
+}>) {
+  return (
+    <button
+      className={styles.navLink}
+      data-active={selected}
+      onClick={() => onSelect(section)}
+      type="button"
+    >
+      <span className={styles.navLinkMain}>
+        <DashboardNavIcon active={selected} section={section} />
+        <span>{label}</span>
+      </span>
+      {attention ? (
+        <span aria-label="New briefing" className={styles.attentionDot} />
+      ) : null}
+    </button>
+  );
+}
 
 export function DashboardShell({
   children,
@@ -49,15 +81,13 @@ export function DashboardShell({
             {dashboardTopLevelItems
               .filter((item) => item.id === "home")
               .map((item) => (
-                <button
-                  className={styles.navLink}
-                  data-active={section === item.id}
+                <NavButton
                   key={item.id}
-                  onClick={() => goTo(item.id)}
-                  type="button"
-                >
-                  <span>{item.label}</span>
-                </button>
+                  label={item.label}
+                  onSelect={goTo}
+                  section={item.id}
+                  selected={section === item.id}
+                />
               ))}
           </div>
 
@@ -66,15 +96,13 @@ export function DashboardShell({
               <div className={styles.groupLabel}>{group.label}</div>
               <div className={styles.groupItems}>
                 {group.items.map((item) => (
-                  <button
-                    className={styles.navLink}
-                    data-active={section === item.id}
+                  <NavButton
                     key={item.id}
-                    onClick={() => goTo(item.id)}
-                    type="button"
-                  >
-                    <span>{item.label}</span>
-                  </button>
+                    label={item.label}
+                    onSelect={goTo}
+                    section={item.id}
+                    selected={section === item.id}
+                  />
                 ))}
               </div>
             </div>
@@ -84,18 +112,14 @@ export function DashboardShell({
             {dashboardTopLevelItems
               .filter((item) => item.id === "observatory")
               .map((item) => (
-                <button
-                  className={styles.navLink}
-                  data-active={section === item.id}
+                <NavButton
+                  attention={observatoryAttention >= 0.5}
                   key={item.id}
-                  onClick={() => goTo(item.id)}
-                  type="button"
-                >
-                  <span>{item.label}</span>
-                  {observatoryAttention >= 0.5 ? (
-                    <span aria-label="New briefing" className={styles.attentionDot} />
-                  ) : null}
-                </button>
+                  label={item.label}
+                  onSelect={goTo}
+                  section={item.id}
+                  selected={section === item.id}
+                />
               ))}
           </div>
         </nav>

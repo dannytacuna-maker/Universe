@@ -6,8 +6,7 @@ export type InterfaceSurfaceId =
   | "reading-library"
   | "strength-whis"
   | "training-archive"
-  | "university-operations"
-  | "websites-production";
+  | "university-operations";
 
 const interfaceSurfaceEvent = "mission-control:interface-surface";
 

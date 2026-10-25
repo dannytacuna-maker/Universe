@@ -17,7 +17,6 @@ import {
   subscribeToInterfaceSurfaces,
   type InterfaceSurfaceId,
 } from "@/lib/interface-surface";
-import { registerOpenWorkspace } from "@/lib/workspace-presence";
 
 import styles from "./mission-workspace.module.css";
 
@@ -129,14 +128,12 @@ export function MissionWorkspace({
     if (!showWorkspace || isPageLayout) return;
 
     activateInterfaceSurface(surfaceId);
-    const release = registerOpenWorkspace();
     const frame = window.requestAnimationFrame(() =>
       panelRef.current?.focus({ preventScroll: true }),
     );
 
     return () => {
       window.cancelAnimationFrame(frame);
-      release();
     };
   }, [isPageLayout, showWorkspace, surfaceId]);
 

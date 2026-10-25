@@ -5,6 +5,8 @@ import { useMemo } from "react";
 import type { DashboardSectionId } from "@/lib/dashboard-sections";
 import { useDashboardNavigationStore } from "@/store/dashboard-navigation-store-provider";
 
+import { DashboardNavIcon } from "./dashboard-nav-icon";
+import { HomeSchedule } from "./home-schedule";
 import styles from "./home-status-page.module.css";
 
 export type HomeStatusSnapshot = Readonly<{
@@ -13,8 +15,6 @@ export type HomeStatusSnapshot = Readonly<{
   observatoryAttention: number;
   openUniversityAssignments: number;
   strengthSessionCount: number;
-  websitesActiveProjects: number;
-  websitesOpenOpportunities: number;
 }>;
 
 type HomeStatusPageProps = Readonly<{
@@ -61,12 +61,6 @@ export function HomeStatusPage({ snapshot }: HomeStatusPageProps) {
         value: String(snapshot.strengthSessionCount),
       },
       {
-        detail: `${snapshot.websitesOpenOpportunities} open interest`,
-        eyebrow: "Websites",
-        section: "websites",
-        value: String(snapshot.websitesActiveProjects),
-      },
-      {
         detail:
           snapshot.observatoryAttention >= 0.5
             ? "Fresh briefing available"
@@ -83,16 +77,19 @@ export function HomeStatusPage({ snapshot }: HomeStatusPageProps) {
       <div className={styles.intro}>
         <h2 id="home-status-title">Status</h2>
         <p>
-          A compact view of academic work, training, reading, and production.
-          Open any area from the sidebar or the cards below.
+          Your week, academic work, training, and reading at a glance. Open any
+          area from the sidebar or a card below.
         </p>
       </div>
 
       {snapshot.observatoryAttention >= 0.5 ? (
         <div className={styles.attention} role="status">
-          <div>
-            <strong>Observatory briefing ready</strong>
-            <p>A new intelligence brief is waiting for review.</p>
+          <div className={styles.attentionCopy}>
+            <DashboardNavIcon section="observatory" size={18} />
+            <div>
+              <strong>Observatory briefing ready</strong>
+              <p>A new intelligence brief is waiting for review.</p>
+            </div>
           </div>
           <button
             onClick={() => navigate({ section: "observatory" })}
@@ -103,6 +100,8 @@ export function HomeStatusPage({ snapshot }: HomeStatusPageProps) {
         </div>
       ) : null}
 
+      <HomeSchedule />
+
       <div className={styles.grid}>
         {cards.map((card) => (
           <button
@@ -111,9 +110,12 @@ export function HomeStatusPage({ snapshot }: HomeStatusPageProps) {
             onClick={() => navigate({ section: card.section })}
             type="button"
           >
-            <span className={styles.cardEyebrow}>{card.eyebrow}</span>
+            <span className={styles.cardTop}>
+              <span className={styles.cardEyebrow}>{card.eyebrow}</span>
+              <DashboardNavIcon section={card.section} size={16} />
+            </span>
             <strong>{card.value}</strong>
-            <span>{card.detail}</span>
+            <span className={styles.cardDetail}>{card.detail}</span>
           </button>
         ))}
       </div>

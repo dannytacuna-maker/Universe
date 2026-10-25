@@ -1,5 +1,3 @@
-import type { Vector3Tuple } from "../galaxy-definition";
-
 export type CourseSystemPalette = Readonly<{
   core: string;
   halo: string;
@@ -18,20 +16,11 @@ export type CourseMeeting = Readonly<{
 }>;
 
 export type CourseSystemDefinition = Readonly<{
-  cameraPosition: Vector3Tuple;
   displayName: string;
   id: string;
-  labelPosition: Readonly<{
-    compact: readonly [number, number];
-    desktop: readonly [number, number];
-    portrait: readonly [number, number];
-  }>;
   name: string;
-  sourceName: string;
   palette: CourseSystemPalette;
-  position: Vector3Tuple;
   schedule: readonly CourseMeeting[];
-  scale: number;
-  seed: number;
-  status: "explorable" | "future";
+  sourceName: string;
+  status: "active" | "future";
 }>;

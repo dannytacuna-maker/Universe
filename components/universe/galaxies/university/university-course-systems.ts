@@ -2,21 +2,14 @@ import type { CourseSystemDefinition } from "./course-system-definition";
 
 export const universityCourseSystems = [
   {
-    cameraPosition: [-3, 1.2, -4.2],
     displayName: "Logistics & Distribution",
     id: "logistics",
-    labelPosition: {
-      compact: [24, 49],
-      desktop: [32, 49],
-      portrait: [25, 49],
-    },
     name: "Logistics and Distribution",
     palette: {
       core: "#f3fbff",
       halo: "#78c8ff",
       orbit: "#79aeea",
     },
-    position: [-3, 1, -8.4],
     schedule: [
       {
         day: "monday",
@@ -33,27 +26,18 @@ export const universityCourseSystems = [
         startTime: "16:30",
       },
     ],
-    scale: 1,
-    seed: 81_732,
     sourceName: "Distribución Logística",
-    status: "explorable",
+    status: "active",
   },
   {
-    cameraPosition: [0, 1.15, -4.4],
     displayName: "Business Ethics",
     id: "business-ethics",
-    labelPosition: {
-      compact: [77, 49],
-      desktop: [68, 49],
-      portrait: [76, 49],
-    },
     name: "International Business Ethics",
     palette: {
       core: "#edf6ff",
       halo: "#9895d8",
       orbit: "#7778aa",
     },
-    position: [0, 1, -8.8],
     schedule: [
       {
         day: "monday",
@@ -70,27 +54,18 @@ export const universityCourseSystems = [
         startTime: "18:30",
       },
     ],
-    scale: 0.86,
-    seed: 26_104,
     sourceName: "Ética en los Negocios Internacionales",
-    status: "explorable",
+    status: "active",
   },
   {
-    cameraPosition: [-0.3, -0.45, -4.6],
     displayName: "Language A III",
     id: "language-a-iii",
-    labelPosition: {
-      compact: [71, 69],
-      desktop: [66, 72],
-      portrait: [68, 70],
-    },
     name: "Language A III",
     palette: {
       core: "#eefeff",
       halo: "#64bac8",
       orbit: "#548a96",
     },
-    position: [-0.3, -0.7, -9],
     schedule: [
       {
         day: "tuesday",
@@ -107,27 +82,18 @@ export const universityCourseSystems = [
         startTime: "14:30",
       },
     ],
-    scale: 0.78,
-    seed: 59_133,
     sourceName: "Idioma A III",
-    status: "explorable",
+    status: "active",
   },
   {
-    cameraPosition: [-2.7, -0.35, -4.8],
     displayName: "Human Resources",
     id: "human-resources-management",
-    labelPosition: {
-      compact: [27, 68],
-      desktop: [34, 71],
-      portrait: [29, 69],
-    },
     name: "Human Resources Management",
     palette: {
       core: "#f5f6ff",
       halo: "#8d9ec3",
       orbit: "#6c7892",
     },
-    position: [-2.7, -0.6, -9.2],
     schedule: [
       {
         day: "thursday",
@@ -144,27 +110,18 @@ export const universityCourseSystems = [
         startTime: "12:30",
       },
     ],
-    scale: 0.76,
-    seed: 94_207,
     sourceName: "Gestión de Recursos Humanos",
-    status: "explorable",
+    status: "active",
   },
   {
-    cameraPosition: [-3.5, 0.38, -4.5],
     displayName: "Mergers & Acquisitions",
     id: "mergers-acquisitions",
-    labelPosition: {
-      compact: [16, 58],
-      desktop: [20, 59],
-      portrait: [17, 58],
-    },
     name: "Mergers and Acquisitions",
     palette: {
       core: "#fff6ef",
       halo: "#e09a6c",
       orbit: "#b87558",
     },
-    position: [-3.5, 0.18, -8.65],
     schedule: [
       {
         day: "tuesday",
@@ -181,27 +138,18 @@ export const universityCourseSystems = [
         startTime: "18:30",
       },
     ],
-    scale: 0.82,
-    seed: 41_882,
     sourceName: "Fusiones y Adquisiciones",
-    status: "explorable",
+    status: "active",
   },
   {
-    cameraPosition: [0.55, 0.32, -4.7],
     displayName: "Emerging Markets",
     id: "emerging-markets",
-    labelPosition: {
-      compact: [84, 60],
-      desktop: [80, 61],
-      portrait: [82, 60],
-    },
     name: "Emerging Powers and Markets",
     palette: {
       core: "#f0fff6",
       halo: "#6dcaa0",
       orbit: "#4e9a78",
     },
-    position: [0.55, 0.12, -9.05],
     schedule: [
       {
         day: "wednesday",
@@ -218,32 +166,21 @@ export const universityCourseSystems = [
         startTime: "16:30",
       },
     ],
-    scale: 0.8,
-    seed: 57_364,
     sourceName: "Potencias y Mercados Emergentes",
-    status: "explorable",
+    status: "active",
   },
   {
-    cameraPosition: [-1.45, -1.05, -4.9],
     displayName: "Final Project",
     id: "final-project",
-    labelPosition: {
-      compact: [50, 80],
-      desktop: [50, 82],
-      portrait: [51, 79],
-    },
     name: "Final Project",
     palette: {
       core: "#fff9ea",
       halo: "#d6b56f",
       orbit: "#9f8351",
     },
-    position: [-1.45, -1.3, -9.6],
     schedule: [],
-    scale: 0.88,
-    seed: 72_511,
     sourceName: "Final Project",
-    status: "explorable",
+    status: "active",
   },
 ] as const satisfies readonly CourseSystemDefinition[];
 

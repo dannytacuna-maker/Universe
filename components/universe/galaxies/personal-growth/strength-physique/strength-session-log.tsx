@@ -317,10 +317,7 @@ export function StrengthSessionLog({
           </button>
         </fieldset>
 
-        <details
-          className="strength-session-log__more"
-          open={hasExtraDetails}
-        >
+        <details className="strength-session-log__more" open={hasExtraDetails}>
           <summary>Notes &amp; recovery</summary>
           <div className="strength-session-log__notes">
             <label>
@@ -398,7 +395,10 @@ export function StrengthSessionLog({
         </div>
       </form>
 
-      <details className="strength-session-log__history" open={sessions.length > 0}>
+      <details
+        className="strength-session-log__history"
+        open={sessions.length > 0}
+      >
         <summary>
           Recent
           <span>{sessions.length}</span>

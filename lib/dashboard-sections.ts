@@ -5,7 +5,6 @@ export const dashboardSectionIds = [
   "jiu-jitsu",
   "strength-physique",
   "reading",
-  "websites",
   "observatory",
 ] as const;
 
@@ -52,11 +51,6 @@ export const dashboardNavGroups = [
       { id: "strength-physique", label: "Strength" },
       { id: "reading", label: "Reading" },
     ],
-  },
-  {
-    id: "forge",
-    label: "Forge",
-    items: [{ id: "websites", label: "Websites" }],
   },
 ] as const satisfies readonly DashboardNavGroup[];
 
@@ -118,11 +112,8 @@ function migrateLegacyDestination(destination: string): DashboardNavigation {
     return { ...defaultDashboardNavigation, section: "university" };
   }
 
-  if (
-    destination === "forge/websites" ||
-    destination.startsWith("forge/")
-  ) {
-    return { ...defaultDashboardNavigation, section: "websites" };
+  if (destination === "forge/websites" || destination.startsWith("forge/")) {
+    return defaultDashboardNavigation;
   }
 
   if (
@@ -180,10 +171,7 @@ function migrateLegacyDestination(destination: string): DashboardNavigation {
     return { ...defaultDashboardNavigation, section: "strength-physique" };
   }
 
-  if (
-    destination.includes("french") ||
-    destination.includes("lumiere")
-  ) {
+  if (destination.includes("french") || destination.includes("lumiere")) {
     return { ...defaultDashboardNavigation, section: "french" };
   }
 
@@ -264,8 +252,6 @@ export function sectionTitle(section: DashboardSectionId): string {
       return "Strength";
     case "reading":
       return "Reading";
-    case "websites":
-      return "Websites";
     case "observatory":
       return "Observatory";
     default: {
