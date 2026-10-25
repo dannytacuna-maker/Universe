@@ -1,7 +1,13 @@
-import { fetchPrimaryCalendarSchedule } from "@/lib/server/google-calendar";
+import {
+  getStoredCalendarIcsUrl,
+  isCalendarFeedStoreConfigured,
+  saveCalendarIcsUrl,
+} from "@/lib/server/calendar-feed-store";
+import { fetchIcsCalendarSchedule } from "@/lib/server/calendar-ics";
 import {
   getMissionAuthorization,
   isMissionAuthConfigured,
+  isSameOriginRequest,
 } from "@/lib/server/mission-auth";
 
 export const runtime = "nodejs";
@@ -54,11 +60,16 @@ export async function GET() {
       );
     }
 
-    const schedule = await fetchPrimaryCalendarSchedule(
-      authorization.owner.userId,
-    );
+    const icsUrl = await getStoredCalendarIcsUrl(authorization.owner.id);
+    if (!icsUrl) {
+      return jsonSchedule({
+        detail:
+          "Paste your Google Calendar secret iCal URL once. Calendar → Settings → Daniel Acuna → Integrate calendar → Secret address in iCal format.",
+        status: "needs_calendar_access",
+      });
+    }
 
-    return jsonSchedule(schedule);
+    return jsonSchedule(await fetchIcsCalendarSchedule(icsUrl));
   } catch (error) {
     const detail =
       error instanceof Error ? error.message : "Could not load schedule.";
@@ -68,6 +79,69 @@ export async function GET() {
         status: "unavailable",
       },
       500,
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    if (!isMissionAuthConfigured()) {
+      return jsonSchedule(
+        {
+          detail: "Mission Control auth is not configured.",
+          status: "unavailable",
+        },
+        503,
+      );
+    }
+
+    if (!isSameOriginRequest(request)) {
+      return jsonSchedule(
+        {
+          detail: "Cross-origin calendar updates are blocked.",
+          status: "unavailable",
+        },
+        403,
+      );
+    }
+
+    const authorization = await getMissionAuthorization();
+    if (authorization.owner === null) {
+      return jsonSchedule(
+        {
+          detail: "Sign in to connect your calendar feed.",
+          status: "unavailable",
+        },
+        401,
+      );
+    }
+
+    if (!isCalendarFeedStoreConfigured()) {
+      return jsonSchedule(
+        {
+          detail:
+            "Cloud storage is not configured. Set MISSION_CONTROL_CALENDAR_ICS_URL instead.",
+          status: "unavailable",
+        },
+        503,
+      );
+    }
+
+    const body = (await request.json()) as { icsUrl?: unknown };
+    const icsUrl = typeof body.icsUrl === "string" ? body.icsUrl : "";
+    const saved = await saveCalendarIcsUrl(authorization.owner.id, icsUrl);
+    const schedule = await fetchIcsCalendarSchedule(saved);
+    return jsonSchedule(schedule);
+  } catch (error) {
+    return jsonSchedule(
+      {
+        detail:
+          error instanceof Error
+            ? error.message
+            : "Could not save calendar feed.",
+        status: "unavailable",
+      },
+      400,
     );
   }
 }

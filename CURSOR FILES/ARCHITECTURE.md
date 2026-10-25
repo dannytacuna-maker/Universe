@@ -31,6 +31,6 @@ plus Home and Observatory.
 ## Data
 
 IndexedDB database `mission-control` and `/api/mission/sync` sync domain
-collections under `components/universe/galaxies/**`. Home schedule reads Google
-Calendar through Clerk (`/api/calendar/schedule`). Mission-operating IndexedDB
-stores remain inert for compatibility.
+collections under `components/universe/galaxies/**`. Home schedule reads a
+private Google Calendar iCal feed (`/api/calendar/schedule`) — no OAuth calendar
+scopes. Mission-operating IndexedDB stores remain inert for compatibility.

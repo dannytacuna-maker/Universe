@@ -1,11 +1,8 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
-  googleAccountHasCalendarScope,
-  googleCalendarConnectScopes,
   groupCalendarEventsByLocalDay,
   type CalendarScheduleDay,
   type CalendarSchedulePayload,
@@ -71,12 +68,11 @@ async function readSchedulePayload(
 }
 
 export function HomeSchedule() {
-  const { isLoaded, user } = useUser();
   const [state, setState] = useState<LoadState>({ kind: "loading" });
-  const [isConnecting, setIsConnecting] = useState(false);
+  const [icsUrl, setIcsUrl] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
   const [now] = useState(() => new Date());
   const requestIdRef = useRef(0);
-  const autoConnectAttemptedRef = useRef(false);
 
   const loadSchedule = useCallback(async () => {
     const requestId = ++requestIdRef.current;
@@ -108,62 +104,6 @@ export function HomeSchedule() {
     }
   }, []);
 
-  const connectCalendar = useCallback(async () => {
-    if (!user || isConnecting) return false;
-
-    const googleAccount = user.externalAccounts.find(
-      (account) => account.provider === "google",
-    );
-
-    if (!googleAccount) {
-      setState({
-        kind: "error",
-        detail: "No Google account is linked to this session.",
-      });
-      return false;
-    }
-
-    setIsConnecting(true);
-    try {
-      const reauth = await googleAccount.reauthorize({
-        additionalScopes: [...googleCalendarConnectScopes],
-        oidcPrompt: "consent",
-        redirectUrl: `${window.location.origin}/sso-callback`,
-      });
-
-      const redirectUrl =
-        reauth.verification?.externalVerificationRedirectURL?.href;
-
-      if (redirectUrl) {
-        window.location.assign(redirectUrl);
-        return true;
-      }
-
-      const verificationError =
-        reauth.verification?.error?.longMessage ||
-        reauth.verification?.error?.message;
-
-      setState({
-        kind: "error",
-        detail:
-          verificationError ??
-          "Google did not return a calendar connection URL. Confirm custom Google credentials and the calendar.readonly scope are enabled in Clerk.",
-      });
-      setIsConnecting(false);
-      return false;
-    } catch (error) {
-      setState({
-        kind: "error",
-        detail:
-          error instanceof Error
-            ? error.message
-            : "Could not start Google Calendar connection.",
-      });
-      setIsConnecting(false);
-      return false;
-    }
-  }, [isConnecting, user]);
-
   useEffect(() => {
     const frame = window.requestAnimationFrame(() => {
       void loadSchedule();
@@ -175,31 +115,52 @@ export function HomeSchedule() {
     };
   }, [loadSchedule]);
 
-  useEffect(() => {
-    if (!isLoaded || !user || autoConnectAttemptedRef.current) return;
-    if (state.kind !== "ready") return;
-    if (state.payload.status !== "needs_calendar_access") return;
-
-    const googleAccount = user.externalAccounts.find(
-      (account) => account.provider === "google",
-    );
-    if (!googleAccount) return;
-
-    // Already granted in Clerk UI metadata but token refresh failed — still reconnect.
-    // Skip auto-redirect only when the user just bounced back without a redirect URL.
-    autoConnectAttemptedRef.current = true;
-    const frame = window.requestAnimationFrame(() => {
-      void connectCalendar();
-    });
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-    };
-  }, [connectCalendar, isLoaded, state, user]);
-
   const retry = () => {
     setState({ kind: "loading" });
     void loadSchedule();
+  };
+
+  const saveFeed = async () => {
+    if (!icsUrl.trim() || isSaving) return;
+
+    setIsSaving(true);
+    try {
+      const response = await fetch("/api/calendar/schedule", {
+        body: JSON.stringify({ icsUrl: icsUrl.trim() }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      });
+      const payload = await readSchedulePayload(response);
+
+      if (payload === null) {
+        setState({
+          kind: "error",
+          detail: "Could not save calendar feed.",
+        });
+        return;
+      }
+
+      if (payload.status !== "ok") {
+        setState({
+          kind: "error",
+          detail: payload.detail ?? "Could not save calendar feed.",
+        });
+        return;
+      }
+
+      setIcsUrl("");
+      setState({ kind: "ready", payload });
+    } catch (error) {
+      setState({
+        kind: "error",
+        detail:
+          error instanceof Error
+            ? error.message
+            : "Could not save calendar feed.",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const days =
@@ -207,12 +168,6 @@ export function HomeSchedule() {
       ? groupCalendarEventsByLocalDay(state.payload.events, { now })
       : [];
   const eventCount = days.reduce((total, day) => total + day.events.length, 0);
-  const googleAccount = user?.externalAccounts.find(
-    (account) => account.provider === "google",
-  );
-  const clientHasScope = googleAccountHasCalendarScope(
-    googleAccount?.approvedScopes,
-  );
 
   return (
     <section aria-labelledby="home-schedule-title" className={styles.schedule}>
@@ -228,49 +183,53 @@ export function HomeSchedule() {
         ) : null}
       </div>
 
-      {state.kind === "loading" || isConnecting ? (
+      {state.kind === "loading" ? (
         <div className={styles.quiet} role="status">
-          {isConnecting
-            ? "Opening Google to connect calendar…"
-            : "Loading schedule…"}
+          Loading schedule…
         </div>
       ) : null}
 
       {state.kind === "error" ? (
         <div className={styles.panel}>
           <p className={styles.quiet}>{state.detail}</p>
-          <div className={styles.actions}>
-            <button
-              className={styles.action}
-              onClick={() => void connectCalendar()}
-              type="button"
-            >
-              Connect calendar
-            </button>
-            <button className={styles.action} onClick={retry} type="button">
-              Retry
-            </button>
-          </div>
+          <button className={styles.action} onClick={retry} type="button">
+            Retry
+          </button>
         </div>
       ) : null}
 
       {state.kind === "ready" &&
-      state.payload.status === "needs_calendar_access" &&
-      !isConnecting ? (
+      state.payload.status === "needs_calendar_access" ? (
         <div className={styles.panel}>
           <p className={styles.quiet}>
             {state.payload.detail ??
-              "Connect Google Calendar once to show your week here."}
-            {clientHasScope
-              ? " Calendar access looks granted, but the Google token needs a fresh reconnect."
-              : null}
+              "Paste your Google Calendar secret iCal URL once to show your week."}
           </p>
+          <ol className={styles.steps}>
+            <li>Open Google Calendar settings for Daniel Acuna</li>
+            <li>Integrate calendar → Secret address in iCal format</li>
+            <li>Copy and paste it below</li>
+          </ol>
+          <label className={styles.feedLabel} htmlFor="calendar-ics-url">
+            Secret iCal URL
+          </label>
+          <input
+            autoComplete="off"
+            className={styles.feedInput}
+            id="calendar-ics-url"
+            onChange={(event) => setIcsUrl(event.target.value)}
+            placeholder="https://calendar.google.com/calendar/ical/…/private-…/basic.ics"
+            spellCheck={false}
+            type="url"
+            value={icsUrl}
+          />
           <button
             className={styles.action}
-            onClick={() => void connectCalendar()}
+            disabled={isSaving || !icsUrl.trim()}
+            onClick={() => void saveFeed()}
             type="button"
           >
-            Connect calendar
+            {isSaving ? "Connecting…" : "Save calendar feed"}
           </button>
         </div>
       ) : null}
