@@ -1,7 +1,7 @@
 .schedule {
   display: grid;
-  gap: 0.75rem;
-  padding: 0.95rem 1rem 1.05rem;
+  gap: 0.85rem;
+  padding: 1rem 1rem 1.15rem;
   border: 1px solid var(--line);
   border-radius: var(--radius-card);
   background:
@@ -12,19 +12,9 @@
 .header {
   display: flex;
   flex-wrap: wrap;
-  align-items: end;
+  align-items: center;
   justify-content: space-between;
-  gap: 0.55rem 1rem;
-}
-
-.eyebrow {
-  display: block;
-  margin-bottom: 0.18rem;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
-  color: var(--ink-muted);
+  gap: 0.75rem 1rem;
 }
 
 .header h2 {
@@ -35,16 +25,68 @@
   color: var(--ink);
 }
 
-.meta {
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: end;
+  gap: 0.55rem;
+}
+
+.categorySelect {
+  width: min(100%, 11.5rem);
+}
+
+.navGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.iconButton,
+.todayButton,
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-strong);
+  background: rgb(255 255 255 / 3.5%);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 140ms var(--ease-ui),
+    border-color 140ms var(--ease-ui),
+    color 140ms var(--ease-ui),
+    transform 150ms ease-out;
+}
+
+.iconButton {
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 999px;
   color: var(--ink-soft);
+}
+
+.todayButton,
+.action {
+  min-height: 2.15rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
   font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.action {
+  border-color: rgb(45 212 191 / 35%);
+  background: rgb(45 212 191 / 12%);
+  color: var(--brand);
 }
 
 .panel {
   display: grid;
   gap: 0.7rem;
   justify-items: start;
-  padding: 0.75rem 0.15rem 0.15rem;
 }
 
 .quiet {
@@ -54,166 +96,328 @@
   line-height: 1.45;
 }
 
-.action {
-  min-height: 2.1rem;
-  padding: 0.45rem 0.8rem;
-  border: 1px solid rgb(45 212 191 / 35%);
-  border-radius: var(--radius-lg);
-  background: rgb(45 212 191 / 12%);
-  color: var(--brand);
+.weekStrip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.25rem;
+  padding: 0.15rem 0 0.25rem;
+}
+
+.weekDay {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.2rem 0.2rem;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  color: var(--ink-soft);
   font: inherit;
-  font-size: var(--text-sm);
-  font-weight: 600;
   cursor: pointer;
   transition:
-    background-color 140ms var(--ease-ui),
+    color 140ms var(--ease-ui),
     transform 150ms ease-out;
 }
 
-.action:disabled {
-  opacity: 0.65;
-  cursor: wait;
+.weekDayLabel {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
-.days {
+.weekDayNumber {
   display: grid;
-  gap: 0.85rem;
+  place-items: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition:
+    background-color 160ms var(--ease-ui),
+    color 160ms var(--ease-ui),
+    box-shadow 160ms var(--ease-ui);
 }
 
-.day {
+.weekDayDot {
+  width: 0.28rem;
+  height: 0.28rem;
+  border-radius: 999px;
+  background: transparent;
+  transition: background-color 160ms var(--ease-ui);
+}
+
+.weekDay[data-selected="true"] {
+  color: var(--ink);
+}
+
+.weekDay[data-selected="true"] .weekDayNumber {
+  background: var(--brand);
+  color: #06201c;
+  box-shadow: 0 0 0 4px rgb(45 212 191 / 14%);
+}
+
+.weekDay[data-selected="true"] .weekDayDot {
+  background: var(--brand);
+}
+
+.weekDay[data-today="true"]:not([data-selected="true"]) .weekDayNumber {
+  color: var(--brand);
+}
+
+.allDayRow {
   display: grid;
-  gap: 0.4rem;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: start;
 }
 
-.dayLabel {
-  margin: 0;
+.allDayLabel {
+  padding-top: 0.35rem;
+  color: var(--ink-muted);
   font-size: 11px;
   font-weight: 600;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: var(--ink-muted);
 }
 
-.events {
-  display: grid;
-  gap: 0.35rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
+.allDayEvents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
-.event {
-  display: grid;
-  grid-template-columns: 5.5rem minmax(0, 1fr) auto;
-  gap: 0.65rem;
-  align-items: start;
-  padding: 0.55rem 0.65rem;
+.allDayPill,
+.eventPill {
   border: 1px solid transparent;
-  border-radius: 10px;
-  background: rgb(255 255 255 / 2.5%);
-}
-
-.event[data-live="true"] {
-  border-color: rgb(45 212 191 / 28%);
-  background: rgb(19 78 74 / 28%);
-}
-
-.time {
-  display: grid;
-  gap: 0.08rem;
-  padding-top: 0.08rem;
-  color: var(--ink-soft);
-  font-size: var(--text-sm);
-  font-variant-numeric: tabular-nums;
-}
-
-.time strong {
-  color: var(--ink);
-  font-weight: 600;
-}
-
-.time small {
-  color: var(--ink-muted);
-  font-size: 11px;
-}
-
-.eventBody {
-  display: grid;
-  gap: 0.15rem;
-  min-width: 0;
-}
-
-.eventTitle {
-  overflow: hidden;
-  color: var(--ink);
-  font-size: var(--text-sm);
-  font-weight: 600;
   text-decoration: none;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-a.eventTitle:hover {
-  color: var(--brand);
+.allDayPill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.85rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 4%);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
 }
 
-.location {
+.gridShell {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+  gap: 0.65rem;
   overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgb(12 13 15 / 55%);
+}
+
+.timeAxis {
+  position: relative;
+  padding-top: 0.15rem;
+}
+
+.timeTick {
   color: var(--ink-muted);
   font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transform: translateY(-0.35em);
+  text-align: right;
+  padding-right: 0.15rem;
+}
+
+.dayColumn {
+  position: relative;
+  min-height: 12rem;
+  margin-right: 0.55rem;
+}
+
+.hourLine {
+  position: absolute;
+  right: 0;
+  left: 0;
+  border-top: 1px solid rgb(255 255 255 / 5%);
+  pointer-events: none;
+}
+
+.nowLine {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: var(--brand);
+  pointer-events: none;
+  box-shadow: 0 0 12px rgb(45 212 191 / 45%);
+}
+
+.nowLine::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -0.28rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: var(--brand);
+  transform: translateY(-50%);
+}
+
+.emptyDay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--ink-muted);
+  font-size: var(--text-sm);
+  pointer-events: none;
+}
+
+.eventPill {
+  position: absolute;
+  right: 0.35rem;
+  left: 0.35rem;
+  z-index: 1;
+  display: grid;
+  align-content: start;
+  gap: 0.12rem;
+  overflow: hidden;
+  padding: 0.45rem 0.65rem;
+  border-radius: 12px;
+  background: rgb(28 30 34 / 92%);
+  color: var(--ink);
+  box-shadow: inset 3px 0 0 var(--event-accent, var(--brand));
+  transition:
+    transform 150ms ease-out,
+    background-color 140ms var(--ease-ui);
+}
+
+.eventPill strong {
+  overflow: hidden;
+  font-size: var(--text-sm);
+  font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.live {
-  align-self: center;
-  padding: 0.15rem 0.4rem;
-  border-radius: 999px;
-  background: rgb(45 212 191 / 16%);
-  color: var(--brand);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.eventPill span {
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.eventPill[data-tone="reading"],
+.allDayPill[data-tone="reading"] {
+  --event-accent: #34d399;
+  background: rgb(16 52 40 / 88%);
+}
+
+.eventPill[data-tone="university"],
+.allDayPill[data-tone="university"] {
+  --event-accent: #60a5fa;
+  background: rgb(22 40 68 / 90%);
+}
+
+.eventPill[data-tone="french"],
+.allDayPill[data-tone="french"] {
+  --event-accent: #c084fc;
+  background: rgb(46 28 68 / 90%);
+}
+
+.eventPill[data-tone="jiujitsu"],
+.allDayPill[data-tone="jiujitsu"] {
+  --event-accent: #fb923c;
+  background: rgb(58 34 18 / 90%);
+}
+
+.eventPill[data-tone="strength"],
+.allDayPill[data-tone="strength"] {
+  --event-accent: #2dd4bf;
+  background: rgb(15 48 46 / 90%);
+}
+
+.eventPill[data-tone="neutral"],
+.allDayPill[data-tone="neutral"] {
+  --event-accent: #94a3b8;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .action:hover:not(:disabled) {
+  .iconButton:hover,
+  .todayButton:hover {
+    border-color: rgb(45 212 191 / 28%);
+    background: rgb(255 255 255 / 6%);
+    color: var(--ink);
+  }
+
+  .action:hover {
     background: rgb(45 212 191 / 18%);
   }
 
-  .event:hover {
-    border-color: var(--line-strong);
-    background: var(--panel-soft);
+  .weekDay:hover .weekDayNumber {
+    background: rgb(255 255 255 / 6%);
   }
 
-  .event[data-live="true"]:hover {
-    border-color: rgb(45 212 191 / 38%);
-    background: rgb(19 78 74 / 36%);
+  .eventPill:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.06);
   }
 }
 
-.action:not(:disabled):active {
+.iconButton:active,
+.todayButton:active,
+.action:active,
+.weekDay:active {
   transform: scale(0.96);
 }
 
 @media (max-width: 40rem) {
-  .event {
-    grid-template-columns: 4.6rem minmax(0, 1fr);
+  .controls {
+    width: 100%;
+    justify-content: space-between;
   }
 
-  .live {
-    grid-column: 2;
-    justify-self: start;
+  .categorySelect {
+    width: min(100%, 10.5rem);
+  }
+
+  .weekDayNumber {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .gridShell {
+    grid-template-columns: 2.6rem minmax(0, 1fr);
+  }
+
+  .allDayRow {
+    grid-template-columns: 2.6rem minmax(0, 1fr);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .action {
+  .iconButton,
+  .todayButton,
+  .action,
+  .weekDay,
+  .weekDayNumber,
+  .weekDayDot,
+  .eventPill {
     transition: none;
   }
 
-  .action:not(:disabled):active {
+  .iconButton:active,
+  .todayButton:active,
+  .action:active,
+  .weekDay:active,
+  .eventPill:hover {
     transform: none;
   }
 }

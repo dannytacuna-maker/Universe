@@ -2,6 +2,8 @@
 
 import { useMemo, useState, type FormEvent } from "react";
 
+import { PillSelect } from "@/components/ui/pill-select";
+
 import type {
   NewStrengthTrainingSession,
   StrengthExerciseEntry,
@@ -60,6 +62,13 @@ export function StrengthSessionLog({
     useState<StrengthTrainingSession | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [focus, setFocus] = useState<StrengthTrainingFocus>("push");
+  const [focusSessionKey, setFocusSessionKey] = useState("new");
+  const nextFocusSessionKey = editingSession?.id ?? "new";
+  if (focusSessionKey !== nextFocusSessionKey) {
+    setFocusSessionKey(nextFocusSessionKey);
+    setFocus(editingSession?.focus ?? "push");
+  }
   const summary = useMemo(() => {
     const threeWeeksAgo = new Date();
     threeWeeksAgo.setDate(threeWeeksAgo.getDate() - 21);
@@ -221,20 +230,16 @@ export function StrengthSessionLog({
               type="date"
             />
           </label>
-          <label>
-            Focus
-            <select
-              defaultValue={editingSession?.focus ?? "push"}
-              key={`focus-${editingSession?.id ?? "new"}`}
-              name="focus"
-            >
-              {Object.entries(focusLabels).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <PillSelect
+            label="Focus"
+            name="focus"
+            onChange={(value) => setFocus(value as StrengthTrainingFocus)}
+            options={Object.entries(focusLabels).map(([value, label]) => ({
+              label,
+              value,
+            }))}
+            value={focus}
+          />
         </div>
 
         <fieldset className="strength-session-log__exercises">

@@ -13,6 +13,7 @@ import {
   WorkspaceGrid,
   WorkspacePanel,
 } from "@/components/ui/mission-workspace";
+import { PillSelect } from "@/components/ui/pill-select";
 
 import type { JiuJitsuProgress } from "./jiu-jitsu-progress";
 import {
@@ -113,16 +114,22 @@ export function JiuJitsuTrainingLog({
   const [isSaving, setIsSaving] = useState(false);
   const [pendingRemovalId, setPendingRemovalId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState("");
+  const [classType, setClassType] = useState<JiuJitsuClassType>("gi");
+  const [classTypeSessionKey, setClassTypeSessionKey] = useState("new");
   const submissionLockRef = useRef(false);
   const removalLockRef = useRef(false);
   const weeklyRhythm = useMemo(() => deriveWeeklyRhythm(sessions), [sessions]);
+  const editingSession =
+    sessions.find((session) => session.id === editingSessionId) ?? null;
+  const nextClassTypeSessionKey = editingSession?.id ?? "new";
+  if (classTypeSessionKey !== nextClassTypeSessionKey) {
+    setClassTypeSessionKey(nextClassTypeSessionKey);
+    setClassType(editingSession?.classType ?? "gi");
+  }
 
   if (!isVisible) {
     return null;
   }
-
-  const editingSession =
-    sessions.find((session) => session.id === editingSessionId) ?? null;
   const hasDetails =
     editingSession !== null &&
     (editingSession.techniques.length > 0 ||
@@ -333,21 +340,15 @@ export function JiuJitsuTrainingLog({
                 type="date"
               />
             </label>
-            <label>
-              Session
-              <select
-                defaultValue={editingSession?.classType ?? "gi"}
-                name="classType"
-              >
-                {Object.entries(jiuJitsuClassTypeLabels).map(
-                  ([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ),
-                )}
-              </select>
-            </label>
+            <PillSelect
+              label="Session"
+              name="classType"
+              onChange={(value) => setClassType(value as JiuJitsuClassType)}
+              options={Object.entries(jiuJitsuClassTypeLabels).map(
+                ([value, label]) => ({ label, value }),
+              )}
+              value={classType}
+            />
             <label>
               Minutes
               <input

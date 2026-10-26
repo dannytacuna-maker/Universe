@@ -15,6 +15,7 @@ import {
   WorkspaceGrid,
   WorkspacePanel,
 } from "@/components/ui/mission-workspace";
+import { PillSelect } from "@/components/ui/pill-select";
 
 import {
   parseReadingShelfId,
@@ -161,6 +162,8 @@ export function CelestialLibraryDashboard({
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
   const [checkInRevision, setCheckInRevision] = useState(0);
   const [feedback, setFeedback] = useState("");
+  const [newBookShelf, setNewBookShelf] =
+    useState<ReadingShelfId>("want-to-read");
   const operationLockRef = useRef(false);
 
   const selectedBook = books.find((book) => book.id === selectedBookId) ?? null;
@@ -226,6 +229,7 @@ export function CelestialLibraryDashboard({
 
     if (didSave) {
       form.reset();
+      setNewBookShelf("want-to-read");
       setIsAddingBook(false);
     }
   };
@@ -425,16 +429,16 @@ export function CelestialLibraryDashboard({
                 Pages
                 <input min="1" name="totalPages" required type="number" />
               </label>
-              <label>
-                Shelf
-                <select defaultValue="want-to-read" name="shelf">
-                  {shelfOrder.map((shelf) => (
-                    <option key={shelf} value={shelf}>
-                      {readingShelfLabels[shelf]}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <PillSelect
+                label="Shelf"
+                name="shelf"
+                onChange={(value) => setNewBookShelf(value as ReadingShelfId)}
+                options={shelfOrder.map((shelf) => ({
+                  label: readingShelfLabels[shelf],
+                  value: shelf,
+                }))}
+                value={newBookShelf}
+              />
               <button disabled={isSaving} type="submit">
                 Add to library
               </button>

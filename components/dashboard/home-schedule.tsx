@@ -1,10 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { PillSelect } from "@/components/ui/pill-select";
 import {
-  groupCalendarEventsByLocalDay,
-  type CalendarScheduleDay,
+  addDays,
+  buildCalendarWeek,
+  calendarEventToneLabels,
+  eventsForDateKey,
+  formatClock,
+  resolveCalendarEventTone,
+  startOfLocalDay,
+  toDateKey,
+  type CalendarEventTone,
+  type CalendarScheduleEvent,
   type CalendarSchedulePayload,
 } from "@/lib/calendar-schedule";
 
@@ -15,44 +24,18 @@ type LoadState =
   | Readonly<{ kind: "ready"; payload: CalendarSchedulePayload }>
   | Readonly<{ kind: "error"; detail: string }>;
 
-function formatEventTime(event: CalendarScheduleDay["events"][number]) {
-  if (event.allDay) return "All day";
+const dayStartHour = 8;
+const dayEndHour = 20;
+const hourHeightPx = 56;
 
-  return new Intl.DateTimeFormat(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(event.startsAt));
-}
-
-function formatEventRange(event: CalendarScheduleDay["events"][number]) {
-  if (event.allDay || event.endsAt === null) return null;
-
-  return new Intl.DateTimeFormat(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(event.endsAt));
-}
-
-function isHappeningNow(
-  event: CalendarScheduleDay["events"][number],
-  now: Date,
-) {
-  if (event.allDay) {
-    const start = new Date(event.startsAt);
-    return (
-      start.getFullYear() === now.getFullYear() &&
-      start.getMonth() === now.getMonth() &&
-      start.getDate() === now.getDate()
-    );
-  }
-
-  const start = new Date(event.startsAt).getTime();
-  const end = event.endsAt
-    ? new Date(event.endsAt).getTime()
-    : start + 60 * 60 * 1000;
-  const stamp = now.getTime();
-  return stamp >= start && stamp < end;
-}
+const categoryOptions = [
+  { label: "All categories", value: "all" },
+  ...(
+    Object.entries(calendarEventToneLabels) as Array<
+      [CalendarEventTone, string]
+    >
+  ).map(([value, label]) => ({ label, value })),
+] as const;
 
 async function readSchedulePayload(
   response: Response,
@@ -67,9 +50,79 @@ async function readSchedulePayload(
   }
 }
 
+function minutesSinceDayStart(date: Date) {
+  return date.getHours() * 60 + date.getMinutes();
+}
+
+function eventWindow(event: CalendarScheduleEvent) {
+  const start = new Date(event.startsAt);
+  const end = event.endsAt
+    ? new Date(event.endsAt)
+    : new Date(start.getTime() + 60 * 60 * 1000);
+  return { end, start };
+}
+
+function layoutEvent(event: CalendarScheduleEvent) {
+  if (event.allDay) {
+    return {
+      allDay: true as const,
+      tone: resolveCalendarEventTone(event.title),
+    };
+  }
+
+  const { end, start } = eventWindow(event);
+  const gridStart = dayStartHour * 60;
+  const gridEnd = dayEndHour * 60;
+  const startMinutes = Math.max(minutesSinceDayStart(start), gridStart);
+  const endMinutes = Math.min(
+    Math.max(minutesSinceDayStart(end), startMinutes + 30),
+    gridEnd,
+  );
+
+  return {
+    allDay: false as const,
+    height: ((endMinutes - startMinutes) / 60) * hourHeightPx,
+    timeLabel: `${formatClock(start)} – ${formatClock(end)}`,
+    tone: resolveCalendarEventTone(event.title),
+    top: ((startMinutes - gridStart) / 60) * hourHeightPx,
+  };
+}
+
+function ChevronLeftIcon() {
+  return (
+    <svg fill="none" height="16" viewBox="0 0 16 16" width="16" aria-hidden>
+      <path
+        d="M10 3.5 5.5 8 10 12.5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.6"
+      />
+    </svg>
+  );
+}
+
+function ChevronRightIcon() {
+  return (
+    <svg fill="none" height="16" viewBox="0 0 16 16" width="16" aria-hidden>
+      <path
+        d="M6 3.5 10.5 8 6 12.5"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.6"
+      />
+    </svg>
+  );
+}
+
 export function HomeSchedule() {
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   const [now] = useState(() => new Date());
+  const [selectedDate, setSelectedDate] = useState(() =>
+    startOfLocalDay(new Date()),
+  );
+  const [category, setCategory] = useState<string>("all");
   const requestIdRef = useRef(0);
 
   const loadSchedule = useCallback(async () => {
@@ -118,24 +171,81 @@ export function HomeSchedule() {
     void loadSchedule();
   };
 
-  const days =
-    state.kind === "ready" && state.payload.status === "ok"
-      ? groupCalendarEventsByLocalDay(state.payload.events, { now })
-      : [];
-  const eventCount = days.reduce((total, day) => total + day.events.length, 0);
+  const week = useMemo(
+    () => buildCalendarWeek(selectedDate, { now }),
+    [now, selectedDate],
+  );
+  const selectedKey = toDateKey(selectedDate);
+  const todayKey = toDateKey(now);
+
+  const dayEvents = useMemo(() => {
+    if (state.kind !== "ready" || state.payload.status !== "ok") return [];
+    const events = eventsForDateKey(state.payload.events, selectedKey);
+    if (category === "all") return events;
+    return events.filter(
+      (event) => resolveCalendarEventTone(event.title) === category,
+    );
+  }, [category, selectedKey, state]);
+
+  const timedEvents = dayEvents.filter((event) => !event.allDay);
+  const allDayEvents = dayEvents.filter((event) => event.allDay);
+  const hours = Array.from(
+    { length: dayEndHour - dayStartHour + 1 },
+    (_, index) => dayStartHour + index,
+  );
+  const gridHeight = (dayEndHour - dayStartHour) * hourHeightPx;
+  const nowMinutes = minutesSinceDayStart(now);
+  const showNowLine =
+    selectedKey === todayKey &&
+    nowMinutes >= dayStartHour * 60 &&
+    nowMinutes <= dayEndHour * 60;
+  const nowTop = ((nowMinutes - dayStartHour * 60) / 60) * hourHeightPx;
+
+  const shiftWeek = (deltaWeeks: number) => {
+    setSelectedDate((current) => addDays(current, deltaWeeks * 7));
+  };
+
+  const goToday = () => {
+    setSelectedDate(startOfLocalDay(now));
+  };
 
   return (
     <section aria-labelledby="home-schedule-title" className={styles.schedule}>
       <div className={styles.header}>
-        <div>
-          <span className={styles.eyebrow}>Google Calendar</span>
-          <h2 id="home-schedule-title">Schedule</h2>
+        <h2 id="home-schedule-title">Calendar</h2>
+        <div className={styles.controls}>
+          <PillSelect
+            className={styles.categorySelect}
+            onChange={setCategory}
+            options={[...categoryOptions]}
+            value={category}
+          />
+          <div className={styles.navGroup}>
+            <button
+              aria-label="Previous week"
+              className={styles.iconButton}
+              onClick={() => shiftWeek(-1)}
+              type="button"
+            >
+              <ChevronLeftIcon />
+            </button>
+            <button
+              className={styles.todayButton}
+              onClick={goToday}
+              type="button"
+            >
+              Today
+            </button>
+            <button
+              aria-label="Next week"
+              className={styles.iconButton}
+              onClick={() => shiftWeek(1)}
+              type="button"
+            >
+              <ChevronRightIcon />
+            </button>
+          </div>
         </div>
-        {state.kind === "ready" && state.payload.status === "ok" ? (
-          <span className={styles.meta}>
-            {eventCount === 0 ? "Next 7 days clear" : `${eventCount} upcoming`}
-          </span>
-        ) : null}
       </div>
 
       {state.kind === "loading" ? (
@@ -167,66 +277,133 @@ export function HomeSchedule() {
       ) : null}
 
       {state.kind === "ready" && state.payload.status === "ok" ? (
-        eventCount === 0 ? (
-          <div className={styles.panel}>
-            <p className={styles.quiet}>
-              Nothing scheduled for the next 7 days.
-            </p>
+        <>
+          <div aria-label="Week" className={styles.weekStrip} role="tablist">
+            {week.map((day) => {
+              const selected = day.dateKey === selectedKey;
+              return (
+                <button
+                  aria-selected={selected}
+                  className={styles.weekDay}
+                  data-selected={selected ? "true" : undefined}
+                  data-today={day.isToday ? "true" : undefined}
+                  key={day.dateKey}
+                  onClick={() => setSelectedDate(day.date)}
+                  role="tab"
+                  type="button"
+                >
+                  <span className={styles.weekDayLabel}>{day.weekday}</span>
+                  <span className={styles.weekDayNumber}>{day.dayNumber}</span>
+                  <span aria-hidden="true" className={styles.weekDayDot} />
+                </button>
+              );
+            })}
           </div>
-        ) : (
-          <div className={styles.days}>
-            {days
-              .filter((day) => day.events.length > 0)
-              .map((day) => (
-                <div className={styles.day} key={day.dateKey}>
-                  <h3 className={styles.dayLabel}>{day.label}</h3>
-                  <ul className={styles.events}>
-                    {day.events.map((event) => {
-                      const ends = formatEventRange(event);
-                      const live = isHappeningNow(event, now);
 
-                      return (
-                        <li
-                          className={styles.event}
-                          data-live={live ? "true" : undefined}
-                          key={event.id}
-                        >
-                          <span className={styles.time}>
-                            <strong>{formatEventTime(event)}</strong>
-                            {ends ? <small>– {ends}</small> : null}
-                          </span>
-                          <span className={styles.eventBody}>
-                            {event.htmlLink ? (
-                              <a
-                                className={styles.eventTitle}
-                                href={event.htmlLink}
-                                rel="noreferrer"
-                                target="_blank"
-                              >
-                                {event.title}
-                              </a>
-                            ) : (
-                              <span className={styles.eventTitle}>
-                                {event.title}
-                              </span>
-                            )}
-                            {event.location ? (
-                              <span className={styles.location}>
-                                {event.location}
-                              </span>
-                            ) : null}
-                          </span>
-                          {live ? (
-                            <span className={styles.live}>Now</span>
-                          ) : null}
-                        </li>
-                      );
-                    })}
-                  </ul>
+          {allDayEvents.length > 0 ? (
+            <div className={styles.allDayRow}>
+              <span className={styles.allDayLabel}>All day</span>
+              <div className={styles.allDayEvents}>
+                {allDayEvents.map((event) => (
+                  <a
+                    className={styles.allDayPill}
+                    data-tone={resolveCalendarEventTone(event.title)}
+                    href={event.htmlLink ?? undefined}
+                    key={event.id}
+                    rel={event.htmlLink ? "noreferrer" : undefined}
+                    target={event.htmlLink ? "_blank" : undefined}
+                  >
+                    {event.title}
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          <div className={styles.gridShell}>
+            <div className={styles.timeAxis} aria-hidden="true">
+              {hours.map((hour) => (
+                <div
+                  className={styles.timeTick}
+                  key={hour}
+                  style={{ height: hour === dayEndHour ? 0 : hourHeightPx }}
+                >
+                  {hour === dayEndHour
+                    ? null
+                    : `${String(hour).padStart(2, "0")}:00`}
                 </div>
               ))}
+            </div>
+
+            <div className={styles.dayColumn} style={{ height: gridHeight }}>
+              {hours.slice(0, -1).map((hour) => (
+                <div
+                  aria-hidden="true"
+                  className={styles.hourLine}
+                  key={hour}
+                  style={{ top: (hour - dayStartHour) * hourHeightPx }}
+                />
+              ))}
+
+              {showNowLine ? (
+                <div
+                  aria-hidden="true"
+                  className={styles.nowLine}
+                  style={{ top: nowTop }}
+                />
+              ) : null}
+
+              {timedEvents.length === 0 ? (
+                <div className={styles.emptyDay}>Nothing scheduled</div>
+              ) : (
+                timedEvents.map((event) => {
+                  const layout = layoutEvent(event);
+                  if (layout.allDay) return null;
+
+                  const content = (
+                    <>
+                      <strong>{event.title}</strong>
+                      <span>{layout.timeLabel}</span>
+                    </>
+                  );
+
+                  const className = styles.eventPill;
+                  const style = {
+                    height: Math.max(layout.height, 44),
+                    top: layout.top,
+                  } as const;
+
+                  if (event.htmlLink) {
+                    return (
+                      <a
+                        className={className}
+                        data-tone={layout.tone}
+                        href={event.htmlLink}
+                        key={event.id}
+                        rel="noreferrer"
+                        style={style}
+                        target="_blank"
+                      >
+                        {content}
+                      </a>
+                    );
+                  }
+
+                  return (
+                    <div
+                      className={className}
+                      data-tone={layout.tone}
+                      key={event.id}
+                      style={style}
+                    >
+                      {content}
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
-        )
+        </>
       ) : null}
     </section>
   );

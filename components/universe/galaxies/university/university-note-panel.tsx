@@ -2,6 +2,8 @@
 
 import { useRef, useState, type FormEvent } from "react";
 
+import { PillSelect } from "@/components/ui/pill-select";
+
 import type {
   NewUniversityNote,
   UniversityCourseId,
@@ -47,6 +49,7 @@ export function UniversityNotePanel({
     null,
   );
   const [feedback, setFeedback] = useState("");
+  const [kind, setKind] = useState<UniversityNoteKind>("note");
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -70,6 +73,7 @@ export function UniversityNotePanel({
     try {
       await onAdd(input);
       form.reset();
+      setKind("note");
       setFeedback(
         input.kind === "reflection" ? "Reflection saved." : "Note saved.",
       );
@@ -120,16 +124,16 @@ export function UniversityNotePanel({
       <details className={styles.composer} open={notes.length === 0}>
         <summary>Record a thought</summary>
         <form className={styles.recordForm} onSubmit={handleSubmit}>
-          <label>
-            <span>Type</span>
-            <select defaultValue="note" name="kind">
-              {noteKindOptions.map((kind) => (
-                <option key={kind.id} value={kind.id}>
-                  {kind.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <PillSelect
+            label="Type"
+            name="kind"
+            onChange={(value) => setKind(value as UniversityNoteKind)}
+            options={noteKindOptions.map((option) => ({
+              label: option.label,
+              value: option.id,
+            }))}
+            value={kind}
+          />
           <label className={styles.wideField}>
             <span>What should be kept?</span>
             <textarea

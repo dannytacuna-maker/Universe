@@ -2,6 +2,8 @@
 
 import { useRef, useState, type FormEvent } from "react";
 
+import { PillSelect } from "@/components/ui/pill-select";
+
 import type {
   NewUniversityAssignment,
   UniversityAssignment,
@@ -58,8 +60,15 @@ export function UniversityAssignmentPanel({
   );
   const [feedback, setFeedback] = useState("");
   const [referenceTime] = useState(() => Date.now());
+  const [status, setStatus] = useState<UniversityAssignmentStatus>("planned");
+  const [statusKey, setStatusKey] = useState("new");
   const editingAssignment =
     assignments.find((assignment) => assignment.id === editingId) ?? null;
+  const nextStatusKey = editingAssignment?.id ?? "new";
+  if (statusKey !== nextStatusKey) {
+    setStatusKey(nextStatusKey);
+    setStatus(editingAssignment?.status ?? "planned");
+  }
 
   const openNewAssignment = () => {
     setEditingId(null);
@@ -204,19 +213,16 @@ export function UniversityAssignmentPanel({
               type="datetime-local"
             />
           </label>
-          <label>
-            <span>Status</span>
-            <select
-              defaultValue={editingAssignment?.status ?? "planned"}
-              name="status"
-            >
-              {assignmentStatusOptions.map((status) => (
-                <option key={status.id} value={status.id}>
-                  {status.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <PillSelect
+            label="Status"
+            name="status"
+            onChange={(value) => setStatus(value as UniversityAssignmentStatus)}
+            options={assignmentStatusOptions.map((option) => ({
+              label: option.label,
+              value: option.id,
+            }))}
+            value={status}
+          />
           <label className={styles.wideField}>
             <span>Context · optional</span>
             <textarea
