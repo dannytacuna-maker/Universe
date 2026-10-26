@@ -24,9 +24,22 @@ type LoadState =
   | Readonly<{ kind: "ready"; payload: CalendarSchedulePayload }>
   | Readonly<{ kind: "error"; detail: string }>;
 
-const dayStartHour = 8;
-const dayEndHour = 20;
-const hourHeightPx = 56;
+type LaidOutEvent = Readonly<{
+  column: number;
+  columnCount: number;
+  endMinutes: number;
+  event: CalendarScheduleEvent;
+  height: number;
+  startMinutes: number;
+  timeLabel: string;
+  tone: CalendarEventTone;
+  top: number;
+}>;
+
+const hourHeightPx = 32;
+const defaultStartHour = 8;
+const defaultEndHour = 18;
+const minEventHeightPx = 28;
 
 const categoryOptions = [
   { label: "All categories", value: "all" },
@@ -54,43 +67,121 @@ function minutesSinceDayStart(date: Date) {
   return date.getHours() * 60 + date.getMinutes();
 }
 
-function eventWindow(event: CalendarScheduleEvent) {
+function eventRangeMinutes(event: CalendarScheduleEvent) {
   const start = new Date(event.startsAt);
   const end = event.endsAt
     ? new Date(event.endsAt)
     : new Date(start.getTime() + 60 * 60 * 1000);
-  return { end, start };
+  const startMinutes = minutesSinceDayStart(start);
+  const endMinutes = Math.max(minutesSinceDayStart(end), startMinutes + 30);
+  return {
+    endMinutes,
+    startMinutes,
+    timeLabel: `${formatClock(start)} – ${formatClock(end)}`,
+  };
 }
 
-function layoutEvent(event: CalendarScheduleEvent) {
-  if (event.allDay) {
-    return {
-      allDay: true as const,
-      tone: resolveCalendarEventTone(event.title),
-    };
+function resolveDayWindow(events: readonly CalendarScheduleEvent[]) {
+  if (events.length === 0) {
+    return { endHour: defaultEndHour, startHour: defaultStartHour };
   }
 
-  const { end, start } = eventWindow(event);
-  const gridStart = dayStartHour * 60;
-  const gridEnd = dayEndHour * 60;
-  const startMinutes = Math.max(minutesSinceDayStart(start), gridStart);
-  const endMinutes = Math.min(
-    Math.max(minutesSinceDayStart(end), startMinutes + 30),
-    gridEnd,
+  let earliest = 24 * 60;
+  let latest = 0;
+  for (const event of events) {
+    const range = eventRangeMinutes(event);
+    earliest = Math.min(earliest, range.startMinutes);
+    latest = Math.max(latest, range.endMinutes);
+  }
+
+  const startHour = Math.max(
+    0,
+    Math.min(defaultStartHour, Math.floor(earliest / 60) - 0),
+  );
+  const endHour = Math.min(
+    24,
+    Math.max(defaultEndHour, Math.ceil(latest / 60)),
   );
 
   return {
-    allDay: false as const,
-    height: ((endMinutes - startMinutes) / 60) * hourHeightPx,
-    timeLabel: `${formatClock(start)} – ${formatClock(end)}`,
-    tone: resolveCalendarEventTone(event.title),
-    top: ((startMinutes - gridStart) / 60) * hourHeightPx,
+    endHour: Math.max(startHour + 4, endHour),
+    startHour,
   };
+}
+
+function layoutTimedEvents(
+  events: readonly CalendarScheduleEvent[],
+  startHour: number,
+  endHour: number,
+): readonly LaidOutEvent[] {
+  const gridStart = startHour * 60;
+  const gridEnd = endHour * 60;
+
+  const prepared = events
+    .map((event) => {
+      const range = eventRangeMinutes(event);
+      const startMinutes = Math.max(range.startMinutes, gridStart);
+      const endMinutes = Math.min(
+        Math.max(range.endMinutes, startMinutes + 20),
+        gridEnd,
+      );
+      return {
+        endMinutes,
+        event,
+        startMinutes,
+        timeLabel: range.timeLabel,
+        tone: resolveCalendarEventTone(event.title),
+      };
+    })
+    .sort(
+      (left, right) =>
+        left.startMinutes - right.startMinutes ||
+        right.endMinutes - left.endMinutes,
+    );
+
+  const columnEnds: number[] = [];
+  const withColumns = prepared.map((item) => {
+    let column = columnEnds.findIndex((end) => end <= item.startMinutes);
+    if (column === -1) {
+      column = columnEnds.length;
+      columnEnds.push(item.endMinutes);
+    } else {
+      columnEnds[column] = item.endMinutes;
+    }
+    return { ...item, column };
+  });
+
+  return withColumns.map((item) => {
+    const overlapping = withColumns.filter(
+      (other) =>
+        other.startMinutes < item.endMinutes &&
+        other.endMinutes > item.startMinutes,
+    );
+    const columnCount = Math.max(
+      1,
+      ...overlapping.map((other) => other.column + 1),
+    );
+
+    return {
+      column: item.column,
+      columnCount,
+      endMinutes: item.endMinutes,
+      event: item.event,
+      height: Math.max(
+        ((item.endMinutes - item.startMinutes) / 60) * hourHeightPx,
+        minEventHeightPx,
+      ),
+      startMinutes: item.startMinutes,
+      timeLabel: item.timeLabel,
+      tone: item.tone,
+      top: ((item.startMinutes - gridStart) / 60) * hourHeightPx,
+    };
+  });
 }
 
 function ChevronLeftIcon() {
   return (
-    <svg fill="none" height="16" viewBox="0 0 16 16" width="16" aria-hidden>
+    <svg fill="none" height="14" viewBox="0 0 16 16" width="14" aria-hidden>
       <path
         d="M10 3.5 5.5 8 10 12.5"
         stroke="currentColor"
@@ -104,7 +195,7 @@ function ChevronLeftIcon() {
 
 function ChevronRightIcon() {
   return (
-    <svg fill="none" height="16" viewBox="0 0 16 16" width="16" aria-hidden>
+    <svg fill="none" height="14" viewBox="0 0 16 16" width="14" aria-hidden>
       <path
         d="M6 3.5 10.5 8 6 12.5"
         stroke="currentColor"
@@ -189,17 +280,19 @@ export function HomeSchedule() {
 
   const timedEvents = dayEvents.filter((event) => !event.allDay);
   const allDayEvents = dayEvents.filter((event) => event.allDay);
+  const { endHour, startHour } = resolveDayWindow(timedEvents);
   const hours = Array.from(
-    { length: dayEndHour - dayStartHour + 1 },
-    (_, index) => dayStartHour + index,
+    { length: Math.max(endHour - startHour, 1) },
+    (_, index) => startHour + index,
   );
-  const gridHeight = (dayEndHour - dayStartHour) * hourHeightPx;
+  const gridHeight = Math.max(endHour - startHour, 1) * hourHeightPx;
+  const laidOut = layoutTimedEvents(timedEvents, startHour, endHour);
   const nowMinutes = minutesSinceDayStart(now);
   const showNowLine =
     selectedKey === todayKey &&
-    nowMinutes >= dayStartHour * 60 &&
-    nowMinutes <= dayEndHour * 60;
-  const nowTop = ((nowMinutes - dayStartHour * 60) / 60) * hourHeightPx;
+    nowMinutes >= startHour * 60 &&
+    nowMinutes <= endHour * 60;
+  const nowTop = ((nowMinutes - startHour * 60) / 60) * hourHeightPx;
 
   const shiftWeek = (deltaWeeks: number) => {
     setSelectedDate((current) => addDays(current, deltaWeeks * 7));
@@ -304,44 +397,58 @@ export function HomeSchedule() {
             <div className={styles.allDayRow}>
               <span className={styles.allDayLabel}>All day</span>
               <div className={styles.allDayEvents}>
-                {allDayEvents.map((event) => (
-                  <a
-                    className={styles.allDayPill}
-                    data-tone={resolveCalendarEventTone(event.title)}
-                    href={event.htmlLink ?? undefined}
-                    key={event.id}
-                    rel={event.htmlLink ? "noreferrer" : undefined}
-                    target={event.htmlLink ? "_blank" : undefined}
-                  >
-                    {event.title}
-                  </a>
-                ))}
+                {allDayEvents.map((event) => {
+                  const className = styles.allDayPill;
+                  const tone = resolveCalendarEventTone(event.title);
+                  if (event.htmlLink) {
+                    return (
+                      <a
+                        className={className}
+                        data-tone={tone}
+                        href={event.htmlLink}
+                        key={event.id}
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        {event.title}
+                      </a>
+                    );
+                  }
+
+                  return (
+                    <span className={className} data-tone={tone} key={event.id}>
+                      {event.title}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           ) : null}
 
           <div className={styles.gridShell}>
-            <div className={styles.timeAxis} aria-hidden="true">
+            <div
+              aria-hidden="true"
+              className={styles.timeAxis}
+              style={{ height: gridHeight }}
+            >
               {hours.map((hour) => (
                 <div
                   className={styles.timeTick}
                   key={hour}
-                  style={{ height: hour === dayEndHour ? 0 : hourHeightPx }}
+                  style={{ top: (hour - startHour) * hourHeightPx }}
                 >
-                  {hour === dayEndHour
-                    ? null
-                    : `${String(hour).padStart(2, "0")}:00`}
+                  {`${String(hour).padStart(2, "0")}:00`}
                 </div>
               ))}
             </div>
 
             <div className={styles.dayColumn} style={{ height: gridHeight }}>
-              {hours.slice(0, -1).map((hour) => (
+              {hours.map((hour) => (
                 <div
                   aria-hidden="true"
                   className={styles.hourLine}
                   key={hour}
-                  style={{ top: (hour - dayStartHour) * hourHeightPx }}
+                  style={{ top: (hour - startHour) * hourHeightPx }}
                 />
               ))}
 
@@ -353,33 +460,32 @@ export function HomeSchedule() {
                 />
               ) : null}
 
-              {timedEvents.length === 0 ? (
+              {laidOut.length === 0 ? (
                 <div className={styles.emptyDay}>Nothing scheduled</div>
               ) : (
-                timedEvents.map((event) => {
-                  const layout = layoutEvent(event);
-                  if (layout.allDay) return null;
-
+                laidOut.map((item) => {
+                  const width = `calc((100% - 0.5rem) / ${item.columnCount})`;
+                  const left = `calc(0.25rem + ((100% - 0.5rem) / ${item.columnCount}) * ${item.column})`;
                   const content = (
                     <>
-                      <strong>{event.title}</strong>
-                      <span>{layout.timeLabel}</span>
+                      <strong>{item.event.title}</strong>
+                      <span>{item.timeLabel}</span>
                     </>
                   );
-
-                  const className = styles.eventPill;
                   const style = {
-                    height: Math.max(layout.height, 44),
-                    top: layout.top,
+                    height: item.height,
+                    left,
+                    top: item.top,
+                    width,
                   } as const;
 
-                  if (event.htmlLink) {
+                  if (item.event.htmlLink) {
                     return (
                       <a
-                        className={className}
-                        data-tone={layout.tone}
-                        href={event.htmlLink}
-                        key={event.id}
+                        className={styles.eventPill}
+                        data-tone={item.tone}
+                        href={item.event.htmlLink}
+                        key={item.event.id}
                         rel="noreferrer"
                         style={style}
                         target="_blank"
@@ -391,9 +497,9 @@ export function HomeSchedule() {
 
                   return (
                     <div
-                      className={className}
-                      data-tone={layout.tone}
-                      key={event.id}
+                      className={styles.eventPill}
+                      data-tone={item.tone}
+                      key={item.event.id}
                       style={style}
                     >
                       {content}
