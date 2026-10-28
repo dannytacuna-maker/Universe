@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { PillSelect } from "@/components/ui/pill-select";
 import {
@@ -32,8 +32,8 @@ type LaidOutEvent = Readonly<{
 }>;
 
 const hourHeightPx = 36;
-const defaultStartHour = 10;
-const defaultEndHour = 21;
+const gridStartHour = 7;
+const gridEndHour = 22;
 const minEventHeightPx = 30;
 
 const categoryOptions = [
@@ -64,30 +64,18 @@ function eventRangeMinutes(event: CalendarScheduleEvent) {
 }
 
 function resolveDayWindow(events: readonly CalendarScheduleEvent[]) {
-  if (events.length === 0) {
-    return { endHour: defaultEndHour, startHour: defaultStartHour };
-  }
+  let earliest = gridStartHour * 60;
+  let latest = gridEndHour * 60;
 
-  let earliest = 24 * 60;
-  let latest = 0;
   for (const event of events) {
     const range = eventRangeMinutes(event);
     earliest = Math.min(earliest, range.startMinutes);
     latest = Math.max(latest, range.endMinutes);
   }
 
-  const startHour = Math.max(
-    0,
-    Math.min(defaultStartHour, Math.floor(earliest / 60)),
-  );
-  const endHour = Math.min(
-    24,
-    Math.max(defaultEndHour, Math.ceil(latest / 60)),
-  );
-
   return {
-    endHour: Math.max(startHour + 4, endHour),
-    startHour,
+    endHour: Math.min(24, Math.max(gridEndHour, Math.ceil(latest / 60))),
+    startHour: Math.max(0, Math.min(gridStartHour, Math.floor(earliest / 60))),
   };
 }
 
@@ -203,6 +191,7 @@ export function HomeSchedule() {
     startOfLocalDay(new Date()),
   );
   const [category, setCategory] = useState<string>("all");
+  const gridShellRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const tick = () => setNow(new Date());
@@ -245,6 +234,22 @@ export function HomeSchedule() {
     nowMinutes >= startHour * 60 &&
     nowMinutes <= endHour * 60;
   const nowTop = ((nowMinutes - startHour * 60) / 60) * hourHeightPx;
+
+  useEffect(() => {
+    const shell = gridShellRef.current;
+    if (!shell) return;
+
+    const focusMinutes =
+      selectedKey === todayKey
+        ? minutesSinceDayStart(new Date())
+        : timedEvents.length > 0
+          ? eventRangeMinutes(timedEvents[0]!).startMinutes
+          : 10 * 60;
+    const focusTop = ((focusMinutes - startHour * 60) / 60) * hourHeightPx;
+    shell.scrollTop = Math.max(0, focusTop - shell.clientHeight * 0.28);
+    // Reposition when the visible day or category changes — not on the clock tick.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
+  }, [category, selectedKey, startHour]);
 
   const daysWithEvents = useMemo(() => {
     const keys = new Set<string>();
@@ -349,7 +354,7 @@ export function HomeSchedule() {
         </div>
       ) : null}
 
-      <div className={styles.gridShell}>
+      <div className={styles.gridShell} ref={gridShellRef}>
         <div
           aria-hidden="true"
           className={styles.timeAxis}

@@ -1,3 +1,5 @@
+import { universityCourseSystems } from "@/components/universe/galaxies/university/university-course-systems";
+import type { CourseWeekday } from "@/components/universe/galaxies/university/course-system-definition";
 import {
   addDays,
   startOfLocalDay,
@@ -15,27 +17,19 @@ type MissionCalendarTemplate = Readonly<{
   weekday: number;
 }>;
 
+const weekdayToJsDay = {
+  friday: 5,
+  monday: 1,
+  thursday: 4,
+  tuesday: 2,
+  wednesday: 3,
+} as const satisfies Record<CourseWeekday, number>;
+
 /**
- * Site-owned weekly schedule mirrored from the owner's Google Calendar week
- * (classes + jiu-jitsu). Not synced live — edit this file when the timetable changes.
+ * Extra recurring blocks that live outside the university course catalog
+ * (training). Edit here when these change.
  */
-const weeklyTemplates = [
-  {
-    weekday: 1,
-    title: "LANGUAGE A III",
-    startTime: "14:30",
-    endTime: "16:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
-  {
-    weekday: 1,
-    title: "LANGUAGE B II",
-    startTime: "16:30",
-    endTime: "18:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
+const trainingTemplates = [
   {
     weekday: 1,
     title: "Jiu-Jitsu Training UEM",
@@ -46,107 +40,11 @@ const weeklyTemplates = [
   },
   {
     weekday: 2,
-    title: "HUMAN RESOURCES",
-    startTime: "10:30",
-    endTime: "12:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
-  {
-    weekday: 2,
-    title: "MANAGEMENT CONTROL",
-    startTime: "12:30",
-    endTime: "14:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
-  {
-    weekday: 2,
-    title: "FINANCIAL ANALYSIS",
-    startTime: "14:30",
-    endTime: "16:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
-  {
-    weekday: 2,
-    title: "LOGISTICS & DISTRIBUTION",
-    startTime: "16:30",
-    endTime: "18:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
-  {
-    weekday: 2,
     title: "Jiu-Jitsu Training UEM",
     startTime: "20:00",
     endTime: "21:30",
     location: null,
     tone: "jiujitsu",
-  },
-  {
-    weekday: 3,
-    title: "LANGUAGE A III",
-    startTime: "10:30",
-    endTime: "12:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
-  {
-    weekday: 3,
-    title: "LANGUAGE B II",
-    startTime: "12:30",
-    endTime: "14:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
-  {
-    weekday: 3,
-    title: "MARKETING STRATEGY",
-    startTime: "14:30",
-    endTime: "16:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
-  {
-    weekday: 3,
-    title: "MERGERS & ACQUISITIONS",
-    startTime: "16:30",
-    endTime: "18:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
-  {
-    weekday: 4,
-    title: "HUMAN RESOURCES",
-    startTime: "10:30",
-    endTime: "12:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
-  {
-    weekday: 4,
-    title: "MANAGEMENT CONTROL",
-    startTime: "12:30",
-    endTime: "14:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
-  {
-    weekday: 4,
-    title: "FINANCIAL ANALYSIS",
-    startTime: "14:30",
-    endTime: "16:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
-  {
-    weekday: 4,
-    title: "LOGISTICS & DISTRIBUTION",
-    startTime: "16:30",
-    endTime: "18:30",
-    location: "A351 · M33",
-    tone: "university",
   },
   {
     weekday: 5,
@@ -156,23 +54,25 @@ const weeklyTemplates = [
     location: null,
     tone: "jiujitsu",
   },
-  {
-    weekday: 5,
-    title: "MARKETING STRATEGY",
-    startTime: "14:30",
-    endTime: "16:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
-  {
-    weekday: 5,
-    title: "MERGERS & ACQUISITIONS",
-    startTime: "16:30",
-    endTime: "18:30",
-    location: "A351 · M33",
-    tone: "university",
-  },
 ] as const satisfies readonly MissionCalendarTemplate[];
+
+function courseTemplates(): readonly MissionCalendarTemplate[] {
+  return universityCourseSystems.flatMap((course) =>
+    course.schedule.map((meeting) => ({
+      endTime: meeting.endTime,
+      location: `${meeting.room} · ${meeting.group}`,
+      startTime: meeting.startTime,
+      title: course.displayName.toUpperCase(),
+      tone: "university" as const,
+      weekday: weekdayToJsDay[meeting.day],
+    })),
+  );
+}
+
+const weeklyTemplates: readonly MissionCalendarTemplate[] = [
+  ...courseTemplates(),
+  ...trainingTemplates,
+];
 
 function parseClock(value: string) {
   const [hoursText = "0", minutesText = "0"] = value.split(":");
@@ -182,17 +82,15 @@ function parseClock(value: string) {
   };
 }
 
-function atLocalTime(day: Date, clock: string) {
+/** Local wall-clock ISO without timezone shift (no trailing Z). */
+function toLocalDateTimeString(day: Date, clock: string) {
   const { hours, minutes } = parseClock(clock);
-  return new Date(
-    day.getFullYear(),
-    day.getMonth(),
-    day.getDate(),
-    hours,
-    minutes,
-    0,
-    0,
-  );
+  const year = day.getFullYear();
+  const month = String(day.getMonth() + 1).padStart(2, "0");
+  const date = String(day.getDate()).padStart(2, "0");
+  const hh = String(hours).padStart(2, "0");
+  const mm = String(minutes).padStart(2, "0");
+  return `${year}-${month}-${date}T${hh}:${mm}:00`;
 }
 
 function slugify(value: string) {
@@ -220,16 +118,13 @@ export function buildMissionCalendarEvents(
     for (const template of weeklyTemplates) {
       if (template.weekday !== weekday) continue;
 
-      const startsAt = atLocalTime(cursor, template.startTime);
-      const endsAt = atLocalTime(cursor, template.endTime);
-
       events.push({
         allDay: false,
-        endsAt: endsAt.toISOString(),
+        endsAt: toLocalDateTimeString(cursor, template.endTime),
         htmlLink: null,
         id: `${dateKey}-${slugify(template.title)}-${template.startTime}`,
         location: template.location,
-        startsAt: startsAt.toISOString(),
+        startsAt: toLocalDateTimeString(cursor, template.startTime),
         title: template.title,
         tone: template.tone,
       });
@@ -238,9 +133,8 @@ export function buildMissionCalendarEvents(
     cursor = addDays(cursor, 1);
   }
 
-  return events.sort(
-    (left, right) =>
-      new Date(left.startsAt).getTime() - new Date(right.startsAt).getTime(),
+  return events.sort((left, right) =>
+    left.startsAt < right.startsAt ? -1 : left.startsAt > right.startsAt ? 1 : 0,
   );
 }
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
 import { useMemo } from "react";
 
 import type { DashboardSectionId } from "@/lib/dashboard-sections";
@@ -27,7 +26,6 @@ type StatusCard = Readonly<{
   eyebrow: string;
   section: Exclude<DashboardSectionId, "home" | "french">;
   value: string;
-  visual: "university" | "reading" | "jiujitsu" | "strength" | "observatory";
 }>;
 
 export function HomeStatusPage({ snapshot }: HomeStatusPageProps) {
@@ -43,28 +41,24 @@ export function HomeStatusPage({ snapshot }: HomeStatusPageProps) {
         eyebrow: "University",
         section: "university",
         value: String(snapshot.openUniversityAssignments),
-        visual: "university",
       },
       {
         detail: snapshot.activeReadingBook ?? "No active book",
         eyebrow: "Reading",
         section: "reading",
         value: snapshot.activeReadingBook === null ? "—" : "In progress",
-        visual: "reading",
       },
       {
         detail: "Logged training sessions",
         eyebrow: "Jiu-Jitsu",
         section: "jiu-jitsu",
         value: String(snapshot.jiuJitsuSessionCount),
-        visual: "jiujitsu",
       },
       {
         detail: "Logged strength sessions",
         eyebrow: "Strength",
         section: "strength-physique",
         value: String(snapshot.strengthSessionCount),
-        visual: "strength",
       },
       {
         detail:
@@ -74,7 +68,6 @@ export function HomeStatusPage({ snapshot }: HomeStatusPageProps) {
         eyebrow: "Observatory",
         section: "observatory",
         value: snapshot.observatoryAttention >= 0.5 ? "New" : "Ready",
-        visual: "observatory",
       },
     ];
   }, [snapshot]);
@@ -94,49 +87,37 @@ export function HomeStatusPage({ snapshot }: HomeStatusPageProps) {
             {primaryCards.map((card) => (
               <button
                 className={styles.card}
-                data-visual={card.visual}
                 key={card.section}
                 onClick={() => navigate({ section: card.section })}
                 type="button"
               >
-                <span className={styles.cardGlow} aria-hidden="true" />
                 <span className={styles.cardTop}>
-                  <DashboardNavIcon section={card.section} size={15} />
                   <span className={styles.cardEyebrow}>{card.eyebrow}</span>
+                  <DashboardNavIcon section={card.section} size={16} />
                 </span>
-                <strong className={styles.cardValue}>{card.value}</strong>
+                <strong>{card.value}</strong>
                 <span className={styles.cardDetail}>{card.detail}</span>
-                <span className={styles.cardAction} aria-hidden="true">
-                  <ArrowUpRight absoluteStrokeWidth size={14} strokeWidth={2} />
-                </span>
               </button>
             ))}
 
             {observatoryCard ? (
               <button
                 className={`${styles.card} ${styles.observatoryCard}`}
-                data-visual={observatoryCard.visual}
                 onClick={() => navigate({ section: observatoryCard.section })}
                 type="button"
               >
-                <span className={styles.cardGlow} aria-hidden="true" />
                 <span className={styles.cardTop}>
-                  <DashboardNavIcon
-                    section={observatoryCard.section}
-                    size={15}
-                  />
                   <span className={styles.cardEyebrow}>
                     {observatoryCard.eyebrow}
                   </span>
+                  <DashboardNavIcon
+                    section={observatoryCard.section}
+                    size={16}
+                  />
                 </span>
-                <strong className={styles.cardValue}>
-                  {observatoryCard.value}
-                </strong>
+                <strong>{observatoryCard.value}</strong>
                 <span className={styles.cardDetail}>
                   {observatoryCard.detail}
-                </span>
-                <span className={styles.cardAction} aria-hidden="true">
-                  <ArrowUpRight absoluteStrokeWidth size={14} strokeWidth={2} />
                 </span>
               </button>
             ) : null}
