@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { PillSelect } from "@/components/ui/pill-select";
 import {
@@ -14,15 +14,10 @@ import {
   toDateKey,
   type CalendarEventTone,
   type CalendarScheduleEvent,
-  type CalendarSchedulePayload,
 } from "@/lib/calendar-schedule";
+import { missionCalendarEventsAround } from "@/lib/mission-calendar";
 
 import styles from "./home-schedule.module.css";
-
-type LoadState =
-  | Readonly<{ kind: "loading" }>
-  | Readonly<{ kind: "ready"; payload: CalendarSchedulePayload }>
-  | Readonly<{ kind: "error"; detail: string }>;
 
 type LaidOutEvent = Readonly<{
   column: number;
@@ -36,10 +31,10 @@ type LaidOutEvent = Readonly<{
   top: number;
 }>;
 
-const hourHeightPx = 32;
-const defaultStartHour = 8;
-const defaultEndHour = 18;
-const minEventHeightPx = 28;
+const hourHeightPx = 36;
+const defaultStartHour = 10;
+const defaultEndHour = 21;
+const minEventHeightPx = 30;
 
 const categoryOptions = [
   { label: "All categories", value: "all" },
@@ -49,19 +44,6 @@ const categoryOptions = [
     >
   ).map(([value, label]) => ({ label, value })),
 ] as const;
-
-async function readSchedulePayload(
-  response: Response,
-): Promise<CalendarSchedulePayload | null> {
-  const text = await response.text();
-  if (!text.trim()) return null;
-
-  try {
-    return JSON.parse(text) as CalendarSchedulePayload;
-  } catch {
-    return null;
-  }
-}
 
 function minutesSinceDayStart(date: Date) {
   return date.getHours() * 60 + date.getMinutes();
@@ -96,7 +78,7 @@ function resolveDayWindow(events: readonly CalendarScheduleEvent[]) {
 
   const startHour = Math.max(
     0,
-    Math.min(defaultStartHour, Math.floor(earliest / 60) - 0),
+    Math.min(defaultStartHour, Math.floor(earliest / 60)),
   );
   const endHour = Math.min(
     24,
@@ -130,7 +112,7 @@ function layoutTimedEvents(
         event,
         startMinutes,
         timeLabel: range.timeLabel,
-        tone: resolveCalendarEventTone(event.title),
+        tone: resolveCalendarEventTone(event),
       };
     })
     .sort(
@@ -207,60 +189,31 @@ function ChevronRightIcon() {
   );
 }
 
+function formatSelectedDateLabel(date: Date) {
+  return new Intl.DateTimeFormat("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(date);
+}
+
 export function HomeSchedule() {
-  const [state, setState] = useState<LoadState>({ kind: "loading" });
-  const [now] = useState(() => new Date());
+  const [now, setNow] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() =>
     startOfLocalDay(new Date()),
   );
   const [category, setCategory] = useState<string>("all");
-  const requestIdRef = useRef(0);
-
-  const loadSchedule = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-
-    try {
-      const response = await fetch("/api/calendar/schedule", {
-        cache: "no-store",
-      });
-      const payload = await readSchedulePayload(response);
-
-      if (requestId !== requestIdRef.current) return;
-
-      if (payload === null) {
-        setState({
-          kind: "error",
-          detail: "Could not load schedule.",
-        });
-        return;
-      }
-
-      setState({ kind: "ready", payload });
-    } catch (error) {
-      if (requestId !== requestIdRef.current) return;
-      setState({
-        kind: "error",
-        detail:
-          error instanceof Error ? error.message : "Could not load schedule.",
-      });
-    }
-  }, []);
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      void loadSchedule();
-    });
+    const tick = () => setNow(new Date());
+    const intervalId = window.setInterval(tick, 30_000);
+    return () => window.clearInterval(intervalId);
+  }, []);
 
-    return () => {
-      window.cancelAnimationFrame(frame);
-      requestIdRef.current += 1;
-    };
-  }, [loadSchedule]);
-
-  const retry = () => {
-    setState({ kind: "loading" });
-    void loadSchedule();
-  };
+  const events = useMemo(
+    () => missionCalendarEventsAround(selectedDate),
+    [selectedDate],
+  );
 
   const week = useMemo(
     () => buildCalendarWeek(selectedDate, { now }),
@@ -270,13 +223,12 @@ export function HomeSchedule() {
   const todayKey = toDateKey(now);
 
   const dayEvents = useMemo(() => {
-    if (state.kind !== "ready" || state.payload.status !== "ok") return [];
-    const events = eventsForDateKey(state.payload.events, selectedKey);
-    if (category === "all") return events;
-    return events.filter(
-      (event) => resolveCalendarEventTone(event.title) === category,
+    const forDay = eventsForDateKey(events, selectedKey);
+    if (category === "all") return forDay;
+    return forDay.filter(
+      (event) => resolveCalendarEventTone(event) === category,
     );
-  }, [category, selectedKey, state]);
+  }, [category, events, selectedKey]);
 
   const timedEvents = dayEvents.filter((event) => !event.allDay);
   const allDayEvents = dayEvents.filter((event) => event.allDay);
@@ -294,8 +246,19 @@ export function HomeSchedule() {
     nowMinutes <= endHour * 60;
   const nowTop = ((nowMinutes - startHour * 60) / 60) * hourHeightPx;
 
-  const shiftWeek = (deltaWeeks: number) => {
-    setSelectedDate((current) => addDays(current, deltaWeeks * 7));
+  const daysWithEvents = useMemo(() => {
+    const keys = new Set<string>();
+    for (const event of events) {
+      if (category !== "all" && resolveCalendarEventTone(event) !== category) {
+        continue;
+      }
+      keys.add(toDateKey(new Date(event.startsAt)));
+    }
+    return keys;
+  }, [category, events]);
+
+  const shiftDay = (deltaDays: number) => {
+    setSelectedDate((current) => addDays(current, deltaDays));
   };
 
   const goToday = () => {
@@ -315,24 +278,25 @@ export function HomeSchedule() {
           />
           <div className={styles.navGroup}>
             <button
-              aria-label="Previous week"
+              aria-label="Previous day"
               className={styles.iconButton}
-              onClick={() => shiftWeek(-1)}
+              onClick={() => shiftDay(-1)}
               type="button"
             >
               <ChevronLeftIcon />
             </button>
             <button
-              className={styles.todayButton}
+              aria-label="Jump to today"
+              className={styles.dateLabel}
               onClick={goToday}
               type="button"
             >
-              Today
+              {formatSelectedDateLabel(selectedDate)}
             </button>
             <button
-              aria-label="Next week"
+              aria-label="Next day"
               className={styles.iconButton}
-              onClick={() => shiftWeek(1)}
+              onClick={() => shiftDay(1)}
               type="button"
             >
               <ChevronRightIcon />
@@ -341,176 +305,120 @@ export function HomeSchedule() {
         </div>
       </div>
 
-      {state.kind === "loading" ? (
-        <div className={styles.quiet} role="status">
-          Loading schedule…
-        </div>
-      ) : null}
+      <div aria-label="Week" className={styles.weekStrip} role="tablist">
+        {week.map((day) => {
+          const selected = day.dateKey === selectedKey;
+          const hasEvents = daysWithEvents.has(day.dateKey);
+          return (
+            <button
+              aria-selected={selected}
+              className={styles.weekDay}
+              data-selected={selected ? "true" : undefined}
+              data-today={day.isToday ? "true" : undefined}
+              key={day.dateKey}
+              onClick={() => setSelectedDate(day.date)}
+              role="tab"
+              type="button"
+            >
+              <span className={styles.weekDayLabel}>{day.weekday}</span>
+              <span className={styles.weekDayNumber}>{day.dayNumber}</span>
+              <span
+                aria-hidden="true"
+                className={styles.weekDayDot}
+                data-active={hasEvents ? "true" : undefined}
+              />
+            </button>
+          );
+        })}
+      </div>
 
-      {state.kind === "error" ? (
-        <div className={styles.panel}>
-          <p className={styles.quiet}>{state.detail}</p>
-          <button className={styles.action} onClick={retry} type="button">
-            Retry
-          </button>
-        </div>
-      ) : null}
-
-      {state.kind === "ready" &&
-      (state.payload.status === "needs_calendar_access" ||
-        state.payload.status === "unavailable") ? (
-        <div className={styles.panel}>
-          <p className={styles.quiet}>
-            {state.payload.detail ?? "Schedule is unavailable right now."}
-          </p>
-          <button className={styles.action} onClick={retry} type="button">
-            Retry
-          </button>
-        </div>
-      ) : null}
-
-      {state.kind === "ready" && state.payload.status === "ok" ? (
-        <>
-          <div aria-label="Week" className={styles.weekStrip} role="tablist">
-            {week.map((day) => {
-              const selected = day.dateKey === selectedKey;
-              return (
-                <button
-                  aria-selected={selected}
-                  className={styles.weekDay}
-                  data-selected={selected ? "true" : undefined}
-                  data-today={day.isToday ? "true" : undefined}
-                  key={day.dateKey}
-                  onClick={() => setSelectedDate(day.date)}
-                  role="tab"
-                  type="button"
-                >
-                  <span className={styles.weekDayLabel}>{day.weekday}</span>
-                  <span className={styles.weekDayNumber}>{day.dayNumber}</span>
-                  <span aria-hidden="true" className={styles.weekDayDot} />
-                </button>
-              );
-            })}
+      {allDayEvents.length > 0 ? (
+        <div className={styles.allDayRow}>
+          <span className={styles.allDayLabel}>All day</span>
+          <div className={styles.allDayEvents}>
+            {allDayEvents.map((event) => (
+              <span
+                className={styles.allDayPill}
+                data-tone={resolveCalendarEventTone(event)}
+                key={event.id}
+              >
+                {event.title}
+              </span>
+            ))}
           </div>
+        </div>
+      ) : null}
 
-          {allDayEvents.length > 0 ? (
-            <div className={styles.allDayRow}>
-              <span className={styles.allDayLabel}>All day</span>
-              <div className={styles.allDayEvents}>
-                {allDayEvents.map((event) => {
-                  const className = styles.allDayPill;
-                  const tone = resolveCalendarEventTone(event.title);
-                  if (event.htmlLink) {
-                    return (
-                      <a
-                        className={className}
-                        data-tone={tone}
-                        href={event.htmlLink}
-                        key={event.id}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
-                        {event.title}
-                      </a>
-                    );
-                  }
-
-                  return (
-                    <span className={className} data-tone={tone} key={event.id}>
-                      {event.title}
-                    </span>
-                  );
-                })}
-              </div>
+      <div className={styles.gridShell}>
+        <div
+          aria-hidden="true"
+          className={styles.timeAxis}
+          style={{ height: gridHeight }}
+        >
+          {hours.map((hour) => (
+            <div
+              className={styles.timeTick}
+              key={hour}
+              style={{ top: (hour - startHour) * hourHeightPx }}
+            >
+              {`${String(hour).padStart(2, "0")}:00`}
             </div>
-          ) : null}
+          ))}
+        </div>
 
-          <div className={styles.gridShell}>
+        <div className={styles.dayColumn} style={{ height: gridHeight }}>
+          {hours.map((hour) => (
             <div
               aria-hidden="true"
-              className={styles.timeAxis}
-              style={{ height: gridHeight }}
-            >
-              {hours.map((hour) => (
-                <div
-                  className={styles.timeTick}
-                  key={hour}
-                  style={{ top: (hour - startHour) * hourHeightPx }}
-                >
-                  {`${String(hour).padStart(2, "0")}:00`}
-                </div>
-              ))}
-            </div>
+              className={styles.hourLine}
+              key={hour}
+              style={{ top: (hour - startHour) * hourHeightPx }}
+            />
+          ))}
 
-            <div className={styles.dayColumn} style={{ height: gridHeight }}>
-              {hours.map((hour) => (
-                <div
-                  aria-hidden="true"
-                  className={styles.hourLine}
-                  key={hour}
-                  style={{ top: (hour - startHour) * hourHeightPx }}
-                />
-              ))}
+          {showNowLine ? (
+            <div
+              aria-hidden="true"
+              className={styles.nowLine}
+              style={{ top: nowTop }}
+            />
+          ) : null}
 
-              {showNowLine ? (
-                <div
-                  aria-hidden="true"
-                  className={styles.nowLine}
-                  style={{ top: nowTop }}
-                />
-              ) : null}
+          {laidOut.length === 0 ? (
+            <div className={styles.emptyDay}>Nothing scheduled</div>
+          ) : (
+            laidOut.map((item) => {
+              const width = `calc((100% - 0.5rem) / ${item.columnCount})`;
+              const left = `calc(0.25rem + ((100% - 0.5rem) / ${item.columnCount}) * ${item.column})`;
 
-              {laidOut.length === 0 ? (
-                <div className={styles.emptyDay}>Nothing scheduled</div>
-              ) : (
-                laidOut.map((item) => {
-                  const width = `calc((100% - 0.5rem) / ${item.columnCount})`;
-                  const left = `calc(0.25rem + ((100% - 0.5rem) / ${item.columnCount}) * ${item.column})`;
-                  const content = (
-                    <>
-                      <strong>{item.event.title}</strong>
-                      <span>{item.timeLabel}</span>
-                    </>
-                  );
-                  const style = {
+              return (
+                <div
+                  className={styles.eventPill}
+                  data-tone={item.tone}
+                  key={item.event.id}
+                  style={{
                     height: item.height,
                     left,
                     top: item.top,
                     width,
-                  } as const;
-
-                  if (item.event.htmlLink) {
-                    return (
-                      <a
-                        className={styles.eventPill}
-                        data-tone={item.tone}
-                        href={item.event.htmlLink}
-                        key={item.event.id}
-                        rel="noreferrer"
-                        style={style}
-                        target="_blank"
-                      >
-                        {content}
-                      </a>
-                    );
+                  }}
+                  title={
+                    item.event.location
+                      ? `${item.event.title} · ${item.event.location}`
+                      : item.event.title
                   }
-
-                  return (
-                    <div
-                      className={styles.eventPill}
-                      data-tone={item.tone}
-                      key={item.event.id}
-                      style={style}
-                    >
-                      {content}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        </>
-      ) : null}
+                >
+                  <strong>{item.event.title}</strong>
+                  <span>
+                    {item.timeLabel}
+                    {item.event.location ? ` · ${item.event.location}` : ""}
+                  </span>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
     </section>
   );
 }

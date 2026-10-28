@@ -1,3 +1,6 @@
+export type CalendarEventTone =
+  "french" | "jiujitsu" | "neutral" | "reading" | "strength" | "university";
+
 export type CalendarScheduleEvent = Readonly<{
   allDay: boolean;
   endsAt: string | null;
@@ -6,6 +9,7 @@ export type CalendarScheduleEvent = Readonly<{
   location: string | null;
   startsAt: string;
   title: string;
+  tone?: CalendarEventTone;
 }>;
 
 export type CalendarScheduleDay = Readonly<{
@@ -19,9 +23,6 @@ export type CalendarSchedulePayload = Readonly<{
   events: readonly CalendarScheduleEvent[];
   status: "ok" | "needs_calendar_access" | "unavailable";
 }>;
-
-export type CalendarEventTone =
-  "french" | "jiujitsu" | "neutral" | "reading" | "strength" | "university";
 
 export type CalendarWeekDay = Readonly<{
   date: Date;
@@ -77,18 +78,30 @@ export function buildCalendarWeek(
   });
 }
 
-export function resolveCalendarEventTone(title: string): CalendarEventTone {
-  const value = title.toLowerCase();
+export function resolveCalendarEventTone(
+  titleOrEvent: string | CalendarScheduleEvent,
+): CalendarEventTone {
+  if (typeof titleOrEvent !== "string" && titleOrEvent.tone) {
+    return titleOrEvent.tone;
+  }
+
+  const value = (
+    typeof titleOrEvent === "string" ? titleOrEvent : titleOrEvent.title
+  ).toLowerCase();
 
   if (/read|book|library|psychology/.test(value)) return "reading";
-  if (/univ|lecture|exam|assignment|course|seminar|class\b/.test(value)) {
-    return "university";
-  }
-  if (/french|français|francais|duolingo/.test(value)) return "french";
   if (/jiu|bjj|\bgi\b|no-?gi|grappling|open mat/.test(value)) {
     return "jiujitsu";
   }
-  if (/strength|gym|lift|workout|physique|training/.test(value)) {
+  if (/french|français|francais|duolingo/.test(value)) return "french";
+  if (
+    /univ|lecture|exam|assignment|course|seminar|class\b|language|marketing|human resources|logistics|mergers|financial|management control/.test(
+      value,
+    )
+  ) {
+    return "university";
+  }
+  if (/strength|gym|lift|workout|physique/.test(value)) {
     return "strength";
   }
 
