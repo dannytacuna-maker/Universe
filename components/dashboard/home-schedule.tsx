@@ -43,10 +43,10 @@ type EditorState =
   | Readonly<{ kind: "create"; draft: MissionCalendarDraft }>
   | Readonly<{ kind: "edit"; draft: MissionCalendarDraft }>;
 
-const hourHeightPx = 28;
+const hourHeightPx = 32;
 const gridStartHour = 7;
 const gridEndHour = 22;
-const minEventHeightPx = 24;
+const minEventHeightPx = 26;
 
 const categoryOptions = [
   { label: "All categories", value: "all" },
