@@ -19,10 +19,10 @@ export const universityCourseSystems = [
         startTime: "16:30",
       },
       {
-        day: "wednesday",
+        day: "thursday",
         endTime: "18:30",
         group: "M41",
-        room: "E121",
+        room: "E133",
         startTime: "16:30",
       },
     ],
@@ -68,17 +68,17 @@ export const universityCourseSystems = [
     },
     schedule: [
       {
+        day: "monday",
+        endTime: "12:30",
+        group: "M33",
+        room: "A372",
+        startTime: "10:30",
+      },
+      {
         day: "tuesday",
         endTime: "16:30",
         group: "M33",
-        room: "A381",
-        startTime: "14:30",
-      },
-      {
-        day: "friday",
-        endTime: "16:30",
-        group: "M33",
-        room: "E032",
+        room: "A351",
         startTime: "14:30",
       },
     ],
@@ -104,7 +104,7 @@ export const universityCourseSystems = [
       },
       {
         day: "friday",
-        endTime: "16:30",
+        endTime: "14:30",
         group: "M32",
         room: "C223",
         startTime: "12:30",
@@ -142,7 +142,7 @@ export const universityCourseSystems = [
     status: "active",
   },
   {
-    displayName: "Emerging Markets",
+    displayName: "Emerging Powers & Markets",
     id: "emerging-markets",
     name: "Emerging Powers and Markets",
     palette: {

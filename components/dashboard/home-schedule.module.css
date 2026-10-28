@@ -1,4 +1,5 @@
 .schedule {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
@@ -47,7 +48,11 @@
 }
 
 .iconButton,
-.dateLabel {
+.dateLabel,
+.addButton,
+.primaryButton,
+.secondaryButton,
+.deleteButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -70,16 +75,26 @@
   color: var(--ink-soft);
 }
 
-.dateLabel {
-  min-width: 6.75rem;
+.dateLabel,
+.addButton {
   min-height: 1.9rem;
   padding: 0.3rem 0.7rem;
   border-radius: 999px;
   color: var(--ink-soft);
   font-size: 12px;
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+.dateLabel {
+  min-width: 6.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.addButton {
+  border-color: rgb(45 212 191 / 35%);
+  background: rgb(45 212 191 / 12%);
+  color: var(--brand);
 }
 
 .weekStrip {
@@ -191,13 +206,16 @@
   min-height: 1.55rem;
   padding: 0.2rem 0.55rem;
   overflow: hidden;
+  border: 0;
   border-radius: 999px;
   background: rgb(255 255 255 / 4%);
   color: var(--ink);
+  font: inherit;
   font-size: 12px;
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .gridShell {
@@ -284,9 +302,13 @@
   overflow: hidden;
   box-sizing: border-box;
   padding: 0.28rem 0.45rem;
+  border: 0;
   border-radius: 9px;
   background: rgb(28 30 34 / 94%);
   color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   box-shadow: inset 2px 0 0 var(--event-accent, var(--brand));
   transition:
     transform 150ms ease-out,
@@ -347,19 +369,145 @@
   --event-accent: #94a3b8;
 }
 
+.editorBackdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  padding: 0.75rem;
+  border-radius: inherit;
+  background: rgb(6 7 9 / 72%);
+}
+
+.editor {
+  display: grid;
+  gap: 0.7rem;
+  width: min(100%, 22rem);
+  max-height: 100%;
+  overflow: auto;
+  padding: 0.9rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--panel);
+  scrollbar-width: thin;
+}
+
+.editorHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.editorHeader h3 {
+  margin: 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.field {
+  display: grid;
+  gap: 0.28rem;
+  min-width: 0;
+}
+
+.field span {
+  color: var(--ink-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+}
+
+.field input {
+  width: 100%;
+  min-height: 2.1rem;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 3.5%);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+.field input:focus {
+  outline: 1px solid rgb(45 212 191 / 45%);
+  outline-offset: 1px;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.55rem;
+}
+
+.editorError {
+  margin: 0;
+  color: #fca5a5;
+  font-size: var(--text-sm);
+}
+
+.editorActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+}
+
+.editorActionsRight {
+  display: inline-flex;
+  gap: 0.4rem;
+}
+
+.primaryButton,
+.secondaryButton,
+.deleteButton {
+  min-height: 2rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.primaryButton {
+  border-color: rgb(45 212 191 / 35%);
+  background: rgb(45 212 191 / 14%);
+  color: var(--brand);
+}
+
+.deleteButton {
+  border-color: rgb(248 113 113 / 30%);
+  background: rgb(127 29 29 / 28%);
+  color: #fecaca;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .iconButton:hover,
-  .dateLabel:hover {
+  .dateLabel:hover,
+  .secondaryButton:hover {
     border-color: rgb(45 212 191 / 28%);
     background: rgb(255 255 255 / 6%);
     color: var(--ink);
+  }
+
+  .addButton:hover,
+  .primaryButton:hover {
+    background: rgb(45 212 191 / 18%);
+  }
+
+  .deleteButton:hover {
+    background: rgb(153 27 27 / 40%);
   }
 
   .weekDay:hover .weekDayNumber {
     background: rgb(255 255 255 / 6%);
   }
 
-  .eventPill:hover {
+  .eventPill:hover,
+  .allDayPill:hover {
     transform: translateY(-1px);
     filter: brightness(1.05);
   }
@@ -367,7 +515,11 @@
 
 .iconButton:active,
 .dateLabel:active,
-.weekDay:active {
+.addButton:active,
+.weekDay:active,
+.primaryButton:active,
+.secondaryButton:active,
+.deleteButton:active {
   transform: scale(0.96);
 }
 
@@ -399,17 +551,27 @@
 @media (prefers-reduced-motion: reduce) {
   .iconButton,
   .dateLabel,
+  .addButton,
   .weekDay,
   .weekDayNumber,
   .weekDayDot,
-  .eventPill {
+  .eventPill,
+  .allDayPill,
+  .primaryButton,
+  .secondaryButton,
+  .deleteButton {
     transition: none;
   }
 
   .iconButton:active,
   .dateLabel:active,
+  .addButton:active,
   .weekDay:active,
-  .eventPill:hover {
+  .eventPill:hover,
+  .allDayPill:hover,
+  .primaryButton:active,
+  .secondaryButton:active,
+  .deleteButton:active {
     transform: none;
   }
 }

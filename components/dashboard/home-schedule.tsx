@@ -15,9 +15,16 @@ import {
   type CalendarEventTone,
   type CalendarScheduleEvent,
 } from "@/lib/calendar-schedule";
-import { missionCalendarEventsAround } from "@/lib/mission-calendar";
+import {
+  getMissionCalendarRecord,
+  missionCalendarEventsAround,
+  resolveRecordIdFromOccurrenceId,
+  type MissionCalendarDraft,
+  type MissionCalendarRecurrence,
+} from "@/lib/mission-calendar";
 
 import styles from "./home-schedule.module.css";
+import { useMissionCalendar } from "./use-mission-calendar";
 
 type LaidOutEvent = Readonly<{
   column: number;
@@ -31,6 +38,11 @@ type LaidOutEvent = Readonly<{
   top: number;
 }>;
 
+type EditorState =
+  | Readonly<{ kind: "closed" }>
+  | Readonly<{ kind: "create"; draft: MissionCalendarDraft }>
+  | Readonly<{ kind: "edit"; draft: MissionCalendarDraft }>;
+
 const hourHeightPx = 36;
 const gridStartHour = 7;
 const gridEndHour = 22;
@@ -43,6 +55,25 @@ const categoryOptions = [
       [CalendarEventTone, string]
     >
   ).map(([value, label]) => ({ label, value })),
+] as const;
+
+const toneOptions = (
+  Object.entries(calendarEventToneLabels) as Array<[CalendarEventTone, string]>
+).map(([value, label]) => ({ label, value }));
+
+const weekdayOptions = [
+  { label: "Sunday", value: "0" },
+  { label: "Monday", value: "1" },
+  { label: "Tuesday", value: "2" },
+  { label: "Wednesday", value: "3" },
+  { label: "Thursday", value: "4" },
+  { label: "Friday", value: "5" },
+  { label: "Saturday", value: "6" },
+] as const;
+
+const recurrenceOptions = [
+  { label: "Every week", value: "weekly" },
+  { label: "One day only", value: "once" },
 ] as const;
 
 function minutesSinceDayStart(date: Date) {
@@ -185,12 +216,50 @@ function formatSelectedDateLabel(date: Date) {
   }).format(date);
 }
 
+function createDraftForDay(day: Date): MissionCalendarDraft {
+  const dateKey = toDateKey(day);
+  return {
+    dateKey,
+    endTime: "11:00",
+    location: "",
+    recurrence: "once",
+    startTime: "10:00",
+    title: "",
+    tone: "university",
+    weekday: day.getDay(),
+  };
+}
+
+function draftFromRecordId(
+  occurrenceId: string,
+  fallbackDay: Date,
+): MissionCalendarDraft | null {
+  const recordId = resolveRecordIdFromOccurrenceId(occurrenceId);
+  const record = getMissionCalendarRecord(recordId);
+  if (!record) return null;
+
+  return {
+    dateKey: record.dateKey ?? toDateKey(fallbackDay),
+    endTime: record.endTime,
+    id: record.id,
+    location: record.location ?? "",
+    recurrence: record.recurrence,
+    startTime: record.startTime,
+    title: record.title,
+    tone: record.tone,
+    weekday: record.weekday ?? fallbackDay.getDay(),
+  };
+}
+
 export function HomeSchedule() {
+  const { records, remove, save } = useMissionCalendar();
   const [now, setNow] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() =>
     startOfLocalDay(new Date()),
   );
   const [category, setCategory] = useState<string>("all");
+  const [editor, setEditor] = useState<EditorState>({ kind: "closed" });
+  const [editorError, setEditorError] = useState<string | null>(null);
   const gridShellRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -200,8 +269,8 @@ export function HomeSchedule() {
   }, []);
 
   const events = useMemo(
-    () => missionCalendarEventsAround(selectedDate),
-    [selectedDate],
+    () => missionCalendarEventsAround(selectedDate, 8, records),
+    [records, selectedDate],
   );
 
   const week = useMemo(
@@ -247,8 +316,7 @@ export function HomeSchedule() {
           : 10 * 60;
     const focusTop = ((focusMinutes - startHour * 60) / 60) * hourHeightPx;
     shell.scrollTop = Math.max(0, focusTop - shell.clientHeight * 0.28);
-    // Reposition when the visible day or category changes — not on the clock tick.
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional day focus
   }, [category, selectedKey, startHour]);
 
   const daysWithEvents = useMemo(() => {
@@ -270,6 +338,54 @@ export function HomeSchedule() {
     setSelectedDate(startOfLocalDay(now));
   };
 
+  const openCreate = () => {
+    setEditorError(null);
+    setEditor({ kind: "create", draft: createDraftForDay(selectedDate) });
+  };
+
+  const openEdit = (occurrenceId: string) => {
+    const draft = draftFromRecordId(occurrenceId, selectedDate);
+    if (!draft) return;
+    setEditorError(null);
+    setEditor({ kind: "edit", draft });
+  };
+
+  const closeEditor = () => {
+    setEditor({ kind: "closed" });
+    setEditorError(null);
+  };
+
+  const updateDraft = <K extends keyof MissionCalendarDraft>(
+    key: K,
+    value: MissionCalendarDraft[K],
+  ) => {
+    setEditor((current) => {
+      if (current.kind === "closed") return current;
+      return {
+        ...current,
+        draft: { ...current.draft, [key]: value },
+      };
+    });
+  };
+
+  const submitEditor = () => {
+    if (editor.kind === "closed") return;
+    try {
+      save(editor.draft);
+      closeEditor();
+    } catch (error) {
+      setEditorError(
+        error instanceof Error ? error.message : "Could not save the event.",
+      );
+    }
+  };
+
+  const deleteEditorEvent = () => {
+    if (editor.kind !== "edit" || !editor.draft.id) return;
+    remove(editor.draft.id);
+    closeEditor();
+  };
+
   return (
     <section aria-labelledby="home-schedule-title" className={styles.schedule}>
       <div className={styles.header}>
@@ -281,6 +397,9 @@ export function HomeSchedule() {
             options={[...categoryOptions]}
             value={category}
           />
+          <button className={styles.addButton} onClick={openCreate} type="button">
+            Add
+          </button>
           <div className={styles.navGroup}>
             <button
               aria-label="Previous day"
@@ -342,13 +461,15 @@ export function HomeSchedule() {
           <span className={styles.allDayLabel}>All day</span>
           <div className={styles.allDayEvents}>
             {allDayEvents.map((event) => (
-              <span
+              <button
                 className={styles.allDayPill}
                 data-tone={resolveCalendarEventTone(event)}
                 key={event.id}
+                onClick={() => openEdit(event.id)}
+                type="button"
               >
                 {event.title}
-              </span>
+              </button>
             ))}
           </div>
         </div>
@@ -397,10 +518,11 @@ export function HomeSchedule() {
               const left = `calc(0.25rem + ((100% - 0.5rem) / ${item.columnCount}) * ${item.column})`;
 
               return (
-                <div
+                <button
                   className={styles.eventPill}
                   data-tone={item.tone}
                   key={item.event.id}
+                  onClick={() => openEdit(item.event.id)}
                   style={{
                     height: item.height,
                     left,
@@ -412,18 +534,170 @@ export function HomeSchedule() {
                       ? `${item.event.title} · ${item.event.location}`
                       : item.event.title
                   }
+                  type="button"
                 >
                   <strong>{item.event.title}</strong>
                   <span>
                     {item.timeLabel}
                     {item.event.location ? ` · ${item.event.location}` : ""}
                   </span>
-                </div>
+                </button>
               );
             })
           )}
         </div>
       </div>
+
+      {editor.kind !== "closed" ? (
+        <div className={styles.editorBackdrop}>
+          <div
+            aria-labelledby="calendar-editor-title"
+            className={styles.editor}
+            role="dialog"
+          >
+            <div className={styles.editorHeader}>
+              <h3 id="calendar-editor-title">
+                {editor.kind === "create" ? "Add event" : "Edit event"}
+              </h3>
+              <button
+                className={styles.iconButton}
+                onClick={closeEditor}
+                type="button"
+                aria-label="Close"
+              >
+                ×
+              </button>
+            </div>
+
+            <label className={styles.field}>
+              <span>Title</span>
+              <input
+                autoFocus
+                onChange={(event) => updateDraft("title", event.target.value)}
+                value={editor.draft.title}
+              />
+            </label>
+
+            <div className={styles.fieldRow}>
+              <label className={styles.field}>
+                <span>Start</span>
+                <input
+                  onChange={(event) =>
+                    updateDraft("startTime", event.target.value)
+                  }
+                  placeholder="14:30"
+                  value={editor.draft.startTime}
+                />
+              </label>
+              <label className={styles.field}>
+                <span>End</span>
+                <input
+                  onChange={(event) =>
+                    updateDraft("endTime", event.target.value)
+                  }
+                  placeholder="16:30"
+                  value={editor.draft.endTime}
+                />
+              </label>
+            </div>
+
+            <label className={styles.field}>
+              <span>Location</span>
+              <input
+                onChange={(event) =>
+                  updateDraft("location", event.target.value)
+                }
+                placeholder="E133 · M41"
+                value={editor.draft.location}
+              />
+            </label>
+
+            <div className={styles.fieldRow}>
+              <div className={styles.field}>
+                <span>Category</span>
+                <PillSelect
+                  onChange={(value) =>
+                    updateDraft("tone", value as CalendarEventTone)
+                  }
+                  options={toneOptions}
+                  value={editor.draft.tone}
+                />
+              </div>
+              <div className={styles.field}>
+                <span>Repeats</span>
+                <PillSelect
+                  onChange={(value) =>
+                    updateDraft(
+                      "recurrence",
+                      value as MissionCalendarRecurrence,
+                    )
+                  }
+                  options={[...recurrenceOptions]}
+                  value={editor.draft.recurrence}
+                />
+              </div>
+            </div>
+
+            {editor.draft.recurrence === "weekly" ? (
+              <div className={styles.field}>
+                <span>Weekday</span>
+                <PillSelect
+                  onChange={(value) => updateDraft("weekday", Number(value))}
+                  options={[...weekdayOptions]}
+                  value={String(editor.draft.weekday)}
+                />
+              </div>
+            ) : (
+              <label className={styles.field}>
+                <span>Date</span>
+                <input
+                  onChange={(event) =>
+                    updateDraft("dateKey", event.target.value)
+                  }
+                  type="date"
+                  value={editor.draft.dateKey}
+                />
+              </label>
+            )}
+
+            {editorError ? (
+              <p className={styles.editorError} role="alert">
+                {editorError}
+              </p>
+            ) : null}
+
+            <div className={styles.editorActions}>
+              {editor.kind === "edit" ? (
+                <button
+                  className={styles.deleteButton}
+                  onClick={deleteEditorEvent}
+                  type="button"
+                >
+                  Delete
+                </button>
+              ) : (
+                <span />
+              )}
+              <div className={styles.editorActionsRight}>
+                <button
+                  className={styles.secondaryButton}
+                  onClick={closeEditor}
+                  type="button"
+                >
+                  Cancel
+                </button>
+                <button
+                  className={styles.primaryButton}
+                  onClick={submitEditor}
+                  type="button"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }
