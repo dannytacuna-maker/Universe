@@ -253,7 +253,7 @@ function draftFromRecordId(
 
 export function HomeSchedule() {
   const { records, remove, save } = useMissionCalendar();
-  const [now, setNow] = useState(() => new Date());
+  const [now] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() =>
     startOfLocalDay(new Date()),
   );
@@ -261,12 +261,6 @@ export function HomeSchedule() {
   const [editor, setEditor] = useState<EditorState>({ kind: "closed" });
   const [editorError, setEditorError] = useState<string | null>(null);
   const gridShellRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const tick = () => setNow(new Date());
-    const intervalId = window.setInterval(tick, 30_000);
-    return () => window.clearInterval(intervalId);
-  }, []);
 
   const events = useMemo(
     () => missionCalendarEventsAround(selectedDate, 8, records),
@@ -297,12 +291,6 @@ export function HomeSchedule() {
   );
   const gridHeight = Math.max(endHour - startHour, 1) * hourHeightPx;
   const laidOut = layoutTimedEvents(timedEvents, startHour, endHour);
-  const nowMinutes = minutesSinceDayStart(now);
-  const showNowLine =
-    selectedKey === todayKey &&
-    nowMinutes >= startHour * 60 &&
-    nowMinutes <= endHour * 60;
-  const nowTop = ((nowMinutes - startHour * 60) / 60) * hourHeightPx;
 
   useEffect(() => {
     const shell = gridShellRef.current;
@@ -501,14 +489,6 @@ export function HomeSchedule() {
               style={{ top: (hour - startHour) * hourHeightPx }}
             />
           ))}
-
-          {showNowLine ? (
-            <div
-              aria-hidden="true"
-              className={styles.nowLine}
-              style={{ top: nowTop }}
-            />
-          ) : null}
 
           {laidOut.length === 0 ? (
             <div className={styles.emptyDay}>Nothing scheduled</div>

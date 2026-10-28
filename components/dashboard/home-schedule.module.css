@@ -260,29 +260,6 @@
   pointer-events: none;
 }
 
-.nowLine {
-  position: absolute;
-  z-index: 2;
-  right: 0;
-  left: 0;
-  height: 2px;
-  background: var(--brand);
-  pointer-events: none;
-  box-shadow: 0 0 10px rgb(45 212 191 / 40%);
-}
-
-.nowLine::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: -0.22rem;
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 999px;
-  background: var(--brand);
-  transform: translateY(-50%);
-}
-
 .emptyDay {
   position: absolute;
   inset: 0;
