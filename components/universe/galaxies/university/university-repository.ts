@@ -9,6 +9,11 @@ import {
   queueMissionRecordUpsert,
 } from "@/lib/mission-record-sync";
 
+import {
+  canvasSeedAssignments,
+  canvasSeedGrades,
+  canvasSeedNotes,
+} from "./university-canvas-seed";
 import type {
   NewUniversityAssignment,
   NewUniversityGrade,
@@ -250,4 +255,89 @@ export async function deleteUniversityNote(id: string) {
   } finally {
     database.close();
   }
+}
+
+/** Insert missing Canvas snapshot rows by stable id (does not overwrite local edits). */
+export async function ensureUniversityCanvasSeed(): Promise<UniversityData> {
+  const queued: Array<
+    | Readonly<{
+        collection: typeof universityStoreNames.assignments;
+        record: UniversityAssignment;
+      }>
+    | Readonly<{
+        collection: typeof universityStoreNames.grades;
+        record: UniversityGrade;
+      }>
+    | Readonly<{
+        collection: typeof universityStoreNames.notes;
+        record: UniversityNote;
+      }>
+  > = [];
+  const database = await openMissionControlDatabase();
+
+  try {
+    const transaction = database.transaction(
+      Object.values(universityStoreNames),
+      "readwrite",
+    );
+    const assignmentStore = transaction.objectStore(
+      universityStoreNames.assignments,
+    );
+    const gradeStore = transaction.objectStore(universityStoreNames.grades);
+    const noteStore = transaction.objectStore(universityStoreNames.notes);
+
+    for (const assignment of canvasSeedAssignments) {
+      const existing = await requestResult(
+        assignmentStore.get(assignment.id) as IDBRequest<
+          UniversityAssignment | undefined
+        >,
+      );
+      if (existing === undefined) {
+        const record = { ...assignment };
+        assignmentStore.add(record);
+        queued.push({
+          collection: universityStoreNames.assignments,
+          record,
+        });
+      }
+    }
+
+    for (const grade of canvasSeedGrades) {
+      const existing = await requestResult(
+        gradeStore.get(grade.id) as IDBRequest<UniversityGrade | undefined>,
+      );
+      if (existing === undefined) {
+        const record = { ...grade };
+        gradeStore.add(record);
+        queued.push({
+          collection: universityStoreNames.grades,
+          record,
+        });
+      }
+    }
+
+    for (const note of canvasSeedNotes) {
+      const existing = await requestResult(
+        noteStore.get(note.id) as IDBRequest<UniversityNote | undefined>,
+      );
+      if (existing === undefined) {
+        const record = { ...note };
+        noteStore.add(record);
+        queued.push({
+          collection: universityStoreNames.notes,
+          record,
+        });
+      }
+    }
+
+    await transactionComplete(transaction);
+  } finally {
+    database.close();
+  }
+
+  for (const item of queued) {
+    await queueMissionRecordUpsert(item.collection, item.record);
+  }
+
+  return listUniversityData();
 }

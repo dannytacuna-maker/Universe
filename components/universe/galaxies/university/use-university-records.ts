@@ -15,6 +15,7 @@ import {
   deleteUniversityAssignment,
   deleteUniversityGrade,
   deleteUniversityNote,
+  ensureUniversityCanvasSeed,
   listUniversityData,
   saveUniversityAssignment,
   saveUniversityGrade,
@@ -33,12 +34,14 @@ export function useUniversityRecords() {
   useEffect(() => {
     let isCurrent = true;
     const load = () =>
-      listUniversityData().then((stored) => {
-        if (isCurrent) {
-          setData(stored);
-          setStorageError(null);
-        }
-      });
+      ensureUniversityCanvasSeed()
+        .catch(() => listUniversityData())
+        .then((stored) => {
+          if (isCurrent) {
+            setData(stored);
+            setStorageError(null);
+          }
+        });
 
     void load()
       .catch((error: unknown) => {
